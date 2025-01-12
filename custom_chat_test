@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Window</title>
+    <style>
+        .color-0 { color: #ffffff; }
+        .color-1 { color: #ff4444; }
+        .color-2 { color: #99cc00; }
+        .color-3 { color: #ffbb33; }
+        .color-4 { color: #0099cc; }
+        .color-5 { color: #33b5e5; }
+        .color-6 { color: #aa66cc; }
+        .color-8 { color: #cc0000; }
+        .color-9 { color: #cc0068; }
+        * {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .no-grow {
+            flex-grow: 0;
+        }
+        em {
+            font-style: normal;
+        }
+        #app {
+            font-family: 'Lato', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: white;
+        }
+        .chat-window {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 38%;
+            height: 22%;
+            max-height: 360px;
+            max-width: 1095px;
+            background-color: rgba(52, 73, 94, 0.7);
+            -webkit-animation-duration: 2s;
+        }
+        .chat-messages {
+            position: relative;
+            height: 95%;
+            font-size: 1.2rem;
+            margin: 10px;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+        .chat-input {
+            font-size: 1.2rem;
+            position: absolute;
+            top: min(calc(22% + 31px), 391px);
+            left: 15px;
+            width: 38%;
+            max-width: 1095px;
+            background-color: rgba(44, 62, 80, 1.0);
+            box-sizing: border-box;
+        }
+        textarea {
+            font-size: 1.1rem;
+            display: block;
+            box-sizing: border-box;
+            padding: 5px;
+            padding-left: 27px;
+            color: white;
+            background-color: rgba(44, 62, 80, 1.0);
+            width: 100%;
+            border-width: 0;
+            height: 34px;
+            overflow: hidden;
+            resize: vertical;
+        }
+        textarea:focus, input:focus {
+            outline: none;
+        }
+        .msg {
+            margin-bottom: 3px;
+        }
+        .multiline {
+            margin-left: 1.5rem;
+            text-indent: -1.5rem;
+            white-space: pre-line;
+        }
+        .suggestions {
+            list-style-type: none;
+            padding: 5px;
+            padding-left: 27px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            color: white;
+            background-color: rgba(44, 62, 80, 1.0);
+            width: 100%;
+        }
+        .help {
+            color: #b0bbbd;
+        }
+        .disabled {
+            color: #b0bbbd;
+        }
+        .suggestion {
+            margin-bottom: 5px;
+        }
+        .chat-btn-wrapper {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+        .chat-btn {
+            background-color: rgba(44, 62, 80, 1.0);
+            color: white;
+            border: none;
+            width: 25%;
+            padding-left: 10px;
+            padding-right: 10px;
+            letter-spacing: 2px;
+        }
+        .chat-btn:hover {
+            background-color: rgba(64, 82, 100, 1.0);
+        }
+        .iconChat {
+            width: 1.5em;
+            margin: -3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="chat-window">
+            <div class="chat-messages">
+                <p class="msg">Welcome to the chat!</p>
+            </div>
+            <div class="chat-input">
+                <textarea placeholder="Type your message..."></textarea>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
