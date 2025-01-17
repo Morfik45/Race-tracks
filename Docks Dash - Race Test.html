@@ -100,7 +100,7 @@ th, td {
             let currentCheckpoint = 0;
             const lapTimes = [];
             start.style.display = "none";
-            isPlaying = false;
+            isPlaying = true;
             setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
             setInterval(() => {
                 if (!isPlaying) return;
