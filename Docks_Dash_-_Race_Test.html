@@ -97,6 +97,36 @@
             let lap = 1;
             let currentCheckpoint = 0;
             const lapTimes = [];
+		// Function to complete a lap
+    function completeLap() {
+    const currentTime = Date.now(); // Current time
+    
+    // Calculate the duration of the current lap
+    let lapDuration;
+    if (lap === 1) {
+        // For the first lap, duration is 0 (or you can set it to the elapsed time)
+        lapDuration = 0;
+    } else {
+        // Calculate lap duration based on the previous lap's end time
+        lapDuration = currentTime - lapEndTimes[lap - 2]; // previous lap's end time
+    }
+
+    // Store the end time of the current lap
+    lapEndTimes.push(currentTime); // Store the current time as the end time for this lap
+
+    // Convert the lap duration to minutes, seconds, and milliseconds
+    const minutes = Math.floor((lapDuration % 3600000) / 60000);
+    const seconds = Math.floor((lapDuration % 60000) / 1000);
+    const millis = Math.floor(lapDuration % 1000);
+
+    // Display the current lap time
+    displayLapTime(lap, minutes, seconds, millis);
+
+    // Prepare for the next lap
+    lap++; // Increment lap number
+    startTime = Date.now(); // Reset start time for the next lap
+}
+
             start.style.display = "none";
             isPlaying = true;
             setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
@@ -120,8 +150,15 @@
                         const minutes = Math.floor(lapTime / 60000);
                         const seconds = Math.floor((lapTime % 60000) / 1000);
                         const millis = lapTime % 1000;
-                        lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap: ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
-                        document.getElementById("lapTimes").appendChild(lapTimeElem);
+                        // Function to display lap time
+function displayLapTime(lapNumber, minutes, seconds, millis) {
+    const lapTimeElem = document.createElement("div");
+    lapTimeElem.innerHTML = `
+      <span style="color: lightgreen;">Lap: ${lapNumber}</span>: 
+      <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>
+    `;
+    document.getElementById("lapTimes").appendChild(lapTimeElem);
+}
 
                         if (lap > nLaps) {
                             sfx(5);
