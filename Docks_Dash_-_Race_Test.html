@@ -35,7 +35,7 @@ th, td {
 </head>
 <body>
 
-<div class="container">
+<div>
   <p style="color:f0c850; font-size: 1.15em; line-height: 22px">Docks Dash</p>
   <p style="color:lightgreen">Author: <span style="color:white"> Collins Alexander </span></p>
   <p style="color:lightgreen"> Checkpoint <span style="color:white" id="rcp">0/0</span></p>
@@ -152,7 +152,7 @@ th, td {
                     const millis = Math.floor(time);
                     timer.innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
                 }
-            }, 1);
+            }, 0);
         };
         window.addEventListener("message", (event) => {
             if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
