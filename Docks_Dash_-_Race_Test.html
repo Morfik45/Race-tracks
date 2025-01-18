@@ -10,7 +10,7 @@
             left: 420px;
             top: 835px;
             font-size: 1.5em;
-            line-height: 1.2px;
+            line-height: 1.3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
 
@@ -120,7 +120,7 @@
                         const minutes = Math.floor(lapTime / 60000);
                         const seconds = Math.floor((lapTime % 60000) / 1000);
                         const millis = lapTime % 1000;
-                        lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap</span> ${lap - 1}<span style="color: white;"> ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
+                        lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap: ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
                         document.getElementById("lapTimes").appendChild(lapTimeElem);
 
                         if (lap > nLaps) {
