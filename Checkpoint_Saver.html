@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkpoint Saver</title>
+    <style>
+        body {
+            font-family: impact;
+            background-color: transparent;
+            color: white;
+            position: absolute;
+            left: 410px;
+            top: 789px;
+            font-size: 1.5em;
+            line-height: 3px;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
+
+        .container {
+            margin: 10px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+            font-size: 1em;
+            color: #333;
+            background-color: #f0f0f0;
+            border: 1px solid #555;
+            padding: 5px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Checkpoint Saver</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Collins Alexander</span></p>
+    <p style="color:lightgreen">Current Position:</p>
+    <p>X: <span id="posX">0</span></p>
+    <p>Y: <span id="posY">0</span></p>
+    <p>Z: <span id="posZ">0</span></p>
+    <button id="save">Save Checkpoint</button>
+    <button id="finish">Finish & Show Checkpoints</button>
+    <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
+</div>
+
+<script>
+    let checkpoints = [];
+    let player_x = 0, player_y = 0, player_z = 0;
+
+    // Function to save the current position as a checkpoint
+    const saveCheckpoint = () => {
+        checkpoints.push({ x: player_x, y: player_y, z: player_z });
+        alert(`Checkpoint saved: X=${player_x}, Y=${player_y}, Z=${player_z}`);
+    };
+
+    // Function to display all saved checkpoints in the textarea
+    const finishAndShowCheckpoints = () => {
+        const output = document.getElementById("output");
+        const formattedCheckpoints = checkpoints.map(cp => `{x: ${cp.x}, y: ${cp.y}, z: ${cp.z}}`).join(",\n");
+        output.value = formattedCheckpoints;
+    };
+
+    // Event listeners for buttons
+    document.getElementById("save").onclick = saveCheckpoint;
+    document.getElementById("finish").onclick = finishAndShowCheckpoints;
+
+    // Mock receiving player position (replace with actual game logic)
+    window.addEventListener("message", (event) => {
+        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
+        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
+        if (event.data.data["pos_z"]) player_z = event.data.data["pos_z"];
+
+        document.getElementById("posX").innerText = player_x.toFixed(3);
+        document.getElementById("posY").innerText = player_y.toFixed(3);
+        document.getElementById("posZ").innerText = player_z.toFixed(3);
+    });
+
+    // Test hotkey for saving position (press "S" to save a checkpoint)
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "s" || e.key === "S") {
+            saveCheckpoint();
+        }
+    });
+
+    // Mock position update every second for testing (replace with real game data updates)
+    setInterval(() => {
+        // Simulate position changes (example only, replace with real data)
+        player_x += Math.random() * 10 - 5;
+        player_y += Math.random() * 10 - 5;
+        player_z += Math.random() * 2 - 1;
+
+        document.getElementById("posX").innerText = player_x.toFixed(3);
+        document.getElementById("posY").innerText = player_y.toFixed(3);
+        document.getElementById("posZ").innerText = player_z.toFixed(3);
+    }, 1000);
+</script>
+</body>
+</html>
