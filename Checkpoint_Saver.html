@@ -56,6 +56,7 @@
     <p>Y: <span id="posY">0</span></p>
     <p>Z: <span id="posZ">0</span></p>
     <button id="save">Save Checkpoint (Press "E")</button>
+    <button id="clear">Clear Checkpoints</button>
     <button id="finish">Finish & Show Checkpoints</button>
     <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
     <p class="notification" id="notification"></p>
@@ -70,7 +71,20 @@
         checkpoints.push({ x: player_x, y: player_y, z: player_z });
         const notification = document.getElementById("notification");
         notification.innerText = `Checkpoint saved: X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`;
-        setTimeout(() => notification.innerText = "", 3000); // Clear after 3 seconds
+
+        // Set waypoint to the saved checkpoint
+        window.parent.postMessage({ type: "setWaypoint", x: player_x, y: player_y }, "*");
+
+        setTimeout(() => notification.innerText = "", 3000); // Clear notification after 3 seconds
+    };
+
+    // Function to clear all saved checkpoints
+    const clearCheckpoints = () => {
+        checkpoints = [];
+        document.getElementById("output").value = ""; // Clear the textarea
+        const notification = document.getElementById("notification");
+        notification.innerText = "All checkpoints cleared!";
+        setTimeout(() => notification.innerText = "", 3000); // Clear notification after 3 seconds
     };
 
     // Function to display all saved checkpoints in the textarea
@@ -82,6 +96,7 @@
 
     // Event listeners for buttons
     document.getElementById("save").onclick = saveCheckpoint;
+    document.getElementById("clear").onclick = clearCheckpoints;
     document.getElementById("finish").onclick = finishAndShowCheckpoints;
 
     // Listen for position updates from the game client
