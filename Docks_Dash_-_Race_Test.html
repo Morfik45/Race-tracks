@@ -105,7 +105,7 @@
         const lapTimes = [];
 
         document.getElementById("start").style.display = "none";
-        document.getElementById("restart").style.display = "none";
+        document.getElementById("restart").style.display = "all";
         isPlaying = true;
 
         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
@@ -144,7 +144,7 @@
                         isPlaying = false;
                         document.getElementById("restart").style.display = "inline-block";
                     } else {
-                        sfx(2);
+                        sfx(17);
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
