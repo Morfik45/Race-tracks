@@ -140,18 +140,18 @@
                     startTime = currentTime;
 
                     if (lap > nLaps) {
-                        sfx(3);
+                        sfx(13); // Finish Audio
                         firstCp = false;
                         isPlaying = false;
                         document.getElementById("restart").style.display = "inline-block";
                     } else {
-                        sfx(4);
+                        sfx(3); // Next Lap Audio
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(11);
+                    sfx(16); //Checkpoint Audio
                 }
             }
 
