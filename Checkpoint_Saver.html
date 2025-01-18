@@ -57,13 +57,17 @@
     <p>Z: <span id="posZ">0</span></p>
     <button id="save">Save Checkpoint</button>
     <button id="clear">Clear Checkpoints</button>
-    <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
+    <label style="margin-left: 10px;">
+        <input type="checkbox" id="autoSave"> Enable Auto-Save (3s)
+    </label>
     <p style="color: lightyellow;">To see your checkpoints, scroll down.</p>
+    <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
 </div>
 
 <script>
     let checkpoints = [];
     let player_x = 0, player_y = 0, player_z = 0;
+    let autoSaveInterval = null;
 
     // Function to save the current position as a checkpoint
     const saveCheckpoint = () => {
@@ -85,9 +89,20 @@
         updateCheckpointDisplay();
     };
 
-    // Event listeners for buttons
+    // Function to toggle auto-save
+    const toggleAutoSave = (enabled) => {
+        if (enabled) {
+            autoSaveInterval = setInterval(saveCheckpoint, 3000); // Auto-save every 3 seconds
+        } else {
+            clearInterval(autoSaveInterval);
+            autoSaveInterval = null;
+        }
+    };
+
+    // Event listeners for buttons and auto-save toggle
     document.getElementById("save").onclick = saveCheckpoint;
     document.getElementById("clear").onclick = clearCheckpoints;
+    document.getElementById("autoSave").onchange = (e) => toggleAutoSave(e.target.checked);
 
     // Simulating receiving player position (replace with actual game data)
     window.addEventListener("message", (event) => {
@@ -106,8 +121,18 @@
     };
 
     // Focus on click within the app
-    document.body.addEventListener("click", () => {
-        document.body.focus();
+ //   document.body.addEventListener("click", () => {
+     //   document.body.focus();
+
+ // Existing script code here...
+
+    // Function to handle the Escape key for pinning the window
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            window.parent.postMessage({type: "pin"}, "*");
+        }
+    });
+    
     });
 </script>
 </body>
