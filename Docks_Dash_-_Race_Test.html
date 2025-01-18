@@ -7,10 +7,10 @@
             background-color: transparent;
             color: white;
             position: absolute;
-            left: 420px;
-            top: 835px;
+            left: 410px;
+            top: 789px;
             font-size: 1.5em;
-            line-height: 2px;
+            line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
 
@@ -33,6 +33,7 @@
         .checkpoint {
             color: lightgreen;
         }
+    
     </style>
 </head>
 <body>
@@ -139,18 +140,18 @@
                     startTime = currentTime;
 
                     if (lap > nLaps) {
-                        sfx(1);
+                        sfx(3);
                         firstCp = false;
                         isPlaying = false;
                         document.getElementById("restart").style.display = "inline-block";
                     } else {
-                        sfx(2);
+                        sfx(4);
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(12);
+                    sfx(11);
                 }
             }
 
