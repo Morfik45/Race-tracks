@@ -10,7 +10,7 @@
             left: 420px;
             top: 835px;
             font-size: 1.5em;
-            line-height: 1.3px;
+            line-height: 2px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
 
@@ -38,14 +38,14 @@
 <body>
 
 <div class="container">
+    
+    <button id="start">Start Race</button> <button id="restart">Restart Race</button>
     <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Docks Dash</p>
     <p style="color:lightgreen">Author: <span style="color:white">Collins Alexander</span></p>
     <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/0</span></p>
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
     <div id="lapTimes"></div>
     <span style="color: white" id="timer">00:00:000</span>
-    <br>
-    <button id="start">Start Race</button> <button id="restart">Restart Race</button>
 
 </div>
 
@@ -139,12 +139,12 @@
                     startTime = currentTime;
 
                     if (lap > nLaps) {
-                        sfx(5);
+                        sfx(1);
                         firstCp = false;
                         isPlaying = false;
                         document.getElementById("restart").style.display = "inline-block";
                     } else {
-                        sfx(17);
+                        sfx(2);
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
