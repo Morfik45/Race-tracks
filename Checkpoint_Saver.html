@@ -11,7 +11,7 @@
             color: white;
             position: absolute;
             left: 410px;
-            top: 689px;
+            top: 789px;
             font-size: 1.5em;
             line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
@@ -42,8 +42,9 @@
         }
 
         .instructions {
-            margin-top: 10px;
-            color: lightblue;
+            margin: 10px 0;
+            color: #f0c850;
+            font-size: 1em;
         }
     </style>
 </head>
@@ -55,7 +56,7 @@
     <p>X: <span id="posX">0</span></p>
     <p>Y: <span id="posY">0</span></p>
     <p>Z: <span id="posZ">0</span></p>
-    <button id="save">Save Checkpoint (Press "E")</button>
+    <button id="save">Save Checkpoint (E)</button>
     <button id="clear">Clear Checkpoints</button>
     <p class="instructions">To see your checkpoints, scroll down.</p>
     <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
@@ -65,40 +66,38 @@
     let checkpoints = [];
     let player_x = 0, player_y = 0, player_z = 0;
 
-    // Function to save the current position as a checkpoint
-    const saveCheckpoint = () => {
-    checkpoints.push({ x: player_x, y: player_y, z: player_z });
-    updateOutput();
-    console.log(`Checkpoint saved: X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`);
-    document.querySelector('.instructions').innerText = `Checkpoint saved at X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`;
-};
-
-    // Function to update the textarea with saved checkpoints
+    // Function to update the output textarea with the saved checkpoints
     const updateOutput = () => {
         const output = document.getElementById("output");
         const formattedCheckpoints = checkpoints.map(cp => `{x: ${cp.x.toFixed(3)}, y: ${cp.y.toFixed(3)}, z: ${cp.z.toFixed(3)}}`).join(",\n");
         output.value = formattedCheckpoints;
     };
 
-    // Function to clear all checkpoints
- const clearCheckpoints = () => {
-    checkpoints = [];
-    updateOutput();
-    console.log("All checkpoints cleared!");
-    document.querySelector('.instructions').innerText = "All checkpoints cleared!";
-};
+    // Function to save the current position as a checkpoint
+    const saveCheckpoint = () => {
+        checkpoints.push({ x: player_x, y: player_y, z: player_z });
+        updateOutput();
+        document.querySelector('.instructions').innerText = `Checkpoint saved at X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`;
+    };
+
+    // Function to clear all saved checkpoints
+    const clearCheckpoints = () => {
+        checkpoints = [];
+        updateOutput();
+        document.querySelector('.instructions').innerText = "All checkpoints cleared!";
+    };
 
     // Event listeners for buttons
     document.getElementById("save").onclick = saveCheckpoint;
     document.getElementById("clear").onclick = clearCheckpoints;
-    document.getElementById("finish").onclick = updateOutput;
 
-    // Listen for key events
+    // Event listener for the "E" key to save a checkpoint
     window.addEventListener("keydown", (e) => {
         if (e.key === "e" || e.key === "E") {
             saveCheckpoint();
-        } else if (e.key === "Escape") {
-            window.parent.postMessage({ type: "pin" }, "*");
+        }
+        if (e.key === "Escape") {
+            window.parent.postMessage({ type: "pin" }, "*"); // Pin functionality
         }
     });
 
@@ -112,8 +111,6 @@
         document.getElementById("posY").innerText = player_y.toFixed(3);
         document.getElementById("posZ").innerText = player_z.toFixed(3);
     });
-
-    // Removed random position updates (rely only on actual game data updates)
 </script>
 </body>
 </html>
