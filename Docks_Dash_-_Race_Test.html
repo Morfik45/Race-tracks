@@ -152,7 +152,7 @@ th, td {
                     const millis = Math.floor(time);
                     timer.innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
                 }
-            }, 0);
+            }, 1);
         };
         window.addEventListener("message", (event) => {
             if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
