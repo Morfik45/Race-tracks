@@ -11,7 +11,7 @@
             color: white;
             position: absolute;
             left: 410px;
-            top: 789px;
+            top: 689px;
             font-size: 1.5em;
             line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
@@ -68,10 +68,11 @@
 
     // Function to save the current position as a checkpoint
     const saveCheckpoint = () => {
-        checkpoints.push({ x: player_x, y: player_y, z: player_z });
-        updateOutput();
-        alert(`Checkpoint saved: X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`);
-    };
+    checkpoints.push({ x: player_x, y: player_y, z: player_z });
+    updateOutput();
+    console.log(`Checkpoint saved: X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`);
+    document.querySelector('.instructions').innerText = `Checkpoint saved at X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`;
+};
 
     // Function to update the textarea with saved checkpoints
     const updateOutput = () => {
@@ -81,11 +82,12 @@
     };
 
     // Function to clear all checkpoints
-    const clearCheckpoints = () => {
-        checkpoints = [];
-        updateOutput();
-        alert("All checkpoints cleared!");
-    };
+ const clearCheckpoints = () => {
+    checkpoints = [];
+    updateOutput();
+    console.log("All checkpoints cleared!");
+    document.querySelector('.instructions').innerText = "All checkpoints cleared!";
+};
 
     // Event listeners for buttons
     document.getElementById("save").onclick = saveCheckpoint;
