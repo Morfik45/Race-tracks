@@ -57,7 +57,7 @@
     <p>Z: <span id="posZ">0</span></p>
     <button id="save">Save Checkpoint (Press E to Save)</button>
     <button id="clear">Clear Checkpoints</button>
-    <p style="color: lightyellow;">To see your checkpoints, scroll down.</p>
+    <button id="clear">Clear Checkpoints</button>
     <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
 </div>
 
@@ -68,9 +68,7 @@
     // Function to save the current position as a checkpoint
     const saveCheckpoint = () => {
         checkpoints.push({ x: player_x, y: player_y, z: player_z });
-        alert(`Checkpoint saved: X=${player_x}, Y=${player_y}, Z=${player_z}`);
         updateCheckpointDisplay();
-        // Set a waypoint in the game (optional)
         setCheckpoint(player_x, player_y);
     };
 
@@ -85,7 +83,6 @@
     const clearCheckpoints = () => {
         checkpoints = [];
         updateCheckpointDisplay();
-        alert("All checkpoints cleared.");
     };
 
     // Event listeners for buttons
