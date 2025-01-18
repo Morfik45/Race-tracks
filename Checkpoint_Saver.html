@@ -100,23 +100,16 @@
         document.getElementById("posZ").innerText = player_z.toFixed(3);
     });
 
-    // Hotkey: Press 'E' to save checkpoint
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "e" || e.key === "E") {
-            saveCheckpoint();
-            document.body.focus(); // Attempt to refocus the web app
-        }
-    });
 
-    // Keep the web app focused continuously
-    setInterval(() => {
-        document.body.focus();
-    }, 500); // Focus attempt every 500ms
 
     // Function to set a waypoint in the game (optional)
     const setCheckpoint = (x, y) => {
         window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
     };
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            window.parent.postMessage({type: "pin"}, "*");
 </script>
 </body>
 </html>
