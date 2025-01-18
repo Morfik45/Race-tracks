@@ -42,9 +42,10 @@
     <p style="color:lightgreen">Author: <span style="color:white">Collins Alexander</span></p>
     <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/0</span></p>
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
-    <div id="lapTimes"></div> <!-- Added missing lap times container -->
-    <span style="color: white" id="timer">00:00:000</span>
+    <div id="lapTimes"></div> <!-- Lap times container -->
+    <span style="color: white" id="timer">00:00:000</span><br><br>
     <button id="start">Start Race</button>
+    <button id="restart" style="display:none;">Restart Race</button>
 </div>
 
 <script>
@@ -79,105 +80,72 @@
 
     let player_x = 0;
     let player_y = 0;
-
-    const setCheckpoint = (x, y) => {
-        window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
-    }
-
-    const sfx = (num) => {
-        window.parent.postMessage({type: "sfx", sfx: num}, "*");
-    }
-
-    const dist = (x1, y1, x2, y2) => {
-        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    }
-
     let isPlaying = false;
+    let currentCheckpoint = 0;
+    let lap = 1;
+    let nLaps = 3;
+    let startTime = 0;
+    const lapTimes = [];
 
-    start.onclick = () => {
+    const setCheckpoint = (x, y) => window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
+    const sfx = (num) => window.parent.postMessage({type: "sfx", sfx: num}, "*");
+    const dist = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+
+    const restartRace = () => {
+        currentCheckpoint = 0;
+        lap = 1;
+        startTime = 0;
+        isPlaying = false;
+        lapTimes.length = 0;
+
+        document.getElementById("lapTimes").innerHTML = "";
+        document.getElementById("rcp").innerText = "0/0";
+        document.getElementById("rlap").innerText = "1/3";
+        document.getElementById("timer").innerText = "00:00:000";
+        document.getElementById("start").style.display = "inline-block";
+        document.getElementById("restart").style.display = "none";
+    };
+
+    document.getElementById("start").onclick = () => {
         if (isPlaying) return;
-
-        let firstCp = false;
-        let startTime = 0;
-        let nLaps = 3;
-        let lap = 1;
-        let currentCheckpoint = 0;
-        const lapTimes = [];
-
-        start.style.display = "none";
         isPlaying = true;
+        currentCheckpoint = 0;
+        lap = 1;
+        startTime = Date.now();
+        document.getElementById("start").style.display = "none";
+        document.getElementById("restart").style.display = "inline-block";
 
         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
 
-        setInterval(() => {
-            if (!isPlaying) return;
+        const interval = setInterval(() => {
+            if (!isPlaying) {
+                clearInterval(interval);
+                return;
+            }
 
             if (dist(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
-                if (!firstCp) {
-                    startTime = new Date().getTime();
-                }
-                firstCp = true;
                 currentCheckpoint++;
-
                 if (currentCheckpoint >= checkpoints.length) {
                     lap++;
-                    const currentTime = new Date().getTime();
-                    const lapTime = currentTime - startTime;
-                    lapTimes.push(lapTime);
-
-                    const lapTimeElem = document.createElement("p");
-                    const minutes = Math.floor(lapTime / 60000);
-                    const seconds = Math.floor((lapTime % 60000) / 1000);
-                    const millis = lapTime % 1000;
-                    lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap: ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
-                    document.getElementById("lapTimes").appendChild(lapTimeElem);
-
-                    // Reset startTime for the next lap
-                    startTime = currentTime;
-
                     if (lap > nLaps) {
-                        sfx(5);
-                        firstCp = false;
                         isPlaying = false;
-                        start.style.display = "inline-block";
-                    } else {
-                        sfx(2);
-                        currentCheckpoint = 0;
-                        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                        sfx(5);
+                        return;
                     }
-                } else {
-                    setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(12);
+                    currentCheckpoint = 0;
                 }
+                setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
             }
-
-            if (firstCp) {
-                rcp.innerText = `${currentCheckpoint}/${checkpoints.length - 1}`;
-                rlap.innerText = `${lap}/${nLaps}`;
-                let time = (new Date().getTime() - startTime);
-                const minutes = Math.floor(time / 60000);
-                time -= minutes * 60000;
-                const seconds = Math.floor(time / 1000);
-                time -= seconds * 1000;
-                const millis = Math.floor(time);
-                timer.innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
-            }
-        }, 0);
+        }, 16);
     };
+
+    document.getElementById("restart").onclick = restartRace;
 
     window.addEventListener("message", (event) => {
         if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
         if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
     });
-
-    window.addEventListener('keydown', (e) => {
-        console.log(e);
-        if (e.key === "Escape") {
-            window.parent.postMessage({type: "pin"}, "*");
-        }
-    });
 </script>
-
 
 </body>
 </html>
