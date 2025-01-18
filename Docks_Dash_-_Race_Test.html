@@ -141,7 +141,7 @@ th, td {
                     }
                 }
                 if (firstCp) {
-                    rcp.innerText = `${currentCheckpoint}/${checkpoints.length - 1}`;
+                    rcp.innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`; //`${currentCheckpoint}/${checkpoints.length - 1}`;
                     rlap.innerText = `${lap}`;
                     let time = (new Date().getTime() - startTime);
                     const minutes = Math.floor(time / 60000);
