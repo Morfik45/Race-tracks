@@ -80,101 +80,79 @@
 			{x: 882.997681, y: -3057.964844, z: 5.629898},
     ];
 
-    let player_x = 0, player_y = 0;
-    let isPlaying = false;
-
-    function setCheckpoint(x, y) {
-        window.parent.postMessage({type: "setWaypoint", x, y}, "*");
-    }
-
-    function sfx(num) {
-        window.parent.postMessage({type: "sfx", sfx: num}, "*");
-    }
-
-    function dist(x1, y1, x2, y2) {
-        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    }
-
-    document.getElementById("start").onclick = () => {
-        if (isPlaying) return;
-
-        let firstCp = false;
-        let startTime = 0;
-        let lap = 1;
-        let currentCheckpoint = 0;
-        let lapTimes = [];
-
-        document.getElementById("start").style.display = "none";
-        isPlaying = true;
-
-        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-
-        let interval = setInterval(() => {
-            if (!isPlaying) {
-                clearInterval(interval);
-                return;
-            }
-
-            if (dist(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
-                if (!firstCp) {
-                    startTime = new Date().getTime();
-                }
-                firstCp = true;
-                currentCheckpoint++;
-
-                if (currentCheckpoint >= checkpoints.length) {
-                    lap++;
-                    let currentTime = new Date().getTime();
-                    let lapTime = currentTime - startTime;
-                    lapTimes.push(lapTime);
-
-                    let minutes = Math.floor(lapTime / 60000);
-                    let seconds = Math.floor((lapTime % 60000) / 1000);
-                    let millis = lapTime % 1000;
-
-                    let lapTimeElem = document.createElement("p");
-                    lapTimeElem.innerText = `Lap ${lap - 1}: ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
-                    document.getElementById("lapTimes").appendChild(lapTimeElem);
-
-                    if (lap > 1) {
-                        sfx(5);
-                        isPlaying = false;
-                        document.getElementById("start").style.display = "inline-block";
-                    } else {
-                        sfx(2);
-                        currentCheckpoint = 0;
-                        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    }
-                } else {
-                    setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(12);
-                }
-            }
-
-            if (firstCp) {
-                document.getElementById("rcp").innerText = `${currentCheckpoint}/${checkpoints.length - 1}`;
-                document.getElementById("rlap").innerText = `${lap}`;
-
-                let elapsedTime = new Date().getTime() - startTime;
-                let minutes = Math.floor(elapsedTime / 60000);
-                let seconds = Math.floor((elapsedTime % 60000) / 1000);
-                let millis = elapsedTime % 1000;
-
-                document.getElementById("timer").innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
-            }
-        }, 50);
-    };
-
-    window.addEventListener("message", (event) => {
-        if (event.data?.data?.pos_x) player_x = event.data.data.pos_x;
-        if (event.data?.data?.pos_y) player_y = event.data.data.pos_y;
-    });
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") {
-            window.parent.postMessage({type: "pin"}, "*");
+        let player_x = 0;
+        let player_y = 0;
+        const setCheckpoint = (x, y) => {
+            window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
         }
-    });
+        const sfx = (num) => {
+            window.parent.postMessage({type: "sfx", sfx: num}, "*");
+        }
+        const dist = (x1, y1, x2, y2) => {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+        let isPlaying = false;
+        start.onclick = () => {
+            if (isPlaying) return;
+            let firstCp = false;
+            let startTime = 0;
+            let nLaps = 3;
+            let lap = 1;
+            let currentCheckpoint = 0;
+            start.style.display = "none";
+            isPlaying = true;
+            setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+            setInterval(() => {
+                if (!isPlaying) return;
+                if (dist(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
+                    if (!firstCp) {
+                        // start timer
+                        startTime = new Date().getTime();
+                    }
+                    firstCp = true;
+                    currentCheckpoint++;
+
+                    if (currentCheckpoint >= checkpoints.length) {
+                        lap++;
+                        if (lap > nLaps) {
+                            sfx(5);
+                            firstCp = false;
+                            isPlaying = false;
+                            start.style.display = "inline-block";
+                        } else {
+                            sfx(2);
+                            currentCheckpoint = 0;
+                            setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                        }
+                    } else {
+                        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                        sfx(12);
+                    }
+                }
+                if (firstCp) {
+                    rcp.innerText = `${currentCheckpoint}/${checkpoints.length - 1}`;
+                    rlap.innerText = `${lap}`;
+                    let time = (new Date().getTime() - startTime);
+                    const minutes = Math.floor(time / 60000);
+                    time -= minutes * 60000;
+                    const seconds = Math.floor(time / 1000);
+                    time -= seconds * 1000;
+                    const millis = Math.floor(time);
+                    timer.innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
+                }
+            }, 0);
+        };
+        window.addEventListener("message", (event) => {
+            if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
+            if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
+        });
+        window.addEventListener('keydown', (e) => {
+            console.log(e);
+            if (e.key === "Escape") {
+                // Pin the window, meaning we give control back to the game
+                window.parent.postMessage({type: "pin"}, "*");
+            }
+        });
 </script>
 
 </body>
