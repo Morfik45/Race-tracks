@@ -58,7 +58,7 @@
     <button id="save">Save Checkpoint</button>
     <button id="clear">Clear Checkpoints</button>
     <label style="margin-left: 10px;">
-        <input type="checkbox" id="autoSave"> Enable Auto-Save (3s)
+        <input type="checkbox" id="autoSave"> Enable Auto-Save (5s)
     </label>
     <p style="color: lightyellow;">To see your checkpoints, scroll down.</p>
     <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
@@ -92,7 +92,7 @@
     // Function to toggle auto-save
     const toggleAutoSave = (enabled) => {
         if (enabled) {
-            autoSaveInterval = setInterval(saveCheckpoint, 3000); // Auto-save every 3 seconds
+            autoSaveInterval = setInterval(saveCheckpoint, 5000); // Auto-save every 3 seconds
         } else {
             clearInterval(autoSaveInterval);
             autoSaveInterval = null;
