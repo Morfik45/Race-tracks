@@ -131,7 +131,7 @@
                     let millis = lapTime % 1000;
 
                     let lapTimeElem = document.createElement("p");
-                    lapTimeElem.innerText = `Lap ${lap - 1}: ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
+                    lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap:</span> <span style="color: white;">${lap - 1}: ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
                     document.getElementById("lapTimes").appendChild(lapTimeElem);
 
                     if (lap > 1) {
