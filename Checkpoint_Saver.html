@@ -11,7 +11,7 @@
             color: white;
             position: absolute;
             left: 410px;
-            top: 689px;
+            top: 789px;
             font-size: 1.5em;
             line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
@@ -57,8 +57,8 @@
     <p>Z: <span id="posZ">0</span></p>
     <button id="save">Save Checkpoint</button>
     <button id="clear">Clear Checkpoints</button>
-    <p style="color:#f0c850">Scroll Down to see all checkpoints below:</p>
     <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
+    <p style="color: lightyellow;">To see your checkpoints, scroll down.</p>
 </div>
 
 <script>
@@ -100,16 +100,15 @@
         document.getElementById("posZ").innerText = player_z.toFixed(3);
     });
 
-
-
     // Function to set a waypoint in the game (optional)
     const setCheckpoint = (x, y) => {
         window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
     };
 
-    window.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") {
-            window.parent.postMessage({type: "pin"}, "*");
+    // Focus on click within the app
+    document.body.addEventListener("click", () => {
+        document.body.focus();
+    });
 </script>
 </body>
 </html>
