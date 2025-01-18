@@ -41,10 +41,9 @@
             resize: none;
         }
 
-        .instructions {
-            margin: 10px 0;
+        .hint {
             color: #f0c850;
-            font-size: 1em;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -56,9 +55,10 @@
     <p>X: <span id="posX">0</span></p>
     <p>Y: <span id="posY">0</span></p>
     <p>Z: <span id="posZ">0</span></p>
-    <button id="save">Save Checkpoint (E)</button>
-    <button id="clear">Clear Checkpoints</button>
-    <p class="instructions">To see your checkpoints, scroll down.</p>
+    <button id="save">Save Checkpoint</button>
+    <button id="clear">Clear All Checkpoints</button>
+    <p class="hint">Press "E" to save a checkpoint or click "Save Checkpoint".</p>
+    <p class="hint">To see your saved checkpoints, scroll down.</p>
     <textarea id="output" readonly placeholder="Your saved checkpoints will appear here..."></textarea>
 </div>
 
@@ -66,51 +66,70 @@
     let checkpoints = [];
     let player_x = 0, player_y = 0, player_z = 0;
 
-    // Function to update the output textarea with the saved checkpoints
-    const updateOutput = () => {
-        const output = document.getElementById("output");
-        const formattedCheckpoints = checkpoints.map(cp => `{x: ${cp.x.toFixed(3)}, y: ${cp.y.toFixed(3)}, z: ${cp.z.toFixed(3)}}`).join(",\n");
-        output.value = formattedCheckpoints;
-    };
-
     // Function to save the current position as a checkpoint
     const saveCheckpoint = () => {
         checkpoints.push({ x: player_x, y: player_y, z: player_z });
         updateOutput();
-        document.querySelector('.instructions').innerText = `Checkpoint saved at X=${player_x.toFixed(3)}, Y=${player_y.toFixed(3)}, Z=${player_z.toFixed(3)}`;
+        setWaypoint(player_x, player_y); // Set a waypoint in-game
     };
 
     // Function to clear all saved checkpoints
     const clearCheckpoints = () => {
         checkpoints = [];
         updateOutput();
-        document.querySelector('.instructions').innerText = "All checkpoints cleared!";
     };
 
-    // Event listeners for buttons
+    // Function to update the textarea with saved checkpoints
+    const updateOutput = () => {
+        const output = document.getElementById("output");
+        const formattedCheckpoints = checkpoints.map(cp => `{x: ${cp.x.toFixed(3)}, y: ${cp.y.toFixed(3)}, z: ${cp.z.toFixed(3)}}`).join(",\n");
+        output.value = formattedCheckpoints || "No checkpoints saved.";
+    };
+
+    // Function to simulate setting a waypoint in the game
+    const setWaypoint = (x, y) => {
+        window.parent.postMessage({ type: "setWaypoint", x, y }, "*");
+    };
+
+    // Add event listeners for buttons
     document.getElementById("save").onclick = saveCheckpoint;
     document.getElementById("clear").onclick = clearCheckpoints;
 
-    // Event listener for the "E" key to save a checkpoint
+    // Listen for "E" key to save a checkpoint
     window.addEventListener("keydown", (e) => {
         if (e.key === "e" || e.key === "E") {
             saveCheckpoint();
         }
-        if (e.key === "Escape") {
-            window.parent.postMessage({ type: "pin" }, "*"); // Pin functionality
+    });
+
+    // Simulate receiving player position from the game
+    window.addEventListener("message", (event) => {
+        if (event.data.data) {
+            player_x = event.data.data["pos_x"] || player_x;
+            player_y = event.data.data["pos_y"] || player_y;
+            player_z = event.data.data["pos_z"] || player_z;
+
+            document.getElementById("posX").innerText = player_x.toFixed(3);
+            document.getElementById("posY").innerText = player_y.toFixed(3);
+            document.getElementById("posZ").innerText = player_z.toFixed(3);
         }
     });
 
-    // Mock receiving player position (replace with actual game logic)
-    window.addEventListener("message", (event) => {
-        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
-        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
-        if (event.data.data["pos_z"]) player_z = event.data.data["pos_z"];
+    // Add click-to-focus functionality for the web app
+    document.body.addEventListener("click", () => {
+        document.body.focus();
+    });
+
+    // Mock data update for testing (replace with actual game updates)
+    setInterval(() => {
+        player_x += Math.random() * 10 - 5; // Simulate position changes
+        player_y += Math.random() * 10 - 5;
+        player_z += Math.random() * 2 - 1;
 
         document.getElementById("posX").innerText = player_x.toFixed(3);
         document.getElementById("posY").innerText = player_y.toFixed(3);
         document.getElementById("posZ").innerText = player_z.toFixed(3);
-    });
+    }, 1000);
 </script>
 </body>
 </html>
