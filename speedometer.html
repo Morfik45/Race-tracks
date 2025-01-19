@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: transparent;
+            background: transparent;
             color: white;
             overflow: hidden;
         }
@@ -110,21 +110,32 @@
     </div>
 
     <script>
-        // Initialize default values
+        // Initialize values
         let speed = 0;
         let rpm = 0;
         let fuel = 100;
 
+        // Function to send the getNamedData command to the game
+        const fetchGameData = () => {
+            window.postMessage(
+                {
+                    command: "getNamedData",
+                    keys: ["rpm", "engine", "fuel"]
+                },
+                "*"
+            );
+        };
+
         // Function to update the gauges
         const updateGauges = () => {
-            // Update HTML elements
+            // Update display values
             document.getElementById('speed').innerText = speed.toFixed(1);
             document.getElementById('rpm').innerText = Math.round(rpm);
             document.getElementById('fuel').innerText = `${fuel.toFixed(1)}%`;
 
-            // Rotate needles
-            const maxSpeed = 240; // Max speed on speedometer
-            const maxRpm = 8000; // Max RPM on RPM gauge
+            // Update needle rotations
+            const maxSpeed = 240; // Max speed on the speedometer
+            const maxRpm = 8000; // Max RPM
             const maxFuel = 100; // Max fuel percentage
 
             const speedAngle = (speed / maxSpeed) * 240 - 120; // -120 to start from left
@@ -136,30 +147,21 @@
             document.getElementById('fuelNeedle').style.transform = `rotate(${fuelAngle}deg)`;
         };
 
-        // Request data from the game client
-        const requestData = () => {
-            // Use getNamedData command to request relevant keys
-            window.postMessage({ 
-                command: "getNamedData", 
-                keys: ["rpm", "engine", "fuel"] 
-            }, "*");
-        };
-
-        // Listen for game data responses
+        // Listen for data from the game
         window.addEventListener("message", (event) => {
             const data = event.data;
 
-            // Check if data includes the keys we're interested in
+            // Update values if keys exist
             if (data.rpm !== undefined) rpm = data.rpm;
             if (data.fuel !== undefined) fuel = data.fuel;
-            if (data.engine === "on") speed = rpm / 40; // Approximate speed calculation based on RPM
-            else speed = 0; // Engine off
+            if (data.engine === "on") speed = rpm / 40; // Approximation of speed based on RPM
+            else speed = 0; // Stop if the engine is off
 
             updateGauges();
         });
 
-        // Request data every 100ms
-        setInterval(requestData, 100);
+        // Fetch data every 100ms
+        setInterval(fetchGameData, 100);
     </script>
 </body>
 </html>
