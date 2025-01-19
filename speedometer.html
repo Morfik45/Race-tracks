@@ -13,55 +13,31 @@
         }
 
         .speedometer-container {
-            position: absolute;
+            position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 300px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .gauge {
             position: relative;
-            width: 150px;
-            height: 150px;
+            width: 100px;
+            height: 100px;
             background: url('speedometer-background.png') no-repeat center;
             background-size: contain;
         }
 
         .needle {
             position: absolute;
-            width: 4px;
-            height: 75px;
-            background: red;
-            top: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            transform: rotate(0deg);
-        }
-
-        .dial-container {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .dial {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            background: url('dial-background.png') no-repeat center;
-            background-size: contain;
-        }
-
-        .small-needle {
-            position: absolute;
             width: 3px;
             height: 50px;
-            background: yellow;
+            background: red;
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
@@ -71,6 +47,7 @@
         .label {
             margin-top: 5px;
             font-size: 0.9em;
+            text-align: center;
         }
 
         .info {
@@ -87,21 +64,6 @@
         </div>
         <div class="label">Speed</div>
 
-        <div class="dial-container">
-            <div>
-                <div class="dial">
-                    <div class="small-needle" id="rpmNeedle"></div>
-                </div>
-                <div class="label">RPM</div>
-            </div>
-            <div>
-                <div class="dial">
-                    <div class="small-needle" id="fuelNeedle"></div>
-                </div>
-                <div class="label">Fuel</div>
-            </div>
-        </div>
-
         <div class="info">
             <div>Speed: <span id="speed">0</span> km/h</div>
             <div>RPM: <span id="rpm">0</span></div>
@@ -115,39 +77,31 @@
         let rpm = 0;
         let fuel = 100;
 
-        // Function to send the getNamedData command to the game
+        // Function to request data from the game
         const fetchGameData = () => {
-            window.postMessage(
+            window.parent.postMessage(
                 {
-                    command: "getNamedData",
+                    type: "getNamedData",
                     keys: ["rpm", "engine", "fuel"]
                 },
                 "*"
             );
         };
 
-        // Function to update the gauges
-        const updateGauges = () => {
-            // Update display values
+        // Function to update the speedometer
+        const updateSpeedometer = () => {
+            // Update values displayed in the info box
             document.getElementById('speed').innerText = speed.toFixed(1);
             document.getElementById('rpm').innerText = Math.round(rpm);
             document.getElementById('fuel').innerText = `${fuel.toFixed(1)}%`;
 
-            // Update needle rotations
-            const maxSpeed = 240; // Max speed on the speedometer
-            const maxRpm = 8000; // Max RPM
-            const maxFuel = 100; // Max fuel percentage
-
-            const speedAngle = (speed / maxSpeed) * 240 - 120; // -120 to start from left
-            const rpmAngle = (rpm / maxRpm) * 240 - 120;
-            const fuelAngle = (fuel / maxFuel) * 240 - 120;
-
+            // Rotate the needle based on speed
+            const maxSpeed = 240; // Assume max speed
+            const speedAngle = (speed / maxSpeed) * 240 - 120; // Speedometer range: -120 to +120
             document.getElementById('speedNeedle').style.transform = `rotate(${speedAngle}deg)`;
-            document.getElementById('rpmNeedle').style.transform = `rotate(${rpmAngle}deg)`;
-            document.getElementById('fuelNeedle').style.transform = `rotate(${fuelAngle}deg)`;
         };
 
-        // Listen for data from the game
+        // Listener to handle incoming messages from the game
         window.addEventListener("message", (event) => {
             const data = event.data;
 
@@ -155,12 +109,12 @@
             if (data.rpm !== undefined) rpm = data.rpm;
             if (data.fuel !== undefined) fuel = data.fuel;
             if (data.engine === "on") speed = rpm / 40; // Approximation of speed based on RPM
-            else speed = 0; // Stop if the engine is off
+            else speed = 0; // Stop speed when the engine is off
 
-            updateGauges();
+            updateSpeedometer();
         });
 
-        // Fetch data every 100ms
+        // Periodically fetch data
         setInterval(fetchGameData, 100);
     </script>
 </body>
