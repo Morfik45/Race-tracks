@@ -10,21 +10,32 @@
             background-color: transparent;
             color: white;
             text-align: center;
+            overflow: hidden;
+        }
+
+        .speedometer-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .gauge {
             position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 20px auto;
-            background: url(https://imgur.com/Bt7Wvu2) no-repeat center;
+            width: 150px;
+            height: 150px;
+            background: url('speedometer-background.png') no-repeat center;
             background-size: contain;
         }
 
         .needle {
             position: absolute;
-            width: 10px;
-            height: 150px;
+            width: 4px;
+            height: 75px;
             background: red;
             top: 50%;
             left: 50%;
@@ -34,22 +45,23 @@
 
         .dial-container {
             display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
         }
 
         .dial {
             position: relative;
-            width: 150px;
-            height: 150px;
+            width: 100px;
+            height: 100px;
             background: url('dial-background.png') no-repeat center;
             background-size: contain;
         }
 
         .small-needle {
             position: absolute;
-            width: 6px;
-            height: 75px;
+            width: 3px;
+            height: 50px;
             background: yellow;
             top: 50%;
             left: 50%;
@@ -58,45 +70,44 @@
         }
 
         .label {
-            margin-top: 10px;
-            font-size: 1.2em;
+            margin-top: 5px;
+            font-size: 0.9em;
         }
 
         .info {
-            margin-top: 20px;
-        }
-
-        .info div {
-            font-size: 1.2em;
-            margin: 10px 0;
+            margin-top: 10px;
+            font-size: 0.9em;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>Speedometer</h1>
-    <div class="gauge">
-        <div class="needle" id="speedNeedle"></div>
-    </div>
-    <div class="label">Speed</div>
-    
-    <div class="dial-container">
-        <div>
-            <div class="dial">
-                <div class="small-needle" id="rpmNeedle"></div>
-            </div>
-            <div class="label">RPM</div>
+    <div class="speedometer-container">
+        <div class="gauge">
+            <div class="needle" id="speedNeedle"></div>
         </div>
-        <div>
-            <div class="dial">
-                <div class="small-needle" id="fuelNeedle"></div>
+        <div class="label">Speed</div>
+
+        <div class="dial-container">
+            <div>
+                <div class="dial">
+                    <div class="small-needle" id="rpmNeedle"></div>
+                </div>
+                <div class="label">RPM</div>
             </div>
-            <div class="label">Fuel</div>
+            <div>
+                <div class="dial">
+                    <div class="small-needle" id="fuelNeedle"></div>
+                </div>
+                <div class="label">Fuel</div>
+            </div>
         </div>
-    </div>
-    <div class="info">
-        <div>Speed: <span id="speed">0</span> km/h</div>
-        <div>RPM: <span id="rpm">0</span></div>
-        <div>Fuel: <span id="fuel">100%</span></div>
+
+        <div class="info">
+            <div>Speed: <span id="speed">0</span> km/h</div>
+            <div>RPM: <span id="rpm">0</span></div>
+            <div>Fuel: <span id="fuel">100%</span></div>
+        </div>
     </div>
 
     <script>
@@ -105,31 +116,8 @@
         let rpm = 0;
         let fuel = 100;
 
-        // Last position and time for speed calculation
-        let lastPos = { x: 0, y: 0, z: 0 };
-        let lastTime = Date.now();
-
         // Function to update the gauges
         const updateGauges = () => {
-            const now = Date.now();
-            const deltaTime = (now - lastTime) / 1000; // Time in seconds
-
-            // Replace these values with actual game data
-            const pos_x = 0; // Replace with actual `pos_x` from game
-            const pos_y = 0; // Replace with actual `pos_y` from game
-            const pos_z = 0; // Replace with actual `pos_z` from game
-
-            const dx = pos_x - lastPos.x;
-            const dy = pos_y - lastPos.y;
-            const dz = pos_z - lastPos.z;
-            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-            // Calculate speed (m/s to km/h)
-            speed = (distance / deltaTime) * 3.6;
-
-            lastPos = { x: pos_x, y: pos_y, z: pos_z };
-            lastTime = now;
-
             // Update HTML elements
             document.getElementById('speed').innerText = speed.toFixed(1);
             document.getElementById('rpm').innerText = Math.round(rpm);
@@ -147,14 +135,22 @@
             document.getElementById('speedNeedle').style.transform = `rotate(${speedAngle}deg)`;
             document.getElementById('rpmNeedle').style.transform = `rotate(${rpmAngle}deg)`;
             document.getElementById('fuelNeedle').style.transform = `rotate(${fuelAngle}deg)`;
-
-            // Simulate decreasing fuel and RPM for testing (remove in live game)
-          //  rpm = Math.min(maxRpm, rpm + 50); // Example RPM increment
-           // fuel = Math.max(0, fuel - 0.01);  // Simulated fuel consumption
         };
 
+        // Simulating data from the game
+        window.addEventListener("message", (event) => {
+            const data = event.data;
+
+            // Update values if they exist in the game data
+            if (data.speed !== undefined) speed = data.speed;
+            if (data.rpm !== undefined) rpm = data.rpm;
+            if (data.fuel !== undefined) fuel = data.fuel;
+
+            updateGauges();
+        });
+
         // Update gauges every 100ms
-        setInterval(updateGauges, 1);
+        setInterval(updateGauges, 100);
     </script>
 </body>
 </html>
