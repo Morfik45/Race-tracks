@@ -17,7 +17,7 @@
             width: 300px;
             height: 300px;
             margin: 50px auto;
-            background: url('speedometer-background.png') no-repeat center;
+            background: url(https://i.imgur.com/b9e4d92.jpeg) no-repeat center;
             background-size: contain;
         }
 
