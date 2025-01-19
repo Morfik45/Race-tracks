@@ -9,7 +9,6 @@
             font-family: Arial, sans-serif;
             background-color: transparent;
             color: white;
-            text-align: center;
             overflow: hidden;
         }
 
@@ -111,7 +110,7 @@
     </div>
 
     <script>
-        // Initialize values for speed, RPM, and fuel
+        // Initialize default values
         let speed = 0;
         let rpm = 0;
         let fuel = 100;
@@ -137,20 +136,30 @@
             document.getElementById('fuelNeedle').style.transform = `rotate(${fuelAngle}deg)`;
         };
 
-        // Simulating data from the game
+        // Request data from the game client
+        const requestData = () => {
+            // Use getNamedData command to request relevant keys
+            window.postMessage({ 
+                command: "getNamedData", 
+                keys: ["rpm", "engine", "fuel"] 
+            }, "*");
+        };
+
+        // Listen for game data responses
         window.addEventListener("message", (event) => {
             const data = event.data;
 
-            // Update values if they exist in the game data
-            if (data.speed !== undefined) speed = data.speed;
+            // Check if data includes the keys we're interested in
             if (data.rpm !== undefined) rpm = data.rpm;
             if (data.fuel !== undefined) fuel = data.fuel;
+            if (data.engine === "on") speed = rpm / 40; // Approximate speed calculation based on RPM
+            else speed = 0; // Engine off
 
             updateGauges();
         });
 
-        // Update gauges every 100ms
-        setInterval(updateGauges, 100);
+        // Request data every 100ms
+        setInterval(requestData, 100);
     </script>
 </body>
 </html>
