@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedometer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            text-align: center;
+        }
+
+        .gauge {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 50px auto;
+            background: url('speedometer-background.png') no-repeat center;
+            background-size: contain;
+        }
+
+        .needle {
+            position: absolute;
+            width: 10px;
+            height: 150px;
+            background: red;
+            top: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: rotate(0deg);
+        }
+
+        .info {
+            margin-top: 20px;
+        }
+
+        .info div {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speedometer</h1>
+    <div class="gauge">
+        <div class="needle" id="speedNeedle"></div>
+    </div>
+    <div class="info">
+        <div>Speed: <span id="speed">0</span> km/h</div>
+        <div>RPM: <span id="rpm">0</span></div>
+        <div>Fuel: <span id="fuel">100%</span></div>
+    </div>
+
+    <script>
+        // Variables for speed, RPM, and fuel
+        let speed = 0;
+        let rpm = 0;
+        let fuel = 100;
+
+        // Positional data for speed calculation
+        let lastPos = { x: 0, y: 0, z: 0 };
+        let lastTime = Date.now();
+
+        // Function to update the speedometer
+        const updateSpeedometer = () => {
+            const now = Date.now();
+            const deltaTime = (now - lastTime) / 1000; // Time in seconds
+
+            // Calculate speed (example: replace with actual game data)
+            const pos_x = Math.random() * 100; // Replace with actual pos_x
+            const pos_y = Math.random() * 100; // Replace with actual pos_y
+            const pos_z = Math.random() * 100; // Replace with actual pos_z
+
+            const dx = pos_x - lastPos.x;
+            const dy = pos_y - lastPos.y;
+            const dz = pos_z - lastPos.z;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            speed = (distance / deltaTime) * 3.6; // Convert m/s to km/h
+
+            lastPos = { x: pos_x, y: pos_y, z: pos_z };
+            lastTime = now;
+
+            // Update RPM and Fuel (example values)
+            rpm = Math.random() * 8000; // Replace with actual RPM data
+            fuel = Math.max(0, fuel - 0.01); // Simulate fuel consumption
+
+            // Update HTML elements
+            document.getElementById('speed').innerText = speed.toFixed(1);
+            document.getElementById('rpm').innerText = Math.round(rpm);
+            document.getElementById('fuel').innerText = `${fuel.toFixed(1)}%`;
+
+            // Update the needle position (speedometer)
+            const speedNeedle = document.getElementById('speedNeedle');
+            const maxSpeed = 240; // Maximum speed on the gauge
+            const maxAngle = 240; // Maximum rotation angle for the needle
+            const speedAngle = (speed / maxSpeed) * maxAngle - 120; // -120 to start from 0
+            speedNeedle.style.transform = `rotate(${speedAngle}deg)`;
+        };
+
+        // Update the speedometer every 100ms
+        setInterval(updateSpeedometer, 100);
+    </script>
+</body>
+</html>
