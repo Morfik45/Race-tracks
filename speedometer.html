@@ -17,7 +17,7 @@
             width: 300px;
             height: 300px;
             margin: 20px auto;
-            background: url(https://i.imgur.com/Bt7Wvu2.png) no-repeat center;
+            background: url('speedometer-background.png') no-repeat center;
             background-size: contain;
         }
 
@@ -57,6 +57,11 @@
             transform: rotate(0deg);
         }
 
+        .label {
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+
         .info {
             margin-top: 20px;
         }
@@ -72,12 +77,20 @@
     <div class="gauge">
         <div class="needle" id="speedNeedle"></div>
     </div>
+    <div class="label">Speed</div>
+    
     <div class="dial-container">
-        <div class="dial">
-            <div class="small-needle" id="rpmNeedle"></div>
+        <div>
+            <div class="dial">
+                <div class="small-needle" id="rpmNeedle"></div>
+            </div>
+            <div class="label">RPM</div>
         </div>
-        <div class="dial">
-            <div class="small-needle" id="fuelNeedle"></div>
+        <div>
+            <div class="dial">
+                <div class="small-needle" id="fuelNeedle"></div>
+            </div>
+            <div class="label">Fuel</div>
         </div>
     </div>
     <div class="info">
@@ -136,8 +149,8 @@
             document.getElementById('fuelNeedle').style.transform = `rotate(${fuelAngle}deg)`;
 
             // Simulate decreasing fuel and RPM for testing (remove in live game)
-            rpm = Math.min(maxRpm, rpm + 50); // Example RPM increment
-            fuel = Math.max(0, fuel - 0.01);  // Simulated fuel consumption
+          //  rpm = Math.min(maxRpm, rpm + 50); // Example RPM increment
+           // fuel = Math.max(0, fuel - 0.01);  // Simulated fuel consumption
         };
 
         // Update gauges every 100ms
