@@ -1,121 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedometer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: transparent;
-            color: white;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gauge Speedometer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
 
-        .speedometer-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 8px;
-        }
+    .container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 300px;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .gauge {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            background: url('speedometer-background.png') no-repeat center;
-            background-size: contain;
-        }
+    .speedometer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
 
-        .needle {
-            position: absolute;
-            width: 3px;
-            height: 50px;
-            background: red;
-            top: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            transform: rotate(0deg);
-        }
+    .dial-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent; /* Set your background image using CSS or overlay */
+      z-index: 1;
+    }
 
-        .label {
-            margin-top: 5px;
-            font-size: 0.9em;
-            text-align: center;
-        }
+    .needle {
+      position: absolute;
+      width: 50%;
+      height: 6px;
+      background: red;
+      border-radius: 3px;
+      transform-origin: 100% 50%;
+      transform: rotate(0deg);
+      top: 50%;
+      left: 50%;
+      z-index: 2;
+    }
 
-        .info {
-            margin-top: 10px;
-            font-size: 0.9em;
-            text-align: center;
-        }
-    </style>
+    .gear-display {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1.5em;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      text-shadow: 0 0 5px black;
+      z-index: 3;
+    }
+
+    .speed-display {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 2em;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      text-shadow: 0 0 5px black;
+      z-index: 3;
+    }
+  </style>
 </head>
 <body>
-    <div class="speedometer-container">
-        <div class="gauge">
-            <div class="needle" id="speedNeedle"></div>
-        </div>
-        <div class="label">Speed</div>
+  <div class="container">
+    <div class="speedometer">
+      <!-- Dial background -->
+      <div class="dial-bg"></div>
 
-        <div class="info">
-            <div>Speed: <span id="speed">0</span> km/h</div>
-            <div>RPM: <span id="rpm">0</span></div>
-            <div>Fuel: <span id="fuel">100%</span></div>
-        </div>
+      <!-- Needle -->
+      <div class="needle" id="needle"></div>
+
+      <!-- Speed display -->
+      <div class="speed-display">
+        <span id="speed">0</span> <span id="unit">kph</span>
+      </div>
+
+      <!-- Gear display -->
+      <div class="gear-display" id="gear">N</div>
     </div>
+  </div>
 
-    <script>
-        // Initialize values
-        let speed = 0;
-        let rpm = 0;
-        let fuel = 100;
+  <script>
+    let lastGear = null;
 
-        // Function to request data from the game
-        const fetchGameData = () => {
-            window.parent.postMessage(
-                {
-                    type: "getNamedData",
-                    keys: ["rpm", "engine", "fuel"]
-                },
-                "*"
-            );
-        };
+    window.addEventListener("DOMContentLoaded", () => {
+      window.addEventListener("message", (e) => {
+        if (e.data.action == "show") {
+          document.querySelector(".container").style.display = "flex";
 
-        // Function to update the speedometer
-        const updateSpeedometer = () => {
-            // Update values displayed in the info box
-            document.getElementById('speed').innerText = speed.toFixed(1);
-            document.getElementById('rpm').innerText = Math.round(rpm);
-            document.getElementById('fuel').innerText = `${fuel.toFixed(1)}%`;
+          // Speed and unit
+          let speed = e.data.isMetric
+            ? e.data.speed * 3.6
+            : e.data.speed * 2.236936;
+          let measurementType = e.data.isMetric ? "kph" : "mph";
 
-            // Rotate the needle based on speed
-            const maxSpeed = 240; // Assume max speed
-            const speedAngle = (speed / maxSpeed) * 240 - 120; // Speedometer range: -120 to +120
-            document.getElementById('speedNeedle').style.transform = `rotate(${speedAngle}deg)`;
-        };
+          document.getElementById("speed").innerText = speed.toFixed(0);
+          document.getElementById("unit").innerText = measurementType;
 
-        // Listener to handle incoming messages from the game
-        window.addEventListener("message", (event) => {
-            const data = event.data;
+          // Needle rotation (max speed is 200)
+          const maxSpeed = 200;
+          const rotation = (speed / maxSpeed) * 180; // Assuming 180 degrees max
+          document.getElementById("needle").style.transform = `rotate(${rotation}deg)`;
 
-            // Update values if keys exist
-            if (data.rpm !== undefined) rpm = data.rpm;
-            if (data.fuel !== undefined) fuel = data.fuel;
-            if (data.engine === "on") speed = rpm / 40; // Approximation of speed based on RPM
-            else speed = 0; // Stop speed when the engine is off
-
-            updateSpeedometer();
-        });
-
-        // Periodically fetch data
-        setInterval(fetchGameData, 100);
-    </script>
+          // Gear display
+          if (e.data.gear !== lastGear && !isNaN(e.data.gear)) {
+            document.getElementById("gear").innerText =
+              e.data.gear || "R"; // Default to reverse gear if no data
+            lastGear = e.data.gear;
+          }
+        } else if (e.data.action == "hide") {
+          document.querySelector(".container").style.display = "none";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
