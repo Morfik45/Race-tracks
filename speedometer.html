@@ -1,136 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gauge Speedometer</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      overflow: hidden;
-    }
-
-    .container {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 300px;
-      height: 300px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .speedometer {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    .dial-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent; /* Set your background image using CSS or overlay */
-      z-index: 1;
-    }
-
-    .needle {
-      position: absolute;
-      width: 50%;
-      height: 6px;
-      background: red;
-      border-radius: 3px;
-      transform-origin: 100% 50%;
-      transform: rotate(0deg);
-      top: 50%;
-      left: 50%;
-      z-index: 2;
-    }
-
-    .gear-display {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 1.5em;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      text-shadow: 0 0 5px black;
-      z-index: 3;
-    }
-
-    .speed-display {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-size: 2em;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      text-shadow: 0 0 5px black;
-      z-index: 3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedometer Overlay</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+        }
+        #speedometer {
+            font-size: 48px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="speedometer">
-      <!-- Dial background -->
-      <div class="dial-bg"></div>
-
-      <!-- Needle -->
-      <div class="needle" id="needle"></div>
-
-      <!-- Speed display -->
-      <div class="speed-display">
-        <span id="speed">0</span> <span id="unit">kph</span>
-      </div>
-
-      <!-- Gear display -->
-      <div class="gear-display" id="gear">N</div>
-    </div>
-  </div>
-
-  <script>
-    let lastGear = null;
-
-    window.addEventListener("DOMContentLoaded", () => {
-      window.addEventListener("message", (e) => {
-        if (e.data.action == "show") {
-          document.querySelector(".container").style.display = "flex";
-
-          // Speed and unit
-          let speed = e.data.isMetric
-            ? e.data.speed * 3.6
-            : e.data.speed * 2.236936;
-          let measurementType = e.data.isMetric ? "kph" : "mph";
-
-          document.getElementById("speed").innerText = speed.toFixed(0);
-          document.getElementById("unit").innerText = measurementType;
-
-          // Needle rotation (max speed is 200)
-          const maxSpeed = 200;
-          const rotation = (speed / maxSpeed) * 180; // Assuming 180 degrees max
-          document.getElementById("needle").style.transform = `rotate(${rotation}deg)`;
-
-          // Gear display
-          if (e.data.gear !== lastGear && !isNaN(e.data.gear)) {
-            document.getElementById("gear").innerText =
-              e.data.gear || "R"; // Default to reverse gear if no data
-            lastGear = e.data.gear;
-          }
-        } else if (e.data.action == "hide") {
-          document.querySelector(".container").style.display = "none";
+    <div id="speedometer">Speed: 0 RPM</div>
+    <script>
+        // This function simulates receiving data from the game
+        function updateSpeedometer(data) {
+            const speedometer = document.getElementById('speedometer');
+            speedometer.innerHTML = `Speed: ${data.rpm} RPM`;
         }
-      });
-    });
-  </script>
+
+        // Example of how you might receive and process data
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'update') {
+                updateSpeedometer(event.data);
+            }
+        });
+
+        // Example Data (This would come from getNamedData in a real scenario)
+        const exampleData = {
+            type: 'update',
+            rpm: 3000 // This value would be dynamic based on the game data
+        };
+
+        // Simulate data update
+        setTimeout(() => {
+            updateSpeedometer(exampleData);
+        }, 1000);
+    </script>
 </body>
 </html>
