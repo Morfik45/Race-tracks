@@ -47,25 +47,25 @@
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/5</span></p>
     <div id="lapTimes"></div>
     <span style="color: white" id="timer">00:00:000</span>
-
+    <p id="totalTime" style="color: lightgreen; font-size: 1.2em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
 </div>
 
 <script>
     const checkpoints = [
-{x: 3610.924560546875, y: 5602.90380859375, z: 7.42602920532226},
-{x: 3666.27685546875, y: 5602.39208984375, z: 7.40911102294921},
-{x: 3740.482666015625, y: 5635.77294921875, z: 7.42153167724609},
-{x: 3756.059814453125, y: 5719.263671875, z: 7.41970443725585},
-{x: 3816.26318359375, y: 5766.0791015625, z: 7.42435932159423},
-{x: 3865.98583984375, y: 5828.7333984375, z: 7.43437767028808},
-{x: 3906.339599609375, y: 5767.185546875, z: 7.42948913574218},
-{x: 3887.396728515625, y: 5624.8037109375, z: 7.43623924255371},
-{x: 3806.833251953125, y: 5572.33203125, z: 7.42811727523803},
-{x: 3680.703125, y: 5564.0361328125, z: 7.4478211402893},
-{x: 3599.511474609375, y: 5512.8134765625, z: 7.44977712631225},
-{x: 3486.134765625, y: 5535.22705078125, z: 7.41068935394287},
-{x: 3531.825439453125, y: 5605.92041015625, z: 7.39822721481323},
-{x: 3610.924560546875, y: 5602.90380859375, z: 7.42602920532226},
+        {x: 3610.924560546875, y: 5602.90380859375, z: 7.42602920532226},
+        {x: 3666.27685546875, y: 5602.39208984375, z: 7.40911102294921},
+        {x: 3740.482666015625, y: 5635.77294921875, z: 7.42153167724609},
+        {x: 3756.059814453125, y: 5719.263671875, z: 7.41970443725585},
+        {x: 3816.26318359375, y: 5766.0791015625, z: 7.42435932159423},
+        {x: 3865.98583984375, y: 5828.7333984375, z: 7.43437767028808},
+        {x: 3906.339599609375, y: 5767.185546875, z: 7.42948913574218},
+        {x: 3887.396728515625, y: 5624.8037109375, z: 7.43623924255371},
+        {x: 3806.833251953125, y: 5572.33203125, z: 7.42811727523803},
+        {x: 3680.703125, y: 5564.0361328125, z: 7.4478211402893},
+        {x: 3599.511474609375, y: 5512.8134765625, z: 7.44977712631225},
+        {x: 3486.134765625, y: 5535.22705078125, z: 7.41068935394287},
+        {x: 3531.825439453125, y: 5605.92041015625, z: 7.39822721481323},
+        {x: 3610.924560546875, y: 5602.90380859375, z: 7.42602920532226},
     ];
 
     let player_x = 0;
@@ -94,7 +94,7 @@
         const lapTimes = [];
 
         document.getElementById("start").style.display = "none";
-        document.getElementById("restart").style.display = "all";
+        document.getElementById("restart").style.display = "inline-block";
         isPlaying = true;
 
         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
@@ -128,6 +128,14 @@
                     startTime = currentTime;
 
                     if (lap > nLaps) {
+                        const totalLapTime = lapTimes.reduce((sum, time) => sum + time, 0);
+                        const totalMinutes = Math.floor(totalLapTime / 60000);
+                        const totalSeconds = Math.floor((totalLapTime % 60000) / 1000);
+                        const totalMillis = totalLapTime % 1000;
+
+                        document.getElementById("totalTimeValue").innerText = `${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}`;
+                        document.getElementById("totalTime").style.display = "block";
+
                         sfx(5); // Finish Audio
                         firstCp = false;
                         isPlaying = false;
@@ -139,7 +147,7 @@
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(2); //Checkpoint Audio
+                    sfx(2); // Checkpoint Audio
                 }
             }
 
