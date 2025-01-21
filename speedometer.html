@@ -18,7 +18,7 @@
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background for visibility */
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -45,15 +45,22 @@
 </head>
 <body>
     <div id="container">
-        <div id="speedometer">Speed: 0</div>
+        <div id="speedometer">Speed: 0 km/h</div>
         <div id="rpm">RPM: 0</div>
     </div>
     <script>
+        // Function to request data from the game client
+        function requestData() {
+            window.parent.postMessage({ command: 'getData' }, '*'); // Sending getData command
+        }
+
         function updateSpeedometer(data) {
             const speedometer = document.getElementById('speedometer');
             const rpmDisplay = document.getElementById('rpm');
-            speedometer.innerHTML = `Speed: ${data.speed} km/h`; // Display speed in km/h
-            rpmDisplay.innerHTML = `RPM: ${data.rpm}`; // Display RPM
+
+            // Update the display with received values
+            speedometer.innerHTML = `Speed: ${data.fuel} km/h`; // Assuming speed is part of the data
+            rpmDisplay.innerHTML = `RPM: ${data.rpm || 0}`; // Display RPM, default to 0 if not available
         }
 
         window.addEventListener('message', function(event) {
@@ -62,16 +69,8 @@
             }
         });
 
-        // Simulated data for testing
-       // const exampleData = {
-        //    type: 'update',
-         //   speed: 120, // Example speed in km/h
-          //  rpm: 3000 // Example RPM
-        };
-
-        setTimeout(() => {
-            updateSpeedometer(exampleData);
-        }, 1000);
+        // Request data every second
+        setInterval(requestData, 1000);
     </script>
 </body>
 </html>
