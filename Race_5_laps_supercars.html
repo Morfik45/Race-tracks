@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5 laps supercars</title>
+    <title>Docks Dash</title>
     <style>
         body {
             font-family: impact;
@@ -43,8 +43,8 @@
 <div class="container">
     <button id="start">Start Race</button>
     <button id="restart" style="display: none;">Restart Race</button>
-    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">5 Laps Supercars</p>
-    <p style="color:lightgreen">Author: <span style="color:white">Danold Tremp</span></p>
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Docks Dash</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Collins Alexander</span></p>
     <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/0</span></p>
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
     <div id="lapTimes"></div>
@@ -174,4 +174,16 @@
     };
 
     window.addEventListener("message", (event) => {
-        if (event.data.data["pos_x"]) player_x =
+        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
+        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            window.parent.postMessage({type: "pin"}, "*");
+        }
+    });
+</script>
+
+</body>
+</html>
