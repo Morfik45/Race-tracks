@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docks Dash</title>
+    <title>5 Laps Supercars</title>
     <style>
         body {
             font-family: impact;
@@ -11,7 +8,7 @@
             color: white;
             position: absolute;
             left: 410px;
-            top: 589px;
+            top: 789px;
             font-size: 1.5em;
             line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
@@ -36,36 +33,38 @@
         .checkpoint {
             color: lightgreen;
         }
+    
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button id="start">Start Race</button>
-    <button id="restart" style="display: none;">Restart Race</button>
-    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Docks Dash</p>
-    <p style="color:lightgreen">Author: <span style="color:white">Collins Alexander</span></p>
+    
+    <button id="start">Start Race</button> <button id="restart">Restart Race</button>
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">5 Laps Supercars</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Danold Tremp</span></p>
     <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/0</span></p>
-    <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
+    <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/5</span></p>
     <div id="lapTimes"></div>
     <span style="color: white" id="timer">00:00:000</span>
+
 </div>
 
 <script>
     const checkpoints = [
-        {x: 3610.924560546875, y: 5602.90380859375, z: 7.42602920532226},
-        {x: 3666.27685546875, y: 5602.39208984375, z: 7.40911102294921},
-        {x: 3740.482666015625, y: 5635.77294921875, z: 7.42153167724609},
-        {x: 3756.059814453125, y: 5719.263671875, z: 7.41970443725585},
-        {x: 3816.26318359375, y: 5766.0791015625, z: 7.42435932159423},
-        {x: 3865.98583984375, y: 5828.7333984375, z: 7.43437767028808},
-        {x: 3906.339599609375, y: 5767.185546875, z: 7.42948913574218},
-        {x: 3887.396728515625, y: 5624.8037109375, z: 7.43623924255371},
-        {x: 3806.833251953125, y: 5572.33203125, z: 7.42811727523803},
-        {x: 3680.703125, y: 5564.0361328125, z: 7.4478211402893},
-        {x: 3599.511474609375, y: 5512.8134765625, z: 7.44977712631225},
-        {x: 3486.134765625, y: 5535.22705078125, z: 7.41068935394287},
-        {x: 3531.825439453125, y: 5605.92041015625, z: 7.39822721481323},
+{x: 3610.924560546875, y: 5602.90380859375, z: 7.42602920532226},
+{x: 3666.27685546875, y: 5602.39208984375, z: 7.40911102294921},
+{x: 3740.482666015625, y: 5635.77294921875, z: 7.42153167724609},
+{x: 3756.059814453125, y: 5719.263671875, z: 7.41970443725585},
+{x: 3816.26318359375, y: 5766.0791015625, z: 7.42435932159423},
+{x: 3865.98583984375, y: 5828.7333984375, z: 7.43437767028808},
+{x: 3906.339599609375, y: 5767.185546875, z: 7.42948913574218},
+{x: 3887.396728515625, y: 5624.8037109375, z: 7.43623924255371},
+{x: 3806.833251953125, y: 5572.33203125, z: 7.42811727523803},
+{x: 3680.703125, y: 5564.0361328125, z: 7.4478211402893},
+{x: 3599.511474609375, y: 5512.8134765625, z: 7.44977712631225},
+{x: 3486.134765625, y: 5535.22705078125, z: 7.41068935394287},
+{x: 3531.825439453125, y: 5605.92041015625, z: 7.39822721481323},
     ];
 
     let player_x = 0;
@@ -94,18 +93,8 @@
         const lapTimes = [];
 
         document.getElementById("start").style.display = "none";
-        document.getElementById("restart").style.display = "inline-block";
+        document.getElementById("restart").style.display = "all";
         isPlaying = true;
-
-        // Pre-create placeholders for lap times
-        const lapTimesContainer = document.getElementById("lapTimes");
-        lapTimesContainer.innerHTML = ""; // Clear existing lap time entries
-        for (let i = 1; i <= nLaps; i++) {
-            const lapTimeElem = document.createElement("p");
-            lapTimeElem.id = `lap-${i}`;
-            lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap ${i}</span>: <span style="color: white;">--:--:---</span>`;
-            lapTimesContainer.appendChild(lapTimeElem);
-        }
 
         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
 
@@ -128,12 +117,12 @@
                     const lapTime = currentTime - startTime;
                     lapTimes.push(lapTime);
 
-                    // Update the lap time for the completed lap
-                    const lapTimeElem = document.getElementById(`lap-${lap - 1}`);
+                    const lapTimeElem = document.createElement("p");
                     const minutes = Math.floor(lapTime / 60000);
                     const seconds = Math.floor((lapTime % 60000) / 1000);
                     const millis = lapTime % 1000;
-                    lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
+                    lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap: ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
+                    document.getElementById("lapTimes").appendChild(lapTimeElem);
 
                     startTime = currentTime;
 
@@ -149,7 +138,7 @@
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(2); // Checkpoint Audio
+                    sfx(2); //Checkpoint Audio
                 }
             }
 
