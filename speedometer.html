@@ -49,25 +49,31 @@
         <div id="rpm">RPM: 0</div>
     </div>
     <script>
-        // Function to request data from the game client
+        let player_x = 0, player_y = 0, player_z = 0;
+
+        window.addEventListener("message", (event) => {
+            const data = event.data.data; // Assuming event.data contains the necessary data
+
+            if (data) {
+                // Get player coordinates (if needed)
+                if (data.pos_x) player_x = data.pos_x;
+                if (data.pos_y) player_y = data.pos_y;
+                if (data.pos_z) player_z = data.pos_z;
+
+                // Get speed and RPM from shared data
+                const speed = data.speed || 0; // Default to 0 if speed is not provided
+                const rpm = data.rpm || 0; // Default to 0 if RPM is not provided
+
+                // Update the speedometer display
+                document.getElementById("speedometer").innerText = `Speed: ${speed.toFixed(1)} km/h`;
+                document.getElementById("rpm").innerText = `RPM: ${rpm.toFixed(0)}`;
+            } 
+        });
+
+        // Request data from the game client
         function requestData() {
             window.parent.postMessage({ command: 'getData' }, '*'); // Sending getData command
         }
-
-        function updateSpeedometer(data) {
-            const speedometer = document.getElementById('speedometer');
-            const rpmDisplay = document.getElementById('rpm');
-
-            // Update the display with received values
-            speedometer.innerHTML = `Speed: ${data.fuel} km/h`; // Assuming speed is part of the data
-            rpmDisplay.innerHTML = `RPM: ${data.rpm || 0}`; // Display RPM, default to 0 if not available
-        }
-
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'update') {
-                updateSpeedometer(event.data);
-            }
-        });
 
         // Request data every second
         setInterval(requestData, 1000);
