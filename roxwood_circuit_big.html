@@ -1,0 +1,247 @@
+<html>
+<head>
+    <title>Roxwood Circuit BIG</title>
+    <style>
+        body {
+            font-family: impact;
+            background-color: transparent;
+            color: white;
+            position: absolute;
+            left: 410px;
+            bottom: 50px;
+            font-size: 1.5em;
+            line-height: 3px;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
+
+        table {
+            width: 200px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 5px;
+            border: 1px solid #555;
+        }
+
+        .time {
+            font-size: 2.2em;
+            color: #ddd;
+        }
+
+        .checkpoint {
+            color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <button id="start">Start Race</button> <button id="restart">Restart Race</button>
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Docks Dash</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Collins Alexander</span></p>
+    <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/26</span></p>
+    <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
+    <div id="lapTimes"></div>
+    <span style="color: white" id="timer">00:00:000</span>
+    <p id="totalTime" style="color: lightgreen; font-size: 1.2em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
+</div>
+
+<script>
+    const checkpoints = [
+       {x: -2762.5625, y: 8079.728515625, z: 42.83762741088867},
+{x: -2717.395751953125, y: 8078.64306640625, z: 42.75195693969726},
+{x: -2649.994384765625, y: 8076.9111328125, z: 43.80749130249023},
+{x: -2583.101806640625, y: 8074.7587890625, z: 45.97261428833008},
+{x: -2530.17578125, y: 8113.8056640625, z: 45.35960006713867},
+{x: -2486.02099609375, y: 8163.712890625, z: 41.03867721557617},
+{x: -2458.958251953125, y: 8223.4658203125, z: 42.16590881347656},
+{x: -2511.71142578125, y: 8244.02734375, z: 38.94086837768555},
+{x: -2554.789794921875, y: 8193.6474609375, z: 38.1954460144043},
+{x: -2610.82763671875, y: 8157.51953125, z: 40.71953201293945},
+{x: -2673.7001953125, y: 8156.5283203125, z: 40.79188537597656},
+{x: -2691.40771484375, y: 8219, z: 40.79134750366211},
+{x: -2689.669921875, y: 8285.6806640625, z: 40.7916259765625},
+{x: -2685.213623046875, y: 8352.1884765625, z: 40.79105377197265},
+{x: -2673.338623046875, y: 8417.833984375, z: 40.79905319213867},
+{x: -2621.66943359375, y: 8457.34765625, z: 41.24366760253906},
+{x: -2557.9404296875, y: 8476.4189453125, z: 42.65321350097656},
+{x: -2493.764404296875, y: 8494.2490234375, z: 44.29406356811523},
+{x: -2428.8984375, y: 8510.212890625, z: 45.67305755615234},
+{x: -2363.226806640625, y: 8528.4091796875, z: 46.25962829589844},
+{x: -2299.64404296875, y: 8546.1142578125, z: 46.1713638305664},
+{x: -2256.630859375, y: 8588.765625, z: 46.18537902832031},
+{x: -2280.75146484375, y: 8650.333984375, z: 46.26008224487305},
+{x: -2309.2314453125, y: 8711.4697265625, z: 46.08255767822265},
+{x: -2336.124267578125, y: 8773.0283203125, z: 46.69311141967773},
+{x: -2350.54296875, y: 8838.16796875, z: 48.04530715942383},
+{x: -2354.477294921875, y: 8900.357421875, z: 50.13329315185547},
+{x: -2386.760009765625, y: 8869.9189453125, z: 48.72596740722656},
+{x: -2397.70654296875, y: 8806.0595703125, z: 44.97714233398437},
+{x: -2446.678466796875, y: 8761.69921875, z: 44.19760513305664},
+{x: -2512.405517578125, y: 8750.080078125, z: 44.59468460083008},
+{x: -2579.11865234375, y: 8755.8349609375, z: 46.53668975830078},
+{x: -2645.570556640625, y: 8749.43359375, z: 45.08803939819336},
+{x: -2711.619140625, y: 8741.1455078125, z: 44.19733428955078},
+{x: -2777.812744140625, y: 8742.9716796875, z: 44.3860969543457},
+{x: -2843.076171875, y: 8758.13671875, z: 44.81959915161133},
+{x: -2904.041259765625, y: 8783.705078125, z: 44.19216156005859},
+{x: -2964.050537109375, y: 8813.2109375, z: 43.49955749511719},
+{x: -3025.147705078125, y: 8840.6298828125, z: 42.17036437988281},
+{x: -3085.953125, y: 8826.517578125, z: 39.54627227783203},
+{x: -3079.292236328125, y: 8767.2685546875, z: 37.28344345092773},
+{x: -3014.6298828125, y: 8749.369140625, z: 35.96191787719726},
+{x: -2947.661865234375, y: 8737.91015625, z: 34.61357116699219},
+{x: -2881.312744140625, y: 8729.5078125, z: 33.13417434692383},
+{x: -2815.7451171875, y: 8714.296875, z: 31.44820404052734},
+{x: -2787.457763671875, y: 8661.2939453125, z: 30.69645881652832},
+{x: -2846.123779296875, y: 8641.0654296875, z: 30.82719230651855},
+{x: -2911.02392578125, y: 8661.125, z: 34.2115478515625},
+{x: -2972.3974609375, y: 8686.095703125, z: 41.94244384765625},
+{x: -3034.143798828125, y: 8709.6435546875, z: 44.84737396240234},
+{x: -3063.027099609375, y: 8669.201171875, z: 38.59157562255859},
+{x: -3116.94091796875, y: 8660.0859375, z: 31.54060173034668},
+{x: -3183.562744140625, y: 8666.75, z: 33.82779693603515},
+{x: -3247.0849609375, y: 8656.59375, z: 35.48611450195312},
+{x: -3262.976806640625, y: 8595.5888671875, z: 36.05905532836914},
+{x: -3234.12744140625, y: 8534.23046875, z: 36.37624740600586},
+{x: -3198.835693359375, y: 8476.474609375, z: 36.39382553100586},
+{x: -3149.109619140625, y: 8433.099609375, z: 36.42921829223633},
+{x: -3082.8212890625, y: 8421.2763671875, z: 36.3992691040039},
+{x: -3015.753173828125, y: 8419.5537109375, z: 36.40341186523437},
+{x: -2949.239013671875, y: 8406.76171875, z: 36.38798141479492},
+{x: -2898.438232421875, y: 8367.267578125, z: 36.38924026489258},
+{x: -2923.355712890625, y: 8309.5537109375, z: 36.38932800292969},
+{x: -2985.44384765625, y: 8296.1748046875, z: 36.4139518737793},
+{x: -3052.0107421875, y: 8304.2880859375, z: 36.4101676940918},
+{x: -3118.81005859375, y: 8305.025390625, z: 36.1069221496582},
+{x: -3178.12841796875, y: 8277.6396484375, z: 37.89602661132812},
+{x: -3204.30908203125, y: 8218.7822265625, z: 42.8808364868164},
+{x: -3184.526123046875, y: 8156.38330078125, z: 44.07469940185547},
+{x: -3126.3525390625, y: 8123.3212890625, z: 44.2269172668457},
+{x: -3059.8837890625, y: 8116.39794921875, z: 44.27207565307617},
+{x: -3002.33837890625, y: 8111.95654296875, z: 44.26305389404297}
+       {x: -2762.5625, y: 8079.728515625, z: 42.83762741088867},
+    ];
+
+    let player_x = 0;
+    let player_y = 0;
+
+    const setCheckpoint = (x, y) => {
+        window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
+    }
+
+    const sfx = (num) => {
+        window.parent.postMessage({type: "sfx", sfx: num}, "*");
+    }
+
+    const dist = (x1, y1, x2, y2) => {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
+
+    let isPlaying = false;
+
+    const startGame = () => {
+        let firstCp = false;
+        let startTime = 0;
+        let nLaps = 1;
+        let lap = 1;
+        let currentCheckpoint = 0;
+        const lapTimes = [];
+
+        document.getElementById("start").style.display = "none";
+        document.getElementById("restart").style.display = "inline-block";
+        isPlaying = true;
+
+        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+
+        const gameInterval = setInterval(() => {
+            if (!isPlaying) {
+                clearInterval(gameInterval);
+                return;
+            }
+
+            if (dist(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
+                if (!firstCp) {
+                    startTime = new Date().getTime();
+                }
+                firstCp = true;
+                currentCheckpoint++;
+
+                if (currentCheckpoint >= checkpoints.length) {
+                    lap++;
+                    const currentTime = new Date().getTime();
+                    const lapTime = currentTime - startTime;
+                    lapTimes.push(lapTime);
+
+                    const lapTimeElem = document.createElement("p");
+                    const minutes = Math.floor(lapTime / 60000);
+                    const seconds = Math.floor((lapTime % 60000) / 1000);
+                    const millis = lapTime % 1000;
+                    lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap: ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
+                    document.getElementById("lapTimes").appendChild(lapTimeElem);
+
+                    startTime = currentTime;
+
+                    if (lap > nLaps) {
+                        sfx(5); // Finish Audio
+                        firstCp = false;
+                        isPlaying = false;
+
+                        // Calculate total time
+                        const totalTime = lapTimes.reduce((a, b) => a + b, 0);
+                        const totalMinutes = Math.floor(totalTime / 60000);
+                        const totalSeconds = Math.floor((totalTime % 60000) / 1000);
+                        const totalMillis = totalTime % 1000;
+                        const totalTimeElem = document.createElement("p");
+                        totalTimeElem.innerHTML = `<span style="color: lightblue;">Total Time: </span><span style="color: white;">${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}</span>`;
+                        document.getElementById("totalTime").appendChild(totalTimeElem);
+
+                        document.getElementById("restart").style.display = "inline-block";
+                    } else {
+                        sfx(3); // Next Lap Audio
+                        currentCheckpoint = 0;
+                        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                    }
+                } else {
+                    setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                    sfx(2); //Checkpoint Audio
+                }
+            }
+
+            if (firstCp) {
+                document.getElementById("rcp").innerText = `${currentCheckpoint}/${checkpoints.length - 1}`;
+                document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+                let time = (new Date().getTime() - startTime);
+                const minutes = Math.floor(time / 60000);
+                time -= minutes * 60000;
+                const seconds = Math.floor(time / 1000);
+                time -= seconds * 1000;
+                const millis = Math.floor(time);
+                document.getElementById("timer").innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
+            }
+        }, 10);
+    };
+
+    document.getElementById("start").onclick = startGame;
+
+    document.getElementById("restart").onclick = () => {
+        location.reload();
+    };
+
+    window.addEventListener("message", (event) => {
+        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
+        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            window.parent.postMessage({type: "pin"}, "*");
+        }
+    });
+</script>
+
+</body>
+</html>
