@@ -1,0 +1,210 @@
+<html>
+<head>
+    <title>Roxwood Circuit Medium</title>
+    <style>
+        body {
+            font-family: impact;
+            background-color: transparent;
+            color: white;
+            position: absolute;
+            left: 410px;
+            bottom: 50px;
+            font-size: 1.5em;
+            line-height: 3px;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
+
+        table {
+            width: 200px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 5px;
+            border: 1px solid #555;
+        }
+
+        .time {
+            font-size: 2.2em;
+            color: #ddd;
+        }
+
+        .checkpoint {
+            color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <button id="start">Start Race</button> <button id="restart">Restart Race</button>
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Medium</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
+    <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/33</span></p>
+    <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
+    <div id="lapTimes"></div>
+    <span style="color: white" id="timer">00:00:000</span>
+    <p id="totalTime" style="color: lightgreen; font-size: 1.2em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
+</div>
+
+<script>
+    const checkpoints = [
+{x: -2781.530517578125, y: 8081.681640625, z: 42.94783020019531},
+{x: -2750.50634765625, y: 8079.03955078125, z: 42.76902770996094},
+{x: -2625.511962890625, y: 8073.8427734375, z: 44.7249526977539},
+{x: -2527.34521484375, y: 8115.935546875, z: 45.3014907836914},
+{x: -2456.546630859375, y: 8220.9638671875, z: 42.14641571044922},
+{x: -2515.370361328125, y: 8243.724609375, z: 38.87232971191406},
+{x: -2600.989013671875, y: 8164.4130859375, z: 40.33348846435547},
+{x: -2690.751708984375, y: 8187.7392578125, z: 40.78696823120117},
+{x: -2682.108154296875, y: 8382.9052734375, z: 40.78002166748047},
+{x: -2591.871826171875, y: 8465.6513671875, z: 41.80508422851562},
+{x: -2401.4462890625, y: 8525.140625, z: 46.04323959350586},
+{x: -2345.354736328125, y: 8632.5439453125, z: 46.21908950805664},
+{x: -2448.38134765625, y: 8698.5546875, z: 46.08601760864258},
+{x: -2560.73876953125, y: 8630.7578125, z: 46.43317413330078},
+{x: -2678.44677734375, y: 8643.125, z: 46.31198501586914},
+{x: -2777.10009765625, y: 8721.822265625, z: 45.24642562866211},
+{x: -2956.864501953125, y: 8810.3828125, z: 43.56183624267578},
+{x: -3076.723876953125, y: 8837.4794921875, z: 40.21310806274414},
+{x: -3072.693115234375, y: 8763.9853515625, z: 37.08478546142578},
+{x: -2858.791015625, y: 8726.0703125, z: 32.55176162719726},
+{x: -2787.58203125, y: 8660.06640625, z: 30.73659896850586},
+{x: -2895.808837890625, y: 8655.451171875, z: 32.71613693237305},
+{x: -3031.142333984375, y: 8709.5166015625, z: 44.89194107055664},
+{x: -3060.28076171875, y: 8671.7294921875, z: 39.27319717407226},
+{x: -3139.347412109375, y: 8661.92578125, z: 31.41870498657226},
+{x: -3258.25927734375, y: 8645.7265625, z: 35.65239715576172},
+{x: -3223.34814453125, y: 8511.6064453125, z: 36.4305534362793},
+{x: -3092.816650390625, y: 8421.7265625, z: 36.3816909790039},
+{x: -2923.204345703125, y: 8396.783203125, z: 36.37991714477539},
+{x: -2907.394287109375, y: 8324.53515625, z: 36.38895034790039},
+{x: -2997.194091796875, y: 8296.5146484375, z: 36.42677307128906},
+{x: -3175.64501953125, y: 8282.45703125, z: 38.18920516967773},
+{x: -3195.627197265625, y: 8171.68994140625, z: 44.26621627807617},
+{x: -3082.961181640625, y: 8116.54296875, z: 44.31651306152344},
+{x: -2959.439697265625, y: 8106.73193359375, z: 44.31415176391601},
+{x: -2781.530517578125, y: 8081.681640625, z: 42.94783020019531},
+    ];
+
+    let player_x = 0;
+    let player_y = 0;
+
+    const setCheckpoint = (x, y) => {
+        window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
+    }
+
+    const sfx = (num) => {
+        window.parent.postMessage({type: "sfx", sfx: num}, "*");
+    }
+
+    const dist = (x1, y1, x2, y2) => {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
+
+    let isPlaying = false;
+
+    const startGame = () => {
+        let firstCp = false;
+        let startTime = 0;
+        let nLaps = 3;
+        let lap = 1;
+        let currentCheckpoint = 0;
+        const lapTimes = [];
+
+        document.getElementById("start").style.display = "none";
+        document.getElementById("restart").style.display = "inline-block";
+        isPlaying = true;
+
+        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+
+        const gameInterval = setInterval(() => {
+            if (!isPlaying) {
+                clearInterval(gameInterval);
+                return;
+            }
+
+            if (dist(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
+                if (!firstCp) {
+                    startTime = new Date().getTime();
+                }
+                firstCp = true;
+                currentCheckpoint++;
+
+                if (currentCheckpoint >= checkpoints.length) {
+                    lap++;
+                    const currentTime = new Date().getTime();
+                    const lapTime = currentTime - startTime;
+                    lapTimes.push(lapTime);
+
+                    const lapTimeElem = document.createElement("p");
+                    const minutes = Math.floor(lapTime / 60000);
+                    const seconds = Math.floor((lapTime % 60000) / 1000);
+                    const millis = lapTime % 1000;
+                    lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap: ${lap - 1}</span>: <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
+                    document.getElementById("lapTimes").appendChild(lapTimeElem);
+
+                    startTime = currentTime;
+
+                    if (lap > nLaps) {
+                        sfx(5); // Finish Audio
+                        firstCp = false;
+                        isPlaying = false;
+
+                        // Calculate total time
+                        const totalTime = lapTimes.reduce((a, b) => a + b, 0);
+                        const totalMinutes = Math.floor(totalTime / 60000);
+                        const totalSeconds = Math.floor((totalTime % 60000) / 1000);
+                        const totalMillis = totalTime % 1000;
+                        const totalTimeElem = document.createElement("p");
+                        totalTimeElem.innerHTML = `<span style="color: lightblue;">Total Time: </span><span style="color: white;">${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}</span>`;
+                        document.getElementById("totalTime").appendChild(totalTimeElem);
+
+                        document.getElementById("restart").style.display = "inline-block";
+                    } else {
+                        sfx(3); // Next Lap Audio
+                        currentCheckpoint = 0;
+                        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                    }
+                } else {
+                    setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+                    sfx(2); //Checkpoint Audio
+                }
+            }
+
+            if (firstCp) {
+                document.getElementById("rcp").innerText = `${currentCheckpoint}/${checkpoints.length - 1}`;
+                document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+                let time = (new Date().getTime() - startTime);
+                const minutes = Math.floor(time / 60000);
+                time -= minutes * 60000;
+                const seconds = Math.floor(time / 1000);
+                time -= seconds * 1000;
+                const millis = Math.floor(time);
+                document.getElementById("timer").innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
+            }
+        }, 10);
+    };
+
+    document.getElementById("start").onclick = startGame;
+
+    document.getElementById("restart").onclick = () => {
+        location.reload();
+    };
+
+    window.addEventListener("message", (event) => {
+        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
+        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            window.parent.postMessage({type: "pin"}, "*");
+        }
+    });
+</script>
+
+</body>
+</html>
