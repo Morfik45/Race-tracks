@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Roxwood Circuit BIG</title>
+    <title>Roxwood Circuit Big</title>
     <style>
         body {
             font-family: impact;
@@ -42,7 +42,7 @@
     <button id="start">Start Race</button> <button id="restart">Restart Race</button>
     <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Big</p>
     <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
-    <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/26</span></p>
+    <p style="color:lightgreen">Checkpoint: <span style="color:white" id="rcp">0/60</span></p>
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/1</span></p>
     <div id="lapTimes"></div>
     <span style="color: white" id="timer">00:00:000</span>
@@ -51,7 +51,7 @@
 
 <script>
     const checkpoints = [
-       {x: -2762.5625, y: 8079.728515625, z: 42.83762741088867},
+{x: -2762.5625, y: 8079.728515625, z: 42.83762741088867},
 {x: -2717.395751953125, y: 8078.64306640625, z: 42.75195693969726},
 {x: -2649.994384765625, y: 8076.9111328125, z: 43.80749130249023},
 {x: -2583.101806640625, y: 8074.7587890625, z: 45.97261428833008},
@@ -122,8 +122,8 @@
 {x: -3184.526123046875, y: 8156.38330078125, z: 44.07469940185547},
 {x: -3126.3525390625, y: 8123.3212890625, z: 44.2269172668457},
 {x: -3059.8837890625, y: 8116.39794921875, z: 44.27207565307617},
-{x: -3002.33837890625, y: 8111.95654296875, z: 44.26305389404297}
-       {x: -2762.5625, y: 8079.728515625, z: 42.83762741088867},
+{x: -3002.33837890625, y: 8111.95654296875, z: 44.26305389404297},
+{x: -2762.5625, y: 8079.728515625, z: 42.83762741088867},
     ];
 
     let player_x = 0;
@@ -146,7 +146,7 @@
     const startGame = () => {
         let firstCp = false;
         let startTime = 0;
-        let nLaps = 1;
+        let nLaps = 3;
         let lap = 1;
         let currentCheckpoint = 0;
         const lapTimes = [];
