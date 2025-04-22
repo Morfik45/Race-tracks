@@ -20,10 +20,6 @@
       for (const key in evt.data)
         {
           if (key == "trigger_open_backpack") {
-            window.parent.postMessage({
-              type: 'openMainMenu',
-            }, '*');
-            setTimeout(() => {
               window.parent.postMessage({
                 type: "forceMenuChoice",
                 choice: "Open Backpack",
