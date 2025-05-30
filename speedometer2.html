@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Speedometer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    #speedometerContainer {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background-image: url('https://i.imgur.com/Bt7Wvu2.jpg');
+      background-size: cover;
+      background-position: center;
+      border: 5px solid #6c757d;
+      border-radius: 50%;
+      z-index: 999;
+      user-select: none;
+    }
+
+    #speedNeedle, #rpmNeedle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 6px;
+      height: 100px;
+      background: red;
+      transform-origin: bottom center;
+      transform: rotate(-135deg);
+      z-index: 2;
+    }
+
+    #rpmNeedle {
+      height: 80px;
+      background: blue;
+    }
+
+    #speedTicks, #rpmTicks {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .overlay-data {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px black;
+    }
+  </style>
+</head>
+<body class="bg-dark text-white">
+
+<div id="speedometerContainer" class="d-none">
+  <div id="speedTicks"></div>
+  <div id="rpmTicks"></div>
+  <div id="speedNeedle"></div>
+  <div id="rpmNeedle"></div>
+  <div class="overlay-data">
+    <div><span id="speedDisplay">0</span> <span id="speedDisplayUnit">km/h</span></div>
+    <div>RPM: <span id="rpmDisplay">0</span></div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <button id="homeButton" class="btn btn-secondary">Home</button>
+    <button id="reloadButton" class="btn btn-warning">Reload</button>
+    <button id="settingsIcon" class="btn btn-info">⚙️ Settings</button>
+    <button id="brakeButton" class="btn btn-danger d-none" onclick="brakeNow()">Brake</button>
+    <select id="debugScenario" class="form-select w-auto d-none">
+      <option value="init">Init</option>
+      <option value="onfoot">On Foot</option>
+      <option value="900rpm">900 RPM</option>
+      <option value="1000rpm">1000 RPM</option>
+      <option value="2000rpm">2000 RPM</option>
+      <option value="accelerate250">Accelerate to 250</option>
+    </select>
+    <button id="debugButton" class="btn btn-outline-light d-none">Debug Run</button>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title">Speedometer Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label for="speedUnit" class="form-label">Speed Unit</label>
+        <select id="speedUnit" class="form-select">
+          <option value="km/h">Kilometers per hour (km/h)</option>
+          <option value="mph">Miles per hour (mph)</option>
+        </select>
+        <button id="clearStorageButton" class="btn btn-sm btn-outline-danger mt-3">Clear Saved Position</button>
+      </div>
+      <div class="modal-footer">
+        <button id="saveSettings" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap + Your Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+   // initialize user details object
+  const userDetails = {};
+  
+  // get cached data once the page has fully loaded
+  window.addEventListener("load", async () => {
+      // if hash is "debug", show debug button
+      if (window.location.hash === "#debug") {
+        document.getElementById('debugButton').classList.remove('d-none');
+        document.getElementById('brakeButton').classList.remove('d-none');
+        document.getElementById('debugScenario').classList.remove('d-none');
+      }
+
+      // initially get all cached data from game client
+      sendCommand("getData");
+
+      const speedometerContainer = document.getElementById('speedometerContainer');
+      restoreSpeedoPosition(speedometerContainer);
+      makeSpeedometerDraggable(speedometerContainer);
+      generateSpeedTicks(localStorage.getItem('speedUnit') || 'km/h');
+      generateRpmTicks();
+
+      // Initialize speed unit display and the dropdown
+      const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
+      document.getElementById('speedDisplayUnit').innerText = speedUnit;
+      document.getElementById('speedUnit').value = speedUnit;
+  });
+
+  // wait for userDetails to be populated and send a success message
+  const userDetailsInterval = setInterval(() => {
+      if (userDetails.username) {
+          clearInterval(userDetailsInterval);
+          sendNotification(Welcome back ${userDetails.username}!);
+      }
+  }, 100);
+
+  // Listen for the escape key to pin the window
+  const escapeListener = (e) => {
+      if (e.key === "Escape") {
+          window.parent.postMessage({type: "pin"}, "*");
+      }
+  };
+  window.addEventListener('keydown', escapeListener);
+
+  // Event listener for the data sent by the game client
+  window.addEventListener("message", (event) => {
+      const data = event.data.data;
+
+      // ignore empty data
+      if (!data || data == "" || data == []) return;
+
+      for (const key in data) {
+        if (window.location.hash === "#debug") {
+          console.log(key, data[key]);
+        }
+        switch (key) {
+          // update user data
+          case "user_id":
+            userDetails.vrpId = data[key];
+            break;
+          case "name":
+            userDetails.username = data[key];
+            break;
+          case "discord":
+            userDetails.discordId = data[key].replace("discord:", "");
+            break;
+          case "job":
+            userDetails.job = data[key];
+            break;
+          case "wallet":
+            userDetails.wallet = data[key];
+            break;
+          case "bank":
+            userDetails.bank = data[key];
+            break;
+          case "vehicle":
+            userDetails.vehicle = data[key];
+            if (userDetails.vehicle === 'onFoot') {
+              document.getElementById('speedometerContainer').classList.add('d-none');
+            } else {
+              document.getElementById('speedometerContainer').classList.remove('d-none');
+            }
+            break;
+          // update rpm
+          case rpm:
+            updateRPM(data[key]);
+            break;
+          // update speed
+          case speed:
+            updateSpeed(data[key]);
+            break;
+        }
+      }
+  });
+
+  // function for sending a command to the game client
+  function sendCommand(command, args) {
+      window.parent.postMessage({type: command, ...args}, "*");
+  }
+
+  // function for sending a notification to the game client
+  async function sendNotification(text) {
+    sendCommand("notification", {text: ~r~[Speedometer] ~s~${text}});
+    if (window.location.hash === "#debug") {
+      showToast(text, 'Notification', 'info', null, 'bottomright');
+    }
+  }
+
+  // function for updating the RPM
+  function updateRPM(rpm) {
+    // convert rpm
+    rpm = rpm * 5000;
+
+    const rpmDisplay = document.getElementById('rpmDisplay');
+    if (rpmDisplay) {
+      rpmDisplay.innerText = ${Math.floor(rpm).toLocaleString('en')};
+    }
+    const rpmNeedle = document.getElementById('rpmNeedle');
+    if (rpmNeedle) {
+      updateAnalogNeedle(rpmNeedle, rpm, 6000);
+    }
+  }
+
+  // function for updating the speed
+  function updateSpeed(speed) {
+    // convert speed from m/s to km/h or mph
+    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
+    let displayUnit = 'km/h';
+    if (speedUnit === 'mph') {
+      speed = speed * 2.23694;
+      displayUnit = 'mph';
+    } else {
+      speed = speed * 3.6;
+      displayUnit = 'km/h';
+    }
+
+    const speedDisplay = document.getElementById('speedDisplay');
+    if (speedDisplay) {
+      speedDisplay.innerText = ${Math.floor(speed)};
+    }
+    const speedNeedle = document.getElementById('speedNeedle');
+    if (speedNeedle) {
+      updateAnalogNeedle(speedNeedle, speed, speedUnit === 'mph' ? 180 : 360);
+    }
+
+    // Update speed unit display
+    const speedDisplayUnit = document.getElementById('speedDisplayUnit');
+    if (speedDisplayUnit) {
+      speedDisplayUnit.innerText = displayUnit;
+    }
+  }
+
+  function updateAnalogNeedle(el, value, maxVal) {
+    const angle = ((value / maxVal) * 270) - 135; // sweep range 270 deg
+    el.style.transform = rotate(${angle}deg);
+  }
+
+  function restoreSpeedoPosition(elem) {
+    const left = localStorage.getItem('speedo_pos_left');
+    const top = localStorage.getItem('speedo_pos_top');
+    if (left && top) {
+      elem.style.left = left;
+      elem.style.top = top;
+    }
+  }
+
+  function makeSpeedometerDraggable(elem) {
+    let offsetX, offsetY, isMouseDown = false;
+    elem.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      const rect = elem.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      e.preventDefault();
+      elem.style.left = (e.clientX - offsetX) + 'px';
+      elem.style.top = (e.clientY - offsetY) + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+      if (isMouseDown) {
+        isMouseDown = false;
+        localStorage.setItem('speedo_pos_left', elem.style.left);
+        localStorage.setItem('speedo_pos_top', elem.style.top);
+      }
+    });
+  }
+
+  // Replace old speed tick creation with a function that sets up the dial for km/h or mph
+  function generateSpeedTicks(unit) {
+    const ticksContainer = document.getElementById('speedTicks');
+    if (!ticksContainer) return;
+    ticksContainer.innerHTML = ''; // clear old ticks
+
+    // define max speed based on unit
+    const maxSpeed = (unit === 'mph') ? 180 : 360;
+    const step = 20;
+
+    // generate ticks
+    for (let i = 0; i <= maxSpeed; i += step) {
+      const angle = 135 + (i / maxSpeed) * 270;
+      const tick = document.createElement('div');
+      tick.style.position = 'absolute';
+      tick.style.left = '50%';
+      tick.style.top = '50%';
+      tick.style.transformOrigin = 'center';
+      tick.style.transform = translate(-50%, -50%) rotate(${angle}deg) translate(120px);
+
+      const label = document.createElement('span');
+      label.style.display = 'block';
+      label.style.transform = rotate(${-angle}deg);
+      label.textContent = i;
+
+      tick.appendChild(label);
+      ticksContainer.appendChild(tick);
+    }
+  }
+
+  // Replace old rpm tick creation with a function
+  function generateRpmTicks() {
+    const ticksContainer = document.getElementById('rpmTicks');
+    if (!ticksContainer) return;
+    ticksContainer.innerHTML = '';
+
+    // from 0 to 6 with equally spaced intervals
+    for (let i = 0; i <= 6; i++) {
+      const angle = 135 + (i / 6) * 270;
+      const tick = document.createElement('div');
+      tick.style.position = 'absolute';
+      tick.style.left = '50%';
+      tick.style.top = '50%';
+      tick.style.transformOrigin = 'center';
+      tick.style.transform = translate(-50%, -50%) rotate(${angle}deg) translate(120px);
+
+      const label = document.createElement('span');
+      label.style.display = 'block';
+      label.style.transform = rotate(${-angle}deg);
+      label.textContent = i;
+
+      tick.appendChild(label);
+      ticksContainer.appendChild(tick);
+    }
+  }
+
+  // Event listener for home button click
+  document.getElementById('homeButton').addEventListener('click', () => {
+    window.location.href = '/userapps';
+  });
+
+  // Event listener for reload button click
+  document.getElementById('reloadButton').addEventListener('click', () => {
+    window.location.reload();
+  });
+
+  // Event listener for settings icon click
+  document.getElementById('settingsIcon').addEventListener('click', () => {
+    const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+    settingsModal.show();
+  });
+
+  // Event listener for save settings button
+  document.getElementById('saveSettings').addEventListener('click', () => {
+    const speedUnit = document.getElementById('speedUnit').value;
+    localStorage.setItem('speedUnit', speedUnit);
+    document.getElementById('speedDisplayUnit').innerText = speedUnit === 'mph' ? 'mph' : 'km/h';
+    generateSpeedTicks(speedUnit);
+    sendNotification('Settings saved!');
+    const settingsModal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+    settingsModal.hide();
+  });
+
+  // Event listener for clear storage button
+  document.getElementById('clearStorageButton').addEventListener('click', () => {
+    localStorage.removeItem('speedo_pos_left');
+    localStorage.removeItem('speedo_pos_top');
+    localStorage.removeItem('speedUnit');
+    sendNotification('Local storage cleared!');
+    window.location.reload();
+  });
+
+  function simulateDummyData(scenario) {
+    let dummyPayload;
+    switch (scenario) {
+      case 'init':
+        dummyPayload = {
+          data: {
+            vehicle: 'adder'
+          }
+        };
+        break;
+      case 'onfoot':
+        dummyPayload = {
+          data: {
+            vehicle: 'onFoot'
+          }
+        };
+        break;
+      case '900rpm':
+        dummyPayload = {
+          data: {
+            rpm: 900 / 5000,
+            speed: 50
+          }
+        };
+        break;
+      case '1000rpm':
+        dummyPayload = {
+          data: {
+            rpm: 1000 / 5000,
+            speed: 60
+          }
+        };
+        break;
+      case '2000rpm':
+        dummyPayload = {
+          data: {
+            rpm: 2000 / 5000,
+            speed: 120
+          }
+        };
+        break;
+      case 'accelerate250':
+        accelerateTo(250);
+        break;
+      default:
+        dummyPayload = {
+          data: {
+            rpm: 700 / 5000,
+            speed: 0
+          }
+        };
+    }
+    window.dispatchEvent(new MessageEvent("message", { data: dummyPayload }));
+  }
+
+  let oldGear = 1;
+  let shiftingInProgress = false;
+  let brakingInProgress = false;
+  let accelerateInterval = null;
+
+  function brakeNow() {
+    brakingInProgress = true;
+    if (accelerateInterval) {
+      clearInterval(accelerateInterval);
+      accelerateInterval = null;
+    }
+    
+    // simulate deceleration
+    // take currentSpeed from the speedometer
+    let currentSpeed = parseInt(document.getElementById('speedDisplay').innerText);
+    const brakeInterval = setInterval(() => {
+      currentSpeed -= 10;
+      if (currentSpeed <= 0) {
+        currentSpeed = 0;
+        clearInterval(brakeInterval);
+        brakingInProgress = false;
+      }
+
+      const dummyPayload = {
+        data: {
+          rpm: 1000 / 5000,
+          speed: currentSpeed / 3.6
+        }
+      };
+      window.dispatchEvent(new MessageEvent("message", { data: dummyPayload }));
+    }, 200);
+  }
+
+  function accelerateTo(targetSpeedKmH) {
+    if (accelerateInterval) {
+      clearInterval(accelerateInterval);
+    }
+    let currentSpeed = 0;
+    accelerateInterval = setInterval(() => {
+      if (brakingInProgress) {
+        currentSpeed = Math.max(0, currentSpeed - 2);
+        if (currentSpeed <= 0) {
+          clearInterval(accelerateInterval);
+        }
+        return;
+      }
+
+      let { gear, rpm } = computeGearAndRpm(currentSpeed);
+
+      // detect gear change
+      if (gear !== oldGear && !shiftingInProgress) {
+        shiftingInProgress = true;
+        oldGear = gear;
+        setTimeout(() => {
+          shiftingInProgress = false;
+        }, 200);
+      }
+
+      // Decelerate slightly while shifting
+      if (shiftingInProgress) {
+        currentSpeed -= 0.5;
+        if (currentSpeed < 0) currentSpeed = 0;
+      } else {
+        // skip acceleration while shifting
+        if (!shiftingInProgress) {
+          const sweetSpotFactor = (rpm >= 3000 && rpm <= 4000) ? 1.2 : 1;
+          const ratio = Math.max(0, 1 - currentSpeed / targetSpeedKmH);
+          const accel = (6 * ratio + 1) * sweetSpotFactor;
+          currentSpeed += accel;
+        }
+      }
+
+      if (currentSpeed >= targetSpeedKmH) {
+        clearInterval(accelerateInterval);
+      }
+
+      const dummyPayload = {
+        data: {
+          rpm: rpm / 5000,
+          speed: currentSpeed / 3.6
+        }
+      };
+      window.dispatchEvent(new MessageEvent("message", { data: dummyPayload }));
+    }, 200);
+  }
+
+  function computeGearAndRpm(kmH) {
+    // Define simple gear ranges
+    let gear = 1;
+    if (kmH > 20) gear = 2;
+    if (kmH > 40) gear = 3;
+    if (kmH > 70) gear = 4;
+    if (kmH > 90) gear = 5;
+    if (kmH > 140) gear = 6;
+
+    // Rough rpm simulation based on speed and gear
+    const maxSpeedInGear = [20, 40, 70, 90, 140, 250][gear - 1];
+    const rpm = (kmH / maxSpeedInGear) * 5000;
+    return { gear, rpm };
+  }
+
+  document.getElementById('debugButton').addEventListener('click', () => {
+    const scenario = document.getElementById('debugScenario').value;
+    simulateDummyData(scenario);
+  });
+</script>
+
+</body>
+</html>
