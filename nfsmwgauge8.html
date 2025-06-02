@@ -386,10 +386,10 @@ function generateRpmTicks() {
     ticksContainer.innerHTML = '';
 
 
-    const startAngle = -100;
-    const sweep = 250;
-    for (let i = 0; i <= 10; i++) { // updated for 10,000 RPM (0–10 scale)
-        const angle = 125 + (i / 10) * 250;
+        const startAngle = -125;
+        const sweep = 250;
+        for (let i = 0; i <= 10; i++) {
+        const angle = startAngle + (i / 10) * sweep;
         const tick = document.createElement('div');
         tick.style.position = 'absolute';
         tick.style.left = '50%';
