@@ -292,7 +292,8 @@ async function sendNotification(text) {
 }
 
 function updateRPM(rpm) {
-    rpm = rpm * 10000; // updated for 10,000 max RPM
+  rpm = Math.max(0, rpm - 0.1);  // Remove the 1000 RPM offset
+  rpm = rpm * 10000;
 
     const rpmDisplay = document.getElementById('rpmDisplay');
     if (rpmDisplay) {
