@@ -385,6 +385,9 @@ function generateRpmTicks() {
     if (!ticksContainer) return;
     ticksContainer.innerHTML = '';
 
+
+    const startAngle = -125;
+    const sweep = 250;
     for (let i = 0; i <= 10; i++) { // updated for 10,000 RPM (0–10 scale)
         const angle = 125 + (i / 10) * 250;
         const tick = document.createElement('div');
