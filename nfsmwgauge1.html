@@ -199,13 +199,15 @@
     <script>
 
 <script>
-  const userDetails = {};
+// initialize user details object
+const userDetails = {};
 
-  window.addEventListener("load", async () => {
+// get cached data once the page has fully loaded
+window.addEventListener("load", async () => {
     if (window.location.hash === "#debug") {
-      document.getElementById('debugButton').classList.remove('d-none');
-      document.getElementById('brakeButton').classList.remove('d-none');
-      document.getElementById('debugScenario').classList.remove('d-none');
+        document.getElementById('debugButton').classList.remove('d-none');
+        document.getElementById('brakeButton').classList.remove('d-none');
+        document.getElementById('debugScenario').classList.remove('d-none');
     }
 
     sendCommand("getData");
@@ -219,294 +221,203 @@
     const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
     document.getElementById('speedDisplayUnit').innerText = speedUnit;
     document.getElementById('speedUnit').value = speedUnit;
-  });
+});
 
-  const userDetailsInterval = setInterval(() => {
+const userDetailsInterval = setInterval(() => {
     if (userDetails.username) {
-      clearInterval(userDetailsInterval);
-      sendNotification(`Welcome back ${userDetails.username}!`);
+        clearInterval(userDetailsInterval);
+        sendNotification(`Welcome back ${userDetails.username}!`);
     }
-  }, 100);
+}, 100);
 
-  window.addEventListener('keydown', (e) => {
+window.addEventListener('keydown', (e) => {
     if (e.key === "Escape") {
-      window.parent.postMessage({ type: "pin" }, "*");
+        window.parent.postMessage({type: "pin"}, "*");
     }
-  });
+});
 
-  window.addEventListener("message", (event) => {
+window.addEventListener("message", (event) => {
     const data = event.data.data;
-    if (!data || data === "" || data == []) return;
+    if (!data || data == "" || data == []) return;
 
     for (const key in data) {
-      if (window.location.hash === "#debug") console.log(key, data[key]);
-
-      switch (key) {
-        case "user_id": userDetails.vrpId = data[key]; break;
-        case "name": userDetails.username = data[key]; break;
-        case "discord": userDetails.discordId = data[key].replace("discord:", ""); break;
-        case "job": userDetails.job = data[key]; break;
-        case "wallet": userDetails.wallet = data[key]; break;
-        case "bank": userDetails.bank = data[key]; break;
-        case "vehicle":
-          userDetails.vehicle = data[key];
-          document.getElementById('speedometerContainer').classList.toggle('d-none', userDetails.vehicle === 'onFoot');
-          break;
-        case "rpm": updateRPM(data[key]); break;
-        case "speed": updateSpeed(data[key]); break;
-      }
+        if (window.location.hash === "#debug") {
+            console.log(key, data[key]);
+        }
+        switch (key) {
+            case "user_id":
+                userDetails.vrpId = data[key];
+                break;
+            case "name":
+                userDetails.username = data[key];
+                break;
+            case "discord":
+                userDetails.discordId = data[key].replace("discord:", "");
+                break;
+            case "job":
+                userDetails.job = data[key];
+                break;
+            case "wallet":
+                userDetails.wallet = data[key];
+                break;
+            case "bank":
+                userDetails.bank = data[key];
+                break;
+            case "vehicle":
+                userDetails.vehicle = data[key];
+                if (userDetails.vehicle === 'onFoot') {
+                    document.getElementById('speedometerContainer').classList.add('d-none');
+                } else {
+                    document.getElementById('speedometerContainer').classList.remove('d-none');
+                }
+                break;
+            case "rpm":
+                updateRPM(data[key]);
+                break;
+            case "speed":
+                updateSpeed(data[key]);
+                break;
+        }
     }
-  });
+});
 
-  function sendCommand(command, args) {
-    window.parent.postMessage({ type: command, ...args }, "*");
-  }
+function sendCommand(command, args) {
+    window.parent.postMessage({type: command, ...args}, "*");
+}
 
-  function sendNotification(text) {
-    sendCommand("notification", { text: `~r~[Speedometer] ~s~${text}` });
+async function sendNotification(text) {
+    sendCommand("notification", {text: `~r~[Speedometer] ~s~${text}`});
     if (window.location.hash === "#debug") {
-      showToast(text, 'Notification', 'info', null, 'bottomright');
+        showToast(text, 'Notification', 'info', null, 'bottomright');
     }
-  }
+}
 
-  function updateRPM(normalizedRpm) {
-    const rpm = normalizedRpm * 10000;
+function updateRPM(rpm) {
+    rpm = rpm * 10000; // updated for 10,000 max RPM
+
     const rpmDisplay = document.getElementById('rpmDisplay');
-    if (rpmDisplay) rpmDisplay.innerText = `${Math.floor(rpm).toLocaleString('en')}`;
-
+    if (rpmDisplay) {
+        rpmDisplay.innerText = `${Math.floor(rpm).toLocaleString('en')}`;
+    }
     const rpmNeedle = document.getElementById('rpmNeedle');
-    if (rpmNeedle) updateAnalogNeedle(rpmNeedle, rpm, 10000);
-  }
+    if (rpmNeedle) {
+        updateAnalogNeedle(rpmNeedle, rpm, 10000);
+    }
+}
 
-  function updateSpeed(speed) {
+function updateSpeed(speed) {
     const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
-    let displayUnit = speedUnit;
-    speed = speedUnit === 'mph' ? speed * 2.23694 : speed * 3.6;
+    let displayUnit = 'km/h';
+    if (speedUnit === 'mph') {
+        speed = speed * 2.23694;
+        displayUnit = 'mph';
+    } else {
+        speed = speed * 3.6;
+        displayUnit = 'km/h';
+    }
 
     const speedDisplay = document.getElementById('speedDisplay');
-    if (speedDisplay) speedDisplay.innerText = `${Math.floor(speed)}`;
-
+    if (speedDisplay) {
+        speedDisplay.innerText = `${Math.floor(speed)}`;
+    }
     const speedNeedle = document.getElementById('speedNeedle');
-    if (speedNeedle) updateAnalogNeedle(speedNeedle, speed, speedUnit === 'mph' ? 180 : 360);
+    if (speedNeedle) {
+        updateAnalogNeedle(speedNeedle, speed, speedUnit === 'mph' ? 180 : 360);
+    }
 
     const speedDisplayUnit = document.getElementById('speedDisplayUnit');
-    if (speedDisplayUnit) speedDisplayUnit.innerText = displayUnit;
-  }
+    if (speedDisplayUnit) {
+        speedDisplayUnit.innerText = displayUnit;
+    }
+}
 
-  function updateAnalogNeedle(el, value, maxVal) {
+function updateAnalogNeedle(el, value, maxVal) {
     const angle = ((value / maxVal) * 270) - 135;
     el.style.transform = `rotate(${angle}deg)`;
-  }
+}
 
-  function restoreSpeedoPosition(elem) {
+function restoreSpeedoPosition(elem) {
     const left = localStorage.getItem('speedo_pos_left');
     const top = localStorage.getItem('speedo_pos_top');
     if (left && top) {
-      elem.style.left = left;
-      elem.style.top = top;
+        elem.style.left = left;
+        elem.style.top = top;
     }
-  }
+}
 
-  function makeSpeedometerDraggable(elem) {
+function makeSpeedometerDraggable(elem) {
     let offsetX, offsetY, isMouseDown = false;
     elem.addEventListener('mousedown', (e) => {
-      isMouseDown = true;
-      const rect = elem.getBoundingClientRect();
-      offsetX = e.clientX - rect.left;
-      offsetY = e.clientY - rect.top;
+        isMouseDown = true;
+        const rect = elem.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
     });
     document.addEventListener('mousemove', (e) => {
-      if (!isMouseDown) return;
-      e.preventDefault();
-      elem.style.left = (e.clientX - offsetX) + 'px';
-      elem.style.top = (e.clientY - offsetY) + 'px';
+        if (!isMouseDown) return;
+        e.preventDefault();
+        elem.style.left = (e.clientX - offsetX) + 'px';
+        elem.style.top = (e.clientY - offsetY) + 'px';
     });
     document.addEventListener('mouseup', () => {
-      if (isMouseDown) {
-        isMouseDown = false;
-        localStorage.setItem('speedo_pos_left', elem.style.left);
-        localStorage.setItem('speedo_pos_top', elem.style.top);
-      }
+        if (isMouseDown) {
+            isMouseDown = false;
+            localStorage.setItem('speedo_pos_left', elem.style.left);
+            localStorage.setItem('speedo_pos_top', elem.style.top);
+        }
     });
-  }
+}
 
-  function generateSpeedTicks(unit) {
+function generateSpeedTicks(unit) {
     const ticksContainer = document.getElementById('speedTicks');
     if (!ticksContainer) return;
     ticksContainer.innerHTML = '';
+
     const maxSpeed = (unit === 'mph') ? 180 : 360;
     const step = 20;
 
     for (let i = 0; i <= maxSpeed; i += step) {
-      const angle = 135 + (i / maxSpeed) * 270;
-      const tick = document.createElement('div');
-      tick.style.position = 'absolute';
-      tick.style.left = '50%';
-      tick.style.top = '50%';
-      tick.style.transformOrigin = 'center';
-      tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(120px)`;
+        const angle = 135 + (i / maxSpeed) * 270;
+        const tick = document.createElement('div');
+        tick.style.position = 'absolute';
+        tick.style.left = '50%';
+        tick.style.top = '50%';
+        tick.style.transformOrigin = 'center';
+        tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(120px)`;
 
-      const label = document.createElement('span');
-      label.style.display = 'block';
-      label.style.transform = `rotate(${-angle}deg)`;
-      label.textContent = i;
+        const label = document.createElement('span');
+        label.style.display = 'block';
+        label.style.transform = `rotate(${-angle}deg)`;
+        label.textContent = i;
 
-      tick.appendChild(label);
-      ticksContainer.appendChild(tick);
+        tick.appendChild(label);
+        ticksContainer.appendChild(tick);
     }
-  }
+}
 
-  function generateRpmTicks() {
+function generateRpmTicks() {
     const ticksContainer = document.getElementById('rpmTicks');
     if (!ticksContainer) return;
     ticksContainer.innerHTML = '';
 
-    for (let i = 0; i <= 10; i++) {
-      const angle = 135 + (i / 10) * 270;
-      const tick = document.createElement('div');
-      tick.style.position = 'absolute';
-      tick.style.left = '50%';
-      tick.style.top = '50%';
-      tick.style.transformOrigin = 'center';
-      tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(120px)`;
+    for (let i = 0; i <= 10; i++) { // updated for 10,000 RPM (0–10 scale)
+        const angle = 135 + (i / 10) * 270;
+        const tick = document.createElement('div');
+        tick.style.position = 'absolute';
+        tick.style.left = '50%';
+        tick.style.top = '50%';
+        tick.style.transformOrigin = 'center';
+        tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(120px)`;
 
-      const label = document.createElement('span');
-      label.style.display = 'block';
-      label.style.transform = `rotate(${-angle}deg)`;
-      label.textContent = i;
+        const label = document.createElement('span');
+        label.style.display = 'block';
+        label.style.transform = `rotate(${-angle}deg)`;
+        label.textContent = i;
 
-      tick.appendChild(label);
-      ticksContainer.appendChild(tick);
+        tick.appendChild(label);
+        ticksContainer.appendChild(tick);
     }
-  }
-
-  document.getElementById('homeButton').addEventListener('click', () => {
-    window.location.href = '/userapps';
-  });
-
-  document.getElementById('reloadButton').addEventListener('click', () => {
-    window.location.reload();
-  });
-
-  document.getElementById('settingsIcon').addEventListener('click', () => {
-    const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-    settingsModal.show();
-  });
-
-  document.getElementById('saveSettings').addEventListener('click', () => {
-    const speedUnit = document.getElementById('speedUnit').value;
-    localStorage.setItem('speedUnit', speedUnit);
-    document.getElementById('speedDisplayUnit').innerText = speedUnit;
-    generateSpeedTicks(speedUnit);
-    sendNotification('Settings saved!');
-    bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
-  });
-
-  document.getElementById('clearStorageButton').addEventListener('click', () => {
-    localStorage.clear();
-    sendNotification('Local storage cleared!');
-    window.location.reload();
-  });
-
-  function simulateDummyData(scenario) {
-    let dummyPayload;
-    switch (scenario) {
-      case 'init': dummyPayload = { data: { vehicle: 'adder' } }; break;
-      case 'onfoot': dummyPayload = { data: { vehicle: 'onFoot' } }; break;
-      case '900rpm': dummyPayload = { data: { rpm: 900 / 10000, speed: 50 } }; break;
-      case '1000rpm': dummyPayload = { data: { rpm: 1000 / 10000, speed: 60 } }; break;
-      case '2000rpm': dummyPayload = { data: { rpm: 2000 / 10000, speed: 120 } }; break;
-      case 'accelerate250': accelerateTo(250); return;
-      default: dummyPayload = { data: { rpm: 700 / 10000, speed: 0 } };
-    }
-    window.dispatchEvent(new MessageEvent("message", { data: dummyPayload }));
-  }
-
-  let oldGear = 1;
-  let shiftingInProgress = false;
-  let brakingInProgress = false;
-  let accelerateInterval = null;
-
-  function brakeNow() {
-    brakingInProgress = true;
-    if (accelerateInterval) clearInterval(accelerateInterval);
-    let currentSpeed = parseInt(document.getElementById('speedDisplay').innerText);
-    const brakeInterval = setInterval(() => {
-      currentSpeed -= 10;
-      if (currentSpeed <= 0) {
-        currentSpeed = 0;
-        clearInterval(brakeInterval);
-        brakingInProgress = false;
-      }
-      const dummyPayload = {
-        data: {
-          rpm: 1000 / 10000,
-          speed: currentSpeed / 3.6
-        }
-      };
-      window.dispatchEvent(new MessageEvent("message", { data: dummyPayload }));
-    }, 200);
-  }
-
-  function accelerateTo(targetSpeedKmH) {
-    if (accelerateInterval) clearInterval(accelerateInterval);
-    let currentSpeed = 0;
-    accelerateInterval = setInterval(() => {
-      if (brakingInProgress) {
-        currentSpeed = Math.max(0, currentSpeed - 2);
-        if (currentSpeed <= 0) clearInterval(accelerateInterval);
-        return;
-      }
-
-      let { gear, rpm } = computeGearAndRpm(currentSpeed);
-
-      if (gear !== oldGear && !shiftingInProgress) {
-        shiftingInProgress = true;
-        oldGear = gear;
-        setTimeout(() => shiftingInProgress = false, 200);
-      }
-
-      if (shiftingInProgress) {
-        currentSpeed -= 0.5;
-        if (currentSpeed < 0) currentSpeed = 0;
-      } else {
-        const sweetSpotFactor = (rpm >= 6000 && rpm <= 8000) ? 1.2 : 1;
-        const ratio = Math.max(0, 1 - currentSpeed / targetSpeedKmH);
-        const accel = (6 * ratio + 1) * sweetSpotFactor;
-        currentSpeed += accel;
-      }
-
-      if (currentSpeed >= targetSpeedKmH) clearInterval(accelerateInterval);
-
-      const dummyPayload = {
-        data: {
-          rpm: rpm / 10000,
-          speed: currentSpeed / 3.6
-        }
-      };
-      window.dispatchEvent(new MessageEvent("message", { data: dummyPayload }));
-    }, 200);
-  }
-
-  function computeGearAndRpm(kmH) {
-    let gear = 1;
-    if (kmH > 20) gear = 2;
-    if (kmH > 40) gear = 3;
-    if (kmH > 70) gear = 4;
-    if (kmH > 90) gear = 5;
-    if (kmH > 140) gear = 6;
-
-    const maxSpeedInGear = [20, 40, 70, 90, 140, 250][gear - 1];
-    const rpm = (kmH / maxSpeedInGear) * 10000;
-    return { gear, rpm };
-  }
-
-  document.getElementById('debugButton').addEventListener('click', () => {
-    const scenario = document.getElementById('debugScenario').value;
-    simulateDummyData(scenario);
-  });
-</script>
-
+}
 
     </script>
   </main>
