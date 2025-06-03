@@ -317,7 +317,7 @@ function updateSpeed(speed) {
 }
 
 function updateAnalogNeedle(el, value, maxVal) {
-    const angle = ((value / maxVal) * 270) - 135;
+    const angle = ((value / maxVal) * 250) - 125;
     el.style.transform = `rotate(${angle}deg)`;
 }
 
