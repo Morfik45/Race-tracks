@@ -405,7 +405,8 @@ function updateSpeed(speed) {
 
     const speedDisplay = document.getElementById('speedDisplay');
     if (speedDisplay) {
-        speedDisplay.innerText = `${Math.floor(speed)}`;
+        const formattedSpeed = Math.floor(speed).toString().padStart(3, '\u00A0');
+        speedDisplay.innerText = formattedSpeed;
     }
     const speedNeedle = document.getElementById('speedNeedle');
     if (speedNeedle) {
