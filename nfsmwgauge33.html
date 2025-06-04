@@ -269,7 +269,7 @@ window.addEventListener("message", (event) => {
 const GearEstimator = (function () {
     let currentGear = 1;
     let lastShiftTime = 0;
-    const shiftCooldown = 350; // in ms
+    const shiftCooldown = 1000; // in ms
 
     return function inferGearByRPM(rpm) {
         const now = Date.now();
@@ -358,7 +358,7 @@ function updateRPM(rpmRaw) {
     if (rpmRaw < 0.72) {
         correctedRpmRaw = Math.max(0, rpmRaw - 0.09);
     } else {
-        correctedRpmRaw = rpmRaw;
+         correctedRpmRaw = Math.max(0, rpmRaw - 0.05);
     }
 
     const displayRpm = correctedRpmRaw * 10000;
