@@ -315,8 +315,8 @@ async function sendNotification(text) {
     }
 }
 
-  function updateRPM(rpmRaw) {
-    const normalizedRpm = Math.max(0, rpmRaw - 0.1); // incoming normalized (0.0–1.0)
+function updateRPM(rpmRaw) {
+    const normalizedRpm = Math.max(0, rpmRaw - 0.1); // remove idle offset
     const displayRpm = normalizedRpm * 10000;
 
     const rpmDisplay = document.getElementById('rpmDisplay');
@@ -334,7 +334,6 @@ async function sendNotification(text) {
     if (gearDisplay) {
         gearDisplay.innerText = gear;
     }
-}
 }
 
 function updateSpeed(speed) {
