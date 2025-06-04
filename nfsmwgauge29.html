@@ -276,7 +276,6 @@ const GearEstimator = (function () {
 
         // Simulate neutral if RPM is too low
         if (rpm < 0.2) {
-            currentGear = 1;
             return 'N';
         }
 
@@ -356,8 +355,8 @@ function updateRPM(rpmRaw) {
     // --- VISUAL DISPLAY FIX ---
     // Correct display only for low RPMs
     let correctedRpmRaw;
-    if (rpmRaw < 0.9) {
-        correctedRpmRaw = Math.max(0, rpmRaw - 0.1);
+    if (rpmRaw < 0.95) {
+        correctedRpmRaw = Math.max(0, rpmRaw - 0.09);
     } else {
         correctedRpmRaw = rpmRaw;
     }
