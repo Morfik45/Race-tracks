@@ -265,6 +265,44 @@ window.addEventListener("message", (event) => {
         }
     }
 });
+      // simulate gears
+      const GearEstimator = (function () {
+    let currentGear = 1;
+
+    return function inferGearByRPM(normalizedRpm) {
+        if (normalizedRpm < 0.1) {
+            currentGear = 1;
+            return 'N'; // simulate neutral if RPM is near idle
+        }
+
+        switch (currentGear) {
+            case 1:
+                if (normalizedRpm > 0.8) currentGear = 2;
+                break;
+            case 2:
+                if (normalizedRpm > 0.95) currentGear = 3;
+                else if (normalizedRpm < 0.4) currentGear = 1;
+                break;
+            case 3:
+                if (normalizedRpm > 0.95) currentGear = 4;
+                else if (normalizedRpm < 0.6) currentGear = 2;
+                break;
+            case 4:
+                if (normalizedRpm > 0.95) currentGear = 5;
+                else if (normalizedRpm < 0.65) currentGear = 3;
+                break;
+            case 5:
+                if (normalizedRpm > 0.95) currentGear = 6;
+                else if (normalizedRpm < 0.75) currentGear = 4;
+                break;
+            case 6:
+                if (normalizedRpm < 0.75) currentGear = 5;
+                break;
+        }
+
+        return currentGear.toString();
+    };
+})();
 
 function sendCommand(command, args) {
     window.parent.postMessage({type: command, ...args}, "*");
