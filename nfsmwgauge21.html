@@ -270,7 +270,7 @@ window.addEventListener("message", (event) => {
     let currentGear = 1;
 
     return function inferGearByRPM(normalizedRpm) {
-        if (normalizedRpm < 0.1) {
+        if (normalizedRpm < 0.15) {
             currentGear = 1;
             return 'N'; // simulate neutral if RPM is near idle
         }
@@ -280,19 +280,19 @@ window.addEventListener("message", (event) => {
                 if (normalizedRpm > 0.8) currentGear = 2;
                 break;
             case 2:
-                if (normalizedRpm > 0.95) currentGear = 3;
+                if (normalizedRpm > 0.9) currentGear = 3;
                 else if (normalizedRpm < 0.4) currentGear = 1;
                 break;
             case 3:
-                if (normalizedRpm > 0.95) currentGear = 4;
+                if (normalizedRpm > 0.9) currentGear = 4;
                 else if (normalizedRpm < 0.6) currentGear = 2;
                 break;
             case 4:
-                if (normalizedRpm > 0.95) currentGear = 5;
+                if (normalizedRpm > 0.9) currentGear = 5;
                 else if (normalizedRpm < 0.65) currentGear = 3;
                 break;
             case 5:
-                if (normalizedRpm > 0.95) currentGear = 6;
+                if (normalizedRpm > 0.9) currentGear = 6;
                 else if (normalizedRpm < 0.75) currentGear = 4;
                 break;
             case 6:
@@ -317,7 +317,7 @@ async function sendNotification(text) {
 
 function updateRPM(rpmRaw) {
     const normalizedRpm = Math.max(0, rpmRaw - 0.1); // remove idle offset
-    const displayRpm = normalizedRpm * 10000;
+    const displayRpm = normalizedRpm * 11000;
 
     const rpmDisplay = document.getElementById('rpmDisplay');
     if (rpmDisplay) {
@@ -326,7 +326,7 @@ function updateRPM(rpmRaw) {
 
     const rpmNeedle = document.getElementById('rpmNeedle');
     if (rpmNeedle) {
-        updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
+        updateAnalogNeedle(rpmNeedle, displayRpm, 11000);
     }
 
     const gear = GearEstimator(normalizedRpm);
