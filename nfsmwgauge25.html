@@ -374,23 +374,6 @@ function updateRPM(rpmRaw) {
         updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
     }
 
-    // Use raw rpmRaw for gear estimation
-    const gear = GearEstimator(rpmRaw);
-    const gearDisplay = document.getElementById('gearDisplay');
-    if (gearDisplay) {
-        gearDisplay.innerText = gear;
-    }
-}
-
-    const rpmDisplay = document.getElementById('rpmDisplay');
-    if (rpmDisplay) {
-        rpmDisplay.innerText = `${Math.floor(displayRpm).toLocaleString('en')}`;
-    }
-
-    const rpmNeedle = document.getElementById('rpmNeedle');
-    if (rpmNeedle) {
-        updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
-    }
 
     // --- GEAR LOGIC (NO OFFSET) ---
     const gear = GearEstimator(rpmRaw);
