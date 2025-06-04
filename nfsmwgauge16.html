@@ -298,6 +298,30 @@ if (speedDisplay) {
         gearDisplay.innerText = gear;
     }
 }
+  function updateRPM(rpmRaw) {
+    const normalizedRpm = Math.max(0, rpmRaw - 0.1); // incoming normalized (0.0–1.0)
+    const displayRpm = normalizedRpm * 10000;
+
+    const rpmDisplay = document.getElementById('rpmDisplay');
+    if (rpmDisplay) {
+        rpmDisplay.innerText = `${Math.floor(displayRpm).toLocaleString('en')}`;
+    }
+
+    const rpmNeedle = document.getElementById('rpmNeedle');
+    if (rpmNeedle) {
+        updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
+    }
+
+    const speedDisplay = document.getElementById('speedDisplay');
+    if (speedDisplay) {
+        const speed = parseFloat(speedDisplay.innerText);
+        const gear = inferGearPure(normalizedRpm, speed);
+        const gearDisplay = document.getElementById('gearDisplay');
+        if (gearDisplay) {
+            gearDisplay.innerText = gear;
+        }
+    }
+}
 }
 function inferGearPure(rpm, speed) {
     // Skip if standing still
