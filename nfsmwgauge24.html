@@ -269,7 +269,7 @@ window.addEventListener("message", (event) => {
 const GearEstimator = (function () {
     let currentGear = 1;
     let lastShiftTime = 0;
-    const shiftCooldown = 500; // in ms
+    const shiftCooldown = 250; // in ms
 
     return function inferGearByRPM(rpm) {
         const now = Date.now();
@@ -354,7 +354,33 @@ async function sendNotification(text) {
 
 function updateRPM(rpmRaw) {
     // --- VISUAL DISPLAY FIX ---
-    const displayRpm = Math.max(0, rpmRaw - 0.1) * 10000;
+    // Correct display only for low RPMs
+    let correctedRpmRaw;
+    if (rpmRaw < 0.7) {
+        correctedRpmRaw = Math.max(0, rpmRaw - 0.1);
+    } else {
+        correctedRpmRaw = rpmRaw;
+    }
+
+    const displayRpm = correctedRpmRaw * 10000;
+
+    const rpmDisplay = document.getElementById('rpmDisplay');
+    if (rpmDisplay) {
+        rpmDisplay.innerText = `${Math.floor(displayRpm).toLocaleString('en')}`;
+    }
+
+    const rpmNeedle = document.getElementById('rpmNeedle');
+    if (rpmNeedle) {
+        updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
+    }
+
+    // Use raw rpmRaw for gear estimation
+    const gear = GearEstimator(rpmRaw);
+    const gearDisplay = document.getElementById('gearDisplay');
+    if (gearDisplay) {
+        gearDisplay.innerText = gear;
+    }
+}
 
     const rpmDisplay = document.getElementById('rpmDisplay');
     if (rpmDisplay) {
