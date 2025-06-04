@@ -356,7 +356,7 @@ function updateRPM(rpmRaw) {
     // --- VISUAL DISPLAY FIX ---
     // Correct display only for low RPMs
     let correctedRpmRaw;
-    if (rpmRaw < 0.75) {
+    if (rpmRaw < 0.9) {
         correctedRpmRaw = Math.max(0, rpmRaw - 0.1);
     } else {
         correctedRpmRaw = rpmRaw;
