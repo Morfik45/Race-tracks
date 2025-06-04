@@ -290,9 +290,7 @@ const GearEstimator = (function () {
                 if (rpm > 0.8) {
                     currentGear = 2;
                     lastShiftTime = now;
-                } else if (rpm < 0.2) {
-                    currentGear = `N`;
-                    lastShiftTime = now;
+                }
                 break;
             case 2:
                 if (rpm > 0.9) {
@@ -304,7 +302,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 3:
-                if (rpm > 0.8) {
+                if (rpm > 0.9) {
                     currentGear = 4;
                     lastShiftTime = now;
                 } else if (rpm < 0.6) {
@@ -322,7 +320,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 5:
-                if (rpm > 0.95) {
+                if (rpm > 0.9) {
                     currentGear = 6;
                     lastShiftTime = now;
                 } else if (rpm < 0.75) {
@@ -357,7 +355,7 @@ function updateRPM(rpmRaw) {
     // --- VISUAL DISPLAY FIX ---
     // Correct display only for low RPMs
     let correctedRpmRaw;
-    if (rpmRaw < 0.72) {
+    if (rpmRaw < 0.95) {
         correctedRpmRaw = Math.max(0, rpmRaw - 0.09);
     } else {
         correctedRpmRaw = rpmRaw;
