@@ -300,24 +300,27 @@ if (speedDisplay) {
 }
 }
 function inferGearPure(rpm, speed) {
-    if (speed < 1 || rpm < 1000) return 'N'; // Neutral or stationary
+    // Skip if standing still
+    if (speed < 1 || rpm < 0.1) return 'N';
 
-    // Convert speed to km/h or mph
-    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
-    if (speedUnit === 'mph') {
-        speed = speed * 1.60934; // convert mph to km/h for a common base
+    // If game provides RPM as a normalized value (0.0 to 1.0)
+    const normalizedRpm = rpm;
+
+    // Speed boundaries for gear changes based on normalized RPM shift points
+    // Format: [maxSpeedForGear1, maxSpeedForGear2, ..., maxSpeedForGear6]
+    // These are adjustable
+    const gearSpeedLimits = [15, 30, 55, 85, 120, 160]; // in km/h
+
+    for (let i = 0; i < gearSpeedLimits.length; i++) {
+        if (speed <= gearSpeedLimits[i]) {
+            // simulate gear shift RPM logic:
+            if (i === 0 && normalizedRpm >= 0.8) return `${i + 2}`;
+            if (i > 0 && normalizedRpm >= 0.95) return `${i + 2}`;
+            return `${i + 1}`;
+        }
     }
 
-    // Calculate a rough ratio
-    const ratio = rpm / speed;
-
-    // These ratio ranges are estimated empirically for typical GTA V vehicles
-    if (ratio > 250) return '1';
-    if (ratio > 160) return '2';
-    if (ratio > 110) return '3';
-    if (ratio > 80) return '4';
-    if (ratio > 60) return '5';
-    return '6';
+    return '6'; // Above known limit, assume 6th gear
 }
 function updateSpeed(speed) {
     const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
