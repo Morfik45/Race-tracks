@@ -289,6 +289,15 @@ function updateRPM(rpm) {
     if (rpmNeedle) {
         updateAnalogNeedle(rpmNeedle, rpm, 10000);
     }
+  const speedDisplay = document.getElementById('speedDisplay');
+if (speedDisplay) {
+    const speed = parseFloat(speedDisplay.innerText);
+    const gear = inferGearPure(rpm, speed);
+    const gearDisplay = document.getElementById('gearDisplay');
+    if (gearDisplay) {
+        gearDisplay.innerText = gear;
+    }
+}
 }
 function inferGearPure(rpm, speed) {
     if (speed < 1 || rpm < 1000) return 'N'; // Neutral or stationary
