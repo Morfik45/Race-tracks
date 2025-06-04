@@ -267,33 +267,43 @@ window.addEventListener("message", (event) => {
 });
       // simulate gears
 const GearEstimator = (function () {
-    let currentGear = 1;
+    let currentGear = 1; // 0 = Neutral
     let lastShiftTime = 0;
-    const shiftCooldown = 1000; // in ms
+    const shiftCooldown = 500; // ms
 
-    return function inferGearByRPM(rpm) {
+    return function (rpm) {
         const now = Date.now();
 
         // Simulate neutral if RPM is too low
         if (rpm < 0.2) {
+            currentGear = 0;
             return 'N';
         }
 
         // Prevent gear jumping: require cooldown
         if (now - lastShiftTime < shiftCooldown) {
-            return currentGear.toString();
+            return currentGear === 0 ? 'N' : currentGear.toString();
         }
 
         // Gear shift logic
         switch (currentGear) {
+            case 0: // Neutral
+                if (rpm > 0.3) {
+                    currentGear = 1;
+                    lastShiftTime = now;
+                }
+                break;
             case 1:
                 if (rpm > 0.8) {
                     currentGear = 2;
                     lastShiftTime = now;
+                } else if (rpm < 0.3) {
+                    currentGear = 0;
+                    lastShiftTime = now;
                 }
                 break;
             case 2:
-                if (rpm > 0.9) {
+                if (rpm > 0.95) {
                     currentGear = 3;
                     lastShiftTime = now;
                 } else if (rpm < 0.4) {
@@ -302,7 +312,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 3:
-                if (rpm > 0.91) {
+                if (rpm > 0.95) {
                     currentGear = 4;
                     lastShiftTime = now;
                 } else if (rpm < 0.6) {
@@ -311,7 +321,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 4:
-                if (rpm > 0.92) {
+                if (rpm > 0.95) {
                     currentGear = 5;
                     lastShiftTime = now;
                 } else if (rpm < 0.65) {
@@ -320,7 +330,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 5:
-                if (rpm > 0.95) {
+                if (rpm > 0.90) {
                     currentGear = 6;
                     lastShiftTime = now;
                 } else if (rpm < 0.75) {
@@ -336,7 +346,7 @@ const GearEstimator = (function () {
                 break;
         }
 
-        return currentGear.toString();
+        return currentGear === 0 ? 'N' : currentGear.toString();
     };
 })();
 
