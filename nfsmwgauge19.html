@@ -315,18 +315,6 @@ async function sendNotification(text) {
     }
 }
 
-function updateRPM(rpm) {
-  rpm = Math.max(0, rpm - 0.1);  // Remove the 1000 RPM offset
-  rpm = rpm * 10000;
-
-    const rpmDisplay = document.getElementById('rpmDisplay');
-    if (rpmDisplay) {
-        rpmDisplay.innerText = `${Math.floor(rpm).toLocaleString('en')}`;
-    }
-    const rpmNeedle = document.getElementById('rpmNeedle');
-    if (rpmNeedle) {
-        updateAnalogNeedle(rpmNeedle, rpm, 10000);
-    }
   function updateRPM(rpmRaw) {
     const normalizedRpm = Math.max(0, rpmRaw - 0.1); // incoming normalized (0.0–1.0)
     const displayRpm = normalizedRpm * 10000;
