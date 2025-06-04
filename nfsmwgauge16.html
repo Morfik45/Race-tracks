@@ -171,7 +171,7 @@
       <!-- RPM Dial -->
       <div style="opacity:1" class="dial rounded-circle position-relative" id="rpmDial">
      <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://cdn.discordapp.com/attachments/484324411693072394/1379785971796676629/nfsgauge2.png?ex=68418152&amp;is=68402fd2&amp;hm=3401c3c4e945ea9ef706759f6d86da8df7a7f9b1a912ca143cb3d4a9a2215ea9&amp;">
-       <div id="gearDisplay" class="gear-display">N</div>
+       
         <div id="rpmTicks" style="opacity:0" class="tick-container"><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(145deg) translate(120px);"><span style="display: block; transform: rotate(-145deg);">0</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(170deg) translate(120px);"><span style="display: block; transform: rotate(-170deg);">1</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(195deg) translate(120px);"><span style="display: block; transform: rotate(-195deg);">2</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(220deg) translate(120px);"><span style="display: block; transform: rotate(-220deg);">3</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(245deg) translate(120px);"><span style="display: block; transform: rotate(-245deg);">4</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(270deg) translate(120px);"><span style="display: block; transform: rotate(-270deg);">5</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(295deg) translate(120px);"><span style="display: block; transform: rotate(-295deg);">6</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(320deg) translate(120px);"><span style="display: block; transform: rotate(-320deg);">7</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(345deg) translate(120px);"><span style="display: block; transform: rotate(-345deg);">8</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(370deg) translate(120px);"><span style="display: block; transform: rotate(-370deg);">9</span></div><div style="position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) rotate(395deg) translate(120px);"><span style="display: block; transform: rotate(-395deg);">10</span></div></div>
         <div id="rpmNeedle" class="needle rpm-needle" style="transform: rotate(-100deg);"> <img style="height:140px;transform: rotate(5deg); transform: translate(-40%, 6%); " src="https://cdn.discordapp.com/attachments/484324411693072394/1379400208873685085/needle.png?ex=68401a0d&amp;is=683ec88d&amp;hm=5cdb2d4f9cff7f653fbdebbd91e1f4c4ad3c93e88b6b3a1ee10eec45935618e1&amp;"> </div>
     <div id="speedDisplay" style="position: absolute; top:53%; right:40%; font-family:ds-digital; color:black; 
@@ -289,63 +289,8 @@ function updateRPM(rpm) {
     if (rpmNeedle) {
         updateAnalogNeedle(rpmNeedle, rpm, 10000);
     }
-  const speedDisplay = document.getElementById('speedDisplay');
-if (speedDisplay) {
-    const speed = parseFloat(speedDisplay.innerText);
-    const gear = inferGearPure(rpm, speed);
-    const gearDisplay = document.getElementById('gearDisplay');
-    if (gearDisplay) {
-        gearDisplay.innerText = gear;
-    }
 }
-  function updateRPM(rpmRaw) {
-    const normalizedRpm = Math.max(0, rpmRaw - 0.1); // incoming normalized (0.0–1.0)
-    const displayRpm = normalizedRpm * 10000;
 
-    const rpmDisplay = document.getElementById('rpmDisplay');
-    if (rpmDisplay) {
-        rpmDisplay.innerText = `${Math.floor(displayRpm).toLocaleString('en')}`;
-    }
-
-    const rpmNeedle = document.getElementById('rpmNeedle');
-    if (rpmNeedle) {
-        updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
-    }
-
-    const speedDisplay = document.getElementById('speedDisplay');
-    if (speedDisplay) {
-        const speed = parseFloat(speedDisplay.innerText);
-        const gear = inferGearPure(normalizedRpm, speed);
-        const gearDisplay = document.getElementById('gearDisplay');
-        if (gearDisplay) {
-            gearDisplay.innerText = gear;
-        }
-    }
-}
-}
-function inferGearPure(rpm, speed) {
-    // Skip if standing still
-    if (speed < 1 || rpm < 0.1) return 'N';
-
-    // If game provides RPM as a normalized value (0.0 to 1.0)
-    const normalizedRpm = rpm;
-
-    // Speed boundaries for gear changes based on normalized RPM shift points
-    // Format: [maxSpeedForGear1, maxSpeedForGear2, ..., maxSpeedForGear6]
-    // These are adjustable
-    const gearSpeedLimits = [15, 30, 55, 85, 120, 160]; // in km/h
-
-    for (let i = 0; i < gearSpeedLimits.length; i++) {
-        if (speed <= gearSpeedLimits[i]) {
-            // simulate gear shift RPM logic:
-            if (i === 0 && normalizedRpm >= 0.8) return `${i + 2}`;
-            if (i > 0 && normalizedRpm >= 0.95) return `${i + 2}`;
-            return `${i + 1}`;
-        }
-    }
-
-    return '6'; // Above known limit, assume 6th gear
-}
 function updateSpeed(speed) {
     const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
     let displayUnit = 'km/h';
