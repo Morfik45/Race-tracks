@@ -262,9 +262,6 @@ window.addEventListener("message", (event) => {
             case "speed":
                 updateSpeed(data[key]);
                 break;
-            case "gear":
-                updateGear(data[key]);
-                break;
         }
     }
 });
@@ -293,11 +290,25 @@ function updateRPM(rpm) {
         updateAnalogNeedle(rpmNeedle, rpm, 10000);
     }
 }
-function updateGear(gear) {
-    const gearDisplay = document.getElementById('gearDisplay');
-    if (gearDisplay) {
-        gearDisplay.innerText = gear;
+function inferGearPure(rpm, speed) {
+    if (speed < 1 || rpm < 1000) return 'N'; // Neutral or stationary
+
+    // Convert speed to km/h or mph
+    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
+    if (speedUnit === 'mph') {
+        speed = speed * 1.60934; // convert mph to km/h for a common base
     }
+
+    // Calculate a rough ratio
+    const ratio = rpm / speed;
+
+    // These ratio ranges are estimated empirically for typical GTA V vehicles
+    if (ratio > 250) return '1';
+    if (ratio > 160) return '2';
+    if (ratio > 110) return '3';
+    if (ratio > 80) return '4';
+    if (ratio > 60) return '5';
+    return '6';
 }
 function updateSpeed(speed) {
     const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
