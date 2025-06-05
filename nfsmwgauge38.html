@@ -277,7 +277,7 @@ const GearEstimator = (function () {
         // Simulate neutral if RPM is too low
         if (rpm < 0.2) {
             currentGear = 0;
-            return '8';
+            return '1';
         }
 
         // Prevent gear jumping: require cooldown
@@ -321,7 +321,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 4:
-                if (rpm > 0.95) {
+                if (rpm > 0.93) {
                     currentGear = 5;
                     lastShiftTime = now;
                 } else if (rpm < 0.65) {
@@ -346,7 +346,7 @@ const GearEstimator = (function () {
                 break;
         }
 
-        return currentGear === 0 ? '8' : currentGear.toString();
+        return currentGear === 0 ? '1' : currentGear.toString();
     };
 })();
 
