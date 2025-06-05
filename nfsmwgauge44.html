@@ -326,7 +326,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 3:
-                if (rpm > 0.95) {
+                if (rpm > 0.9) {
                     currentGear = 4;
                     lastShiftTime = now;
                 } else if (rpm < 0.6) {
