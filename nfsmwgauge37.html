@@ -1,314 +1,523 @@
-<html><head><style>
-        #app {
-            width: 100%;
-            height: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow: none;
-            user-select: none;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            margin: none;
-            top: 0;
-            left: 0;
-            position: fixed;
-        }
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 99;
-        }
-        
-        .selected {
-            background-color: #bcffa1;
-        }
-        
-        #loaderdisclaimer {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 12px;
-            max-width: 420px;
-            margin: 20px auto;
-            font-family: Verdana, sans-serif;
-            text-align: left;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speedometer Overlay</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>body {
+  background-color: transparent;
+}
 
-        #loaderdisclaimer strong {
-            font-size: 1.1em;
-            color: #222;
-        }
+#overlayControl {
+  z-index: 3000;
+}
 
-        #loaderdisclaimer p {
-            font-size: 0.95em;
-            color: #444;
-            line-height: 1.5;
-        }
 
-        #loaderdisclaimer em {
-            font-style: italic;
-            color: #b00;
-        }
 
-        #loaderdisclaimer a {
-            color: #007acc;
-            text-decoration: none;
-        }
+#rpmDial { 
+  position: relative;
+  overflow: visible !important; /* allow elements to extend beyond */
+  font-size: 1em; /* base font-size, used to scale text/ticks */
+}
 
-        #loaderdisclaimer a:hover {
-            text-decoration: underline;
-        }
-    </style>
-    </head><body><div id="loader" style="display: none; top: 0px; max-width: 80vw;">
-        <div id="loaderdisclaimer" style="display: none;">
-            <strong>User-Generated Web Applications</strong><br>
-            <p>Load tools and web applications directly into the game client. Find applications in <a href="#" id="discordlink">our discord</a>.</p>
-            <p><strong>⚠ Note:</strong> This application will get access to <em>game information</em>, <em>account information</em>, and may <em>act on your behalf</em>.</p>
-            <p><strong><u>Only load trusted applications.</u></strong></p>
-            <p>See <a href="#" id="wikilink">the wiki</a> for more information.</p>
+#speedDisplay,
+#speedDisplayUnit,
+#rpmDisplay,
+.dial-label.rpm {
+  position: absolute;
+  z-index: 10;
+  color: white;
+  pointer-events: none;
+}
+
+#speedTicks div,
+#rpmTicks div {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+}
+
+#speedTicks span,
+#rpmTicks span {
+  display: block;
+  transform-origin: center;
+  font-size: 0.9em; /* ticks scale with dial size */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.dial {
+  width: 300px;
+  height: 300px;
+}
+
+/* INDIVIDUAL RESIZABLE STYLES */
+
+
+#rpmDial.dial {
+  width: 300px;
+  height: 300px;
+  right:-100%;
+  font-size: 0.83em; /* scaled down font size relative to speedDial */
+}
+
+.tick-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.tick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+}
+
+.tick span {
+  display: block;
+  transform-origin: center;
+}
+
+.needle {
+  position: absolute;
+  width: 4px;
+  height: 120px;
+  left: 50%;
+  bottom: 50%;
+  transform-origin: 50% 100%;
+  transition: transform 0.3s ease-in-out;
+}
+
+.speed-needle {
+  background-color: red;
+}
+
+.rpm-needle {
+  background-color: transparent;
+}
+
+.dial-label {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+}
+
+.speed-value {
+  top: 60%;
+}
+
+.speed-unit {
+  top: 70%;
+}
+
+
+.rpm-label {
+  top: 70%;
+}
+</style>
+</head>
+<body>
+  <main class="mx-auto">
+      <select id="debugScenario" class="form-select form-select-sm d-none bg-primary" style="width:auto; display:inline-block;">
+        <option value="">Idle (Default)</option>
+        <option value="init">Initialize (set vehicle)</option>
+        <option value="onfoot">On Foot</option>
+        <option value="900rpm">900 RPM</option>
+        <option value="1000rpm">1000 RPM</option>
+        <option value="2000rpm">2000 RPM</option>
+        <option value="accelerate250">Accelerate to 250 km/h</option>
+      </select>
+      <button class="btn btn-primary px-1 py-0 d-none" id="debugButton" title="Simulate Dummy Data">Debug</button>
+      <button onclick="brakeNow()" class="btn btn-primary px-1 py-0 d-none" id="brakeButton" title="Brake">
+        <i class="bi bi-sign-stop"></i>
+      </button>
+    
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+      <div class="modal-dialog bg-dark rounded" style="z-index: 2500;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="settingsModalLabel">Speedometer Settings</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group mb-3">
+              <label class="input-group-text" for="speedUnit">Speed Unit</label>
+              <select class="form-select bg-dark" id="speedUnit">
+                <option value="mph">Miles per Hour (mph)</option>
+                <option value="km/h">Kilometers per Hour (km/h)</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="saveSettings">Save changes</button>
+            <button type="button" class="btn btn-danger" id="clearStorageButton">Clear Cache + Reload</button>
+          </div>
         </div>
-        <input type="text" id="app_url" placeholder="Application URL">
-        <button id="load" disabled="">🔃 Load</button>
-        <button id="pin" style="display: inline;">📌 Pin</button>
-        <button id="close_btn">🐱&zwj;👤 Hide</button>
-        <button id="remove_btn" style="display: inline;">❌ Remove Tab</button>
-        <button id="newtab_btn" style="display: inline;">📑 New Tab</button>
-    <button class="selected">(1) Speedometer Overlay</button></div>
-    <div id="app" style="display: block;">
-    <iframe src="https://morfik45.github.io/Race-tracks/nfsmwgauge37.html" style="z-index: 1; opacity: 1;"></iframe></div>
+      </div>
+    </div>
+
+    <!-- Speedometer Container -->
+    <div class="d-flex rounded position-absolute" id="speedometerContainer" style="left: 1300px; top: 770px;">
+
+      <!-- Speed Dial -->
+      
+
+      <!-- RPM Dial -->
+     <div style="opacity:1" class="dial rounded-circle position-relative" id="rpmDial">
+     <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://cdn.discordapp.com/attachments/484324411693072394/1379785971796676629/nfsgauge2.png?ex=68418152&amp;is=68402fd2&amp;hm=3401c3c4e945ea9ef706759f6d86da8df7a7f9b1a912ca143cb3d4a9a2215ea9&amp;">
+        <div id="gearDisplay"style="color:black; text-align:right;transform: translate(-42%, 170%);font-family:digital-7 mono; font-weight:bold;font-size:2.0rem;"">1</div>
+        
+        <div id="rpmNeedle" class="needle rpm-needle" style="transform: rotate(-100deg);"> <img style="height:140px;transform: rotate(5deg); transform: translate(-40%, 6%); " src="https://cdn.discordapp.com/attachments/484324411693072394/1379400208873685085/needle.png?ex=68401a0d&amp;is=683ec88d&amp;hm=5cdb2d4f9cff7f653fbdebbd91e1f4c4ad3c93e88b6b3a1ee10eec45935618e1&amp;"> </div>
+    <div id="speedDisplay" style="position: absolute; top:53.5%; right:38.3%; font-family:digital-7 mono; color:black; 
+  font-size:2.3rem!important; font-weight:bold; text-align:right; letter-spacing:4.5px; " " class="dial-label speed-value fs-5">0</div>
+<div id="speedDisplayUnit" class="dial-label speed-unit fs-5" style="font-weight:bold;text-transform:uppercase;">km/h</div>
+        
+        
+      </div>
+
+    </div>
     <script>
-        // send.onclick = () => {
-        //     const message = "Sent from outside.html";
-        //     document.querySelector("#frame").contentWindow.postMessage({
-        //         message: message,
-        //     }, "*");
-        // };
-        let isInFocus = false;
-        let hasLoadedAnyTabs = false;
-        const tabs = [];
-        let currentTab = 0;
-        const maxTabs = 10;
 
-        const getAllAppURLs = () => {
-            let urls = [];
-            for (const tab in tabs) {
-                urls.push(tabs[tab][0].src);
-            }
-            return urls;
-        }
+// initialize user details object
+const userDetails = {};
 
-        wikilink.onclick = () => {
-            const url = "https://dash.tycoon.community/wiki/index.php/User_Applications";
-            window.invokeNative("openUrl", url);
-        }
-        discordlink.onclick = () => {
-            const url = "https://discord.com/channels/307266366174658560/1326953908836241469";
-            window.invokeNative("openUrl", url);
-        }
-        const sendData = (data) => {
-            if (!data.data) {
-                let newData = data;
-                data = {data: newData};
-            }
-            for (const tab in tabs) {
-                tabs[tab][0].contentWindow.postMessage(data, "*");
-            }
-        }
-        const updateTabs = () => {
-            for (const tab in tabs) {
-                tabs[tab][0].contentWindow.postMessage({data: {tabbed: tab == currentTab}}, "*");
-            }
-        }
-        const runEvent = (name, data, cb) => {
-            data = data || {};
-            fetch(`https://${GetParentResourceName()}/${name}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json; charset=UTF-8',
-                },
-                body: JSON.stringify(data)
-            }).then((response) => response.json()).then((data) => {
-                if (cb) {
-                    cb(data);
-                }
-            }).catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-        pin.onclick = () => {
-            runEvent("pin");
-        };
-        close_btn.onclick = () => {
-            runEvent("close");
-        };
-        remove_btn.onclick = () => {
-            tabs[currentTab][0].remove();
-            tabs[currentTab][1].remove();
-            tabs.splice(currentTab, 1);
-            setTab(currentTab);
-            runEvent("updatedUrls", {urls: getAllAppURLs()});
+// get cached data once the page has fully loaded
+window.addEventListener("load", async () => {
+    if (window.location.hash === "#debug") {
+        document.getElementById('debugButton').classList.remove('d-none');
+        document.getElementById('brakeButton').classList.remove('d-none');
+        document.getElementById('debugScenario').classList.remove('d-none');
+    }
 
-            if (Object.keys(tabs).length == 0) {
-                app.style.display = "none";
-                loader.style.top = "50%";
-                pin.style.display = "none";
-                remove_btn.style.display = "none";
-                newtab_btn.style.display = "none";
-                loaderdisclaimer.style.display = "block";
-                hasLoadedAnyTabs = false;
-            }
+    sendCommand("getData");
+
+    const speedometerContainer = document.getElementById('speedometerContainer');
+    restoreSpeedoPosition(speedometerContainer);
+    makeSpeedometerDraggable(speedometerContainer);
+    generateSpeedTicks(localStorage.getItem('speedUnit') || 'km/h');
+    generateRpmTicks();
+
+    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
+    document.getElementById('speedDisplayUnit').innerText = speedUnit;
+    document.getElementById('speedUnit').value = speedUnit;
+});
+
+const userDetailsInterval = setInterval(() => {
+    if (userDetails.username) {
+        clearInterval(userDetailsInterval);
+        sendNotification(`Welcome back ${userDetails.username}!`);
+    }
+}, 100);
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        window.parent.postMessage({type: "pin"}, "*");
+    }
+});
+
+window.addEventListener("message", (event) => {
+    const data = event.data.data;
+    if (!data || data == "" || data == []) return;
+
+    for (const key in data) {
+        if (window.location.hash === "#debug") {
+            console.log(key, data[key]);
         }
-        const fadeOutUnfocusedTabs = () => {
-            if (!isInFocus) {
-                return;
-            }
-            for (const tab in tabs) {
-                if (tab != currentTab) {
-                    tabs[tab][0].style.opacity = "0.5";
+        switch (key) {
+            case "user_id":
+                userDetails.vrpId = data[key];
+                break;
+            case "name":
+                userDetails.username = data[key];
+                break;
+            case "discord":
+                userDetails.discordId = data[key].replace("discord:", "");
+                break;
+            case "job":
+                userDetails.job = data[key];
+                break;
+            case "wallet":
+                userDetails.wallet = data[key];
+                break;
+            case "bank":
+                userDetails.bank = data[key];
+                break;
+            case "vehicle":
+                userDetails.vehicle = data[key];
+                if (userDetails.vehicle === 'onFoot') {
+                    document.getElementById('speedometerContainer').classList.add('d-none');
                 } else {
-                    tabs[tab][0].style.opacity = "1";
+                    document.getElementById('speedometerContainer').classList.remove('d-none');
                 }
-            }
+                break;
+            case "rpm":
+                updateRPM(data[key]);
+                break;
+            case "speed":
+                updateSpeed(data[key]);
+                break;
         }
-        const fadeInAllTabs = () => {
-            for (const tab in tabs) {
-                tabs[tab][0].style.opacity = "1";
-            }
-        }
-        const setTab = (tab) => {
-            // Recursively set the tab to the next one if it doesn't exist
-            if (tab < 0) { return; }
-            if (tabs[tab] == undefined) { return setTab(tab - 1); }
+    }
+});
+      // simulate gears
+const GearEstimator = (function () {
+    let currentGear = 1; // 0 = Neutral
+    let lastShiftTime = 0;
+    const shiftCooldown = 500; // ms
 
-            for (const tab in tabs) {
-                tabs[tab][0].style.zIndex = "0";
-                tabs[tab][1].classList.remove("selected");
-            }
-            tabs[tab][0].style.zIndex = "1";
-            tabs[tab][1].classList.add("selected");
-            currentTab = tab;
-            updateTabs();
-            fadeOutUnfocusedTabs();
+    return function (rpm) {
+        const now = Date.now();
+
+        // Simulate neutral if RPM is too low
+        if (rpm < 0.2) {
+            currentGear = 0;
+            return '8';
         }
-        const setUrl = (tab, url) => {
-            if (tabs[tab] == undefined) {
-                if (tab >= maxTabs) {
-                    return;
-                }
-                if (url.startsWith("nui://")) {
-                    console.log("Cannot load nui:// URLs");
-                    return;
-                }
-                
-                tabs[tab] = {};
-                tabs[tab][0] = document.createElement("iframe");
-                app.appendChild(tabs[tab][0]);
-                tabs[tab][1] = document.createElement("button");
-                tabs[tab][1].textContent = "Tab " + tab;
-                tabs[tab][1].onclick = () => {
-                    setTab(tab);
-                };
-                tabs[tab][0].onload = () => {
-                    let title = tabs[tab][0].contentWindow.document.title;
-                    if (title.length > 0) {
-                        tabs[tab][1].textContent = `(${tab + 1}) ` + title;
-                    } else {
-                        tabs[tab][1].textContent = `(${tab + 1}) ` + url;
-                    }
-                };
-                document.querySelector("#loader").appendChild(tabs[tab][1]);
-            }
-            hasLoadedAnyTabs = true;
-            tabs[tab][0].src = url;
-            document.querySelector("#app_url").value = "";
-            app.style.display = "block";
-            loader.style.top = "0";
-            pin.style.display = "inline";
-            remove_btn.style.display = "inline";
-            newtab_btn.style.display = "inline";
-            loaderdisclaimer.style.display = "none";
-            load.disabled = true;
-            fadeOutUnfocusedTabs();
+
+        // Prevent gear jumping: require cooldown
+        if (now - lastShiftTime < shiftCooldown) {
+            return currentGear === 0 ? '1' : currentGear.toString();
         }
-        newtab_btn.onclick = () => {
-            currentTab = Object.keys(tabs).length;
-            setUrl(currentTab, "");
-        };
-        load.onclick = () => {
-            const url = document.querySelector("#app_url").value;
-            setUrl(currentTab, url);
-            setTab(currentTab);
-            runEvent("updatedUrls", {urls: getAllAppURLs()});
-            runEvent("appRequest", {type: "getData"});
-        };
-        app_url.oninput = () => {
-            const url = document.querySelector("#app_url").value;
-            if (url.length > 0) {
-                load.disabled = false;
-            } else {
-                load.disabled = true;
-            }
-        };
-        const escapeListener = (e) => {
-            if (e.key === "Escape") {
-                if (hasLoadedAnyTabs) {
-                    runEvent("pin");
-                } else {
-                    runEvent("close");
+
+        // Gear shift logic
+        switch (currentGear) {
+            case 0: // Neutral
+                if (rpm > 0.3) {
+                    currentGear = 1;
+                    lastShiftTime = now;
                 }
-            }
-            if (e.keyCode === 9) {
-                e.preventDefault();
-                currentTab++;
-                if (currentTab >= Object.keys(tabs).length) {
-                    currentTab = 0;
+                break;
+            case 1:
+                if (rpm > 0.8) {
+                    currentGear = 2;
+                    lastShiftTime = now;
+                } else if (rpm < 0.3) {
+                    currentGear = 0;
+                    lastShiftTime = now;
                 }
-                setTab(currentTab);
-            }
-        };
-        setTab(0);
-        window.addEventListener('keydown', escapeListener);
-        window.addEventListener("message", (event) => {
-            if (!event.data.fromTycoonScript) {
-                // Send the request to script
-                if (event.data.type == "api") {
-                    
+                break;
+            case 2:
+                if (rpm > 0.95) {
+                    currentGear = 3;
+                    lastShiftTime = now;
+                } else if (rpm < 0.4) {
+                    currentGear = 1;
+                    lastShiftTime = now;
                 }
-                runEvent("appRequest", {source: event.source.location.href, ...event.data});
-                console.log(event.source.location.href, event.data.type, JSON.stringify(event.data));
-            } else {
-                const type = event.data.type;
-                if (type == "data") {
-                    // Send the response to the iframe
-                    sendData(event.data);
-                } else if (type == "close") {
-                    isInFocus = false;
-                    sendData({"focused": false, "hidden": true, "pinned": false});
-                    app.style.display = "none";
-                    loader.style.display = "none";
-                } else if (type == "pin") {
-                    isInFocus = false;
-                    sendData({"focused": false, "hidden": false, "pinned": true});
-                    fadeInAllTabs();
-                    loader.style.display = "none";
-                } else if (type == "open") {
-                    isInFocus = true;
-                    setTab(currentTab);
-                    sendData({"focused": true, "hidden": false, "pinned": false});
-                    fadeOutUnfocusedTabs();
-                    app.style.display = "block";
-                    loader.style.display = "block";
-                } else if (type == "url") {
-                    setUrl(event.data.tab, event.data.url);
+                break;
+            case 3:
+                if (rpm > 0.95) {
+                    currentGear = 4;
+                    lastShiftTime = now;
+                } else if (rpm < 0.6) {
+                    currentGear = 2;
+                    lastShiftTime = now;
                 }
-            }
-        });
+                break;
+            case 4:
+                if (rpm > 0.95) {
+                    currentGear = 5;
+                    lastShiftTime = now;
+                } else if (rpm < 0.65) {
+                    currentGear = 3;
+                    lastShiftTime = now;
+                }
+                break;
+            case 5:
+                if (rpm > 0.90) {
+                    currentGear = 6;
+                    lastShiftTime = now;
+                } else if (rpm < 0.75) {
+                    currentGear = 4;
+                    lastShiftTime = now;
+                }
+                break;
+            case 6:
+                if (rpm < 0.75) {
+                    currentGear = 5;
+                    lastShiftTime = now;
+                }
+                break;
+        }
+
+        return currentGear === 0 ? '8' : currentGear.toString();
+    };
+})();
+
+function sendCommand(command, args) {
+    window.parent.postMessage({type: command, ...args}, "*");
+}
+
+async function sendNotification(text) {
+    sendCommand("notification", {text: `~r~[Speedometer] ~s~${text}`});
+    if (window.location.hash === "#debug") {
+        showToast(text, 'Notification', 'info', null, 'bottomright');
+    }
+}
+
+function updateRPM(rpmRaw) {
+    // --- VISUAL DISPLAY FIX ---
+    // Correct display only for low RPMs
+    let correctedRpmRaw;
+    if (rpmRaw < 0.72) {
+        correctedRpmRaw = Math.max(0, rpmRaw - 0.09);
+    } else {
+         correctedRpmRaw = Math.max(0, rpmRaw - 0.05);
+    }
+
+    const displayRpm = correctedRpmRaw * 10000;
+
+    const rpmDisplay = document.getElementById('rpmDisplay');
+    if (rpmDisplay) {
+        rpmDisplay.innerText = `${Math.floor(displayRpm).toLocaleString('en')}`;
+    }
+
+    const rpmNeedle = document.getElementById('rpmNeedle');
+    if (rpmNeedle) {
+        updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
+    }
+
+
+    // --- GEAR LOGIC (NO OFFSET) ---
+    const gear = GearEstimator(rpmRaw);
+    const gearDisplay = document.getElementById('gearDisplay');
+    if (gearDisplay) {
+        gearDisplay.innerText = gear;
+    }
+}
+
+function updateSpeed(speed) {
+    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
+    let displayUnit = 'km/h';
+    if (speedUnit === 'mph') {
+        speed = speed * 2.23694;
+        displayUnit = 'mph';
+    } else {
+        speed = speed * 3.6;
+        displayUnit = 'km/h';
+    }
+
+    const speedDisplay = document.getElementById('speedDisplay');
+    if (speedDisplay) {
+        const formattedSpeed = Math.floor(speed).toString().padStart(3, '\u00A0');
+        speedDisplay.innerText = formattedSpeed;
+    }
+    const speedNeedle = document.getElementById('speedNeedle');
+    if (speedNeedle) {
+        updateAnalogNeedle(speedNeedle, speed, speedUnit === 'mph' ? 180 : 360);
+    }
+
+    const speedDisplayUnit = document.getElementById('speedDisplayUnit');
+    if (speedDisplayUnit) {
+        speedDisplayUnit.innerText = displayUnit;
+    }
+}
+
+function updateAnalogNeedle(el, value, maxVal) {
+    const angle = ((value / maxVal) * 250) - 125;
+    el.style.transform = `rotate(${angle}deg)`;
+}
+
+function restoreSpeedoPosition(elem) {
+    const left = localStorage.getItem('speedo_pos_left');
+    const top = localStorage.getItem('speedo_pos_top');
+    if (left && top) {
+        elem.style.left = left;
+        elem.style.top = top;
+    }
+}
+
+function makeSpeedometerDraggable(elem) {
+    let offsetX, offsetY, isMouseDown = false;
+    elem.addEventListener('mousedown', (e) => {
+        isMouseDown = true;
+        const rect = elem.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isMouseDown) return;
+        e.preventDefault();
+        elem.style.left = (e.clientX - offsetX) + 'px';
+        elem.style.top = (e.clientY - offsetY) + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+        if (isMouseDown) {
+            isMouseDown = false;
+            localStorage.setItem('speedo_pos_left', elem.style.left);
+            localStorage.setItem('speedo_pos_top', elem.style.top);
+        }
+    });
+}
+
+function generateSpeedTicks(unit) {
+    const ticksContainer = document.getElementById('speedTicks');
+    if (!ticksContainer) return;
+    ticksContainer.innerHTML = '';
+
+    const maxSpeed = (unit === 'mph') ? 180 : 360;
+    const step = 20;
+
+    for (let i = 0; i <= maxSpeed; i += step) {
+        const angle = 135 + (i / maxSpeed) * 270;
+        const tick = document.createElement('div');
+        tick.style.position = 'absolute';
+        tick.style.left = '50%';
+        tick.style.top = '50%';
+        tick.style.transformOrigin = 'center';
+        tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(120px)`;
+
+        const label = document.createElement('span');
+        label.style.display = 'block';
+        label.style.transform = `rotate(${-angle}deg)`;
+        label.textContent = i;
+
+        tick.appendChild(label);
+        ticksContainer.appendChild(tick);
+    }
+}
+
+function generateRpmTicks() {
+    const ticksContainer = document.getElementById('rpmTicks');
+    if (!ticksContainer) return;
+    ticksContainer.innerHTML = '';
+
+
+        const startAngle = 145;
+        const sweep = 250;
+        for (let i = 0; i <= 10; i++) {
+        const angle = startAngle + (i / 10) * sweep;
+        const tick = document.createElement('div');
+        tick.style.position = 'absolute';
+        tick.style.left = '50%';
+        tick.style.top = '50%';
+        tick.style.transformOrigin = 'center';
+        tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(120px)`;
+
+        const label = document.createElement('span');
+        label.style.display = 'block';
+        label.style.transform = `rotate(${-angle}deg)`;
+        label.textContent = i;
+
+        tick.appendChild(label);
+        ticksContainer.appendChild(tick);
+    }
+}
+
     </script>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+
+
 </body></html>
