@@ -401,7 +401,7 @@ function updateRPM(rpmRaw) {
     if (triangle) {
         triangle.style.display = normalizedRpm > 0.8 ? 'block' : 'none';
     }
-}
+
     // --- GEAR LOGIC (NO OFFSET) ---
     const gear = GearEstimator(rpmRaw);
     const gearDisplay = document.getElementById('gearDisplay');
