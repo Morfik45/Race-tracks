@@ -63,6 +63,20 @@
   font-size: 0.83em; /* scaled down font size relative to speedDial */
 }
 
+    #rpmTriangle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid white; /* white triangle pointing up */
+  top: 10px; /* adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  z-index: 999;
+}
+
 .tick-container {
   position: absolute;
   width: 100%;
@@ -170,9 +184,9 @@
 
       <!-- RPM Dial -->
      <div style="opacity:1" class="dial rounded-circle position-relative" id="rpmDial">
-     <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://cdn.discordapp.com/attachments/484324411693072394/1379918762102362162/nfsgauge2.png?ex=6841fcfe&amp;is=6840ab7e&amp;hm=55edc5a37649faa7a80c053d37bd1654cd2cf077a739ff4536829ff5d571dbe3&amp;">
+     <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://cdn.discordapp.com/attachments/484324411693072394/1380081387712811101/nfsgauge3.png?ex=68429473&is=684142f3&hm=9729aeaf132e69083713bfc8343faa4e4af476f4965c21d14d842a884dadf11e&;">
         <div id="gearDisplay" style="color:black; text-align:right;transform: translate(-42.5%, 227%);font-family:digital-7 mono; font-weight:bold;font-size:1.6rem;" "="">1</div>
-        
+        <div id="rpmTriangle"></div>
         <div id="rpmNeedle" class="needle rpm-needle" style="transform: rotate(-97.5deg);"> <img style="height:140px;transform: rotate(5deg); transform: translate(-40%, 6%); " src="https://cdn.discordapp.com/attachments/484324411693072394/1379400208873685085/needle.png?ex=68401a0d&amp;is=683ec88d&amp;hm=5cdb2d4f9cff7f653fbdebbd91e1f4c4ad3c93e88b6b3a1ee10eec45935618e1&amp;"> </div>
     <div id="speedDisplay" style="position: absolute; top:53.5%; right:38.3%; font-family:digital-7 mono; color:black; 
   font-size:2.3rem!important; font-weight:bold; text-align:right; letter-spacing:4.5px; " "="" class="dial-label speed-value fs-5">&nbsp;&nbsp;0</div>
@@ -382,8 +396,12 @@ function updateRPM(rpmRaw) {
     if (rpmNeedle) {
         updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
     }
-
-
+    // Show triangle if RPM > 0.8
+    const triangle = document.getElementById('rpmTriangle');
+    if (triangle) {
+        triangle.style.display = normalizedRpm > 0.8 ? 'block' : 'none';
+    }
+}
     // --- GEAR LOGIC (NO OFFSET) ---
     const gear = GearEstimator(rpmRaw);
     const gearDisplay = document.getElementById('gearDisplay');
