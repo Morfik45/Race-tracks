@@ -344,7 +344,7 @@ const GearEstimator = (function () {
                 }
                 break;
             case 5:
-                if (rpm > 0.90) {
+                if (rpm > 0.93) {
                     currentGear = 6;
                     lastShiftTime = now;
                 } else if (rpm < 0.75) {
@@ -406,7 +406,7 @@ function updateRPM(rpmRaw) {
       // Show triangle if RPM > 0.8
 const triangle = document.getElementById('rpmTriangle');
 if (triangle) {
-    triangle.style.display = displayRpm > 8000 ? 'block' : 'none';
+    triangle.style.display = correctedRpmRaw > 0.8 ? 'block' : 'none';
 }
 
 }
