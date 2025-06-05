@@ -396,11 +396,6 @@ function updateRPM(rpmRaw) {
     if (rpmNeedle) {
         updateAnalogNeedle(rpmNeedle, displayRpm, 10000);
     }
-    // Show triangle if RPM > 0.8
-    const triangle = document.getElementById('rpmTriangle');
-    if (triangle) {
-        triangle.style.display = normalizedRpm > 0.8 ? 'block' : 'none';
-    }
 
     // --- GEAR LOGIC (NO OFFSET) ---
     const gear = GearEstimator(rpmRaw);
@@ -408,6 +403,12 @@ function updateRPM(rpmRaw) {
     if (gearDisplay) {
         gearDisplay.innerText = gear;
     }
+      // Show triangle if RPM > 0.8
+const triangle = document.getElementById('rpmTriangle');
+if (triangle) {
+    triangle.style.display = correctedRpmRaw > 0.8 ? 'block' : 'none';
+}
+
 }
 
 function updateSpeed(speed) {
