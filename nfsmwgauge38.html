@@ -163,19 +163,19 @@
     </div>
 
     <!-- Speedometer Container -->
-    <div class="d-flex rounded position-absolute" id="speedometerContainer" style="left: 1300px; top: 770px;">
+    <div class="d-flex rounded position-absolute" id="speedometerContainer" style="left: 1317px; top: 681px;">
 
       <!-- Speed Dial -->
       
 
       <!-- RPM Dial -->
      <div style="opacity:1" class="dial rounded-circle position-relative" id="rpmDial">
-     <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://cdn.discordapp.com/attachments/484324411693072394/1379785971796676629/nfsgauge2.png?ex=68418152&amp;is=68402fd2&amp;hm=3401c3c4e945ea9ef706759f6d86da8df7a7f9b1a912ca143cb3d4a9a2215ea9&amp;">
-        <div id="gearDisplay"style="color:black; text-align:right;transform: translate(-42%, 170%);font-family:digital-7 mono; font-weight:bold;font-size:2.0rem;"">1</div>
+     <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://cdn.discordapp.com/attachments/484324411693072394/1379918762102362162/nfsgauge2.png?ex=6841fcfe&amp;is=6840ab7e&amp;hm=55edc5a37649faa7a80c053d37bd1654cd2cf077a739ff4536829ff5d571dbe3&amp;">
+        <div id="gearDisplay" style="color:black; text-align:right;transform: translate(-42.5%, 227%);font-family:digital-7 mono; font-weight:bold;font-size:1.6rem;" "="">1</div>
         
-        <div id="rpmNeedle" class="needle rpm-needle" style="transform: rotate(-100deg);"> <img style="height:140px;transform: rotate(5deg); transform: translate(-40%, 6%); " src="https://cdn.discordapp.com/attachments/484324411693072394/1379400208873685085/needle.png?ex=68401a0d&amp;is=683ec88d&amp;hm=5cdb2d4f9cff7f653fbdebbd91e1f4c4ad3c93e88b6b3a1ee10eec45935618e1&amp;"> </div>
+        <div id="rpmNeedle" class="needle rpm-needle" style="transform: rotate(-97.5deg);"> <img style="height:140px;transform: rotate(5deg); transform: translate(-40%, 6%); " src="https://cdn.discordapp.com/attachments/484324411693072394/1379400208873685085/needle.png?ex=68401a0d&amp;is=683ec88d&amp;hm=5cdb2d4f9cff7f653fbdebbd91e1f4c4ad3c93e88b6b3a1ee10eec45935618e1&amp;"> </div>
     <div id="speedDisplay" style="position: absolute; top:53.5%; right:38.3%; font-family:digital-7 mono; color:black; 
-  font-size:2.3rem!important; font-weight:bold; text-align:right; letter-spacing:4.5px; " " class="dial-label speed-value fs-5">0</div>
+  font-size:2.3rem!important; font-weight:bold; text-align:right; letter-spacing:4.5px; " "="" class="dial-label speed-value fs-5">&nbsp;&nbsp;0</div>
 <div id="speedDisplayUnit" class="dial-label speed-unit fs-5" style="font-weight:bold;text-transform:uppercase;">km/h</div>
         
         
@@ -405,8 +405,7 @@ function updateSpeed(speed) {
 
     const speedDisplay = document.getElementById('speedDisplay');
     if (speedDisplay) {
-        const formattedSpeed = Math.floor(speed).toString().padStart(3, '\u00A0');
-        speedDisplay.innerText = formattedSpeed;
+        speedDisplay.innerText = `${Math.floor(speed)}`;
     }
     const speedNeedle = document.getElementById('speedNeedle');
     if (speedNeedle) {
@@ -514,6 +513,7 @@ function generateRpmTicks() {
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
 
