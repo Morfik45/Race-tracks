@@ -296,7 +296,8 @@ window.addEventListener("message", (event) => {
 const GearEstimator = (function () {
     let currentGear = 1; // 0 = Neutral
     let lastShiftTime = 0;
-    const shiftCooldown = 300; // ms
+    const upshiftCooldown = 500;   // ms
+    const downshiftCooldown = 200; // ms
 
     return function (rpm) {
         const now = Date.now();
@@ -311,65 +312,68 @@ const GearEstimator = (function () {
         }
 
         // Prevent gear jumping: require cooldown
-        if (now - lastShiftTime < shiftCooldown) {
+        if (now - lastShiftTime < upshiftCooldown) {
             return currentGear === 0 ? '1' : currentGear.toString();
         }
 
-        // Gear shift logic
+        // Determine cooldown based on direction
+        let cooldown = shiftCooldown;
+        let isUpshift = false;
+
         switch (currentGear) {
             case 0: // Neutral
-                if (rpm > 0.3) {
+                if (rpm > 0.3 && now - lastShiftTime > upshiftCooldown) {
                     currentGear = 1;
                     lastShiftTime = now;
                 }
                 break;
             case 1:
-                if (rpm > 0.8) {
+                if (rpm > 0.8 && now - lastShiftTime > upshiftCooldown) {
                     currentGear = 2;
                     lastShiftTime = now;
-                } else if (rpm < 0.3) {
+                } else if (rpm < 0.3 && now - lastShiftTime > downshiftCooldown) {
                     currentGear = 0;
                     lastShiftTime = now;
                 }
                 break;
             case 2:
-                if (rpm > 0.95) {
+                if (rpm > 0.95 && now - lastShiftTime > upshiftCooldown) {
                     currentGear = 3;
                     lastShiftTime = now;
-                } else if (rpm < 0.4) {
+                } else if (rpm < 0.4 && now - lastShiftTime > downshiftCooldown) {
                     currentGear = 1;
                     lastShiftTime = now;
                 }
                 break;
             case 3:
-                if (rpm > 0.9) {
+                if (rpm > 0.9 && now - lastShiftTime > upshiftCooldown) {
                     currentGear = 4;
                     lastShiftTime = now;
-                } else if (rpm < 0.6) {
+                } else if (rpm < 0.6 && now - lastShiftTime > downshiftCooldown) {
                     currentGear = 2;
                     lastShiftTime = now;
                 }
                 break;
             case 4:
-                if (rpm > 0.93) {
+                if (rpm > 0.93 && now - lastShiftTime > upshiftCooldown) {
                     currentGear = 5;
                     lastShiftTime = now;
-                } else if (rpm < 0.65) {
+                } else if (rpm < 0.65 && now - lastShiftTime > downshiftCooldown) {
                     currentGear = 3;
                     lastShiftTime = now;
                 }
                 break;
             case 5:
-                if (rpm > 0.93) {
+                if (rpm > 0.93 && now - lastShiftTime > upshiftCooldown) {
                     currentGear = 6;
                     lastShiftTime = now;
-                } else if (rpm < 0.75) {
+                } else if (rpm < 0.75 && now - lastShiftTime > downshiftCooldown) {
                     currentGear = 4;
                     lastShiftTime = now;
                 }
                 break;
             case 6:
-                if (rpm < 0.75) {
+                if (rpm < 0.75 && now - lastShiftTime > downshiftCooldown) {
                     currentGear = 5;
                     lastShiftTime = now;
                 }
