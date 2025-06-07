@@ -280,6 +280,9 @@ window.addEventListener("message", (event) => {
                     document.getElementById('speedometerContainer').classList.remove('d-none');
                 }
                 break;
+            case "vehicleClassName":
+                  userDetails.vehicleClassName = data[key];
+                break;
             case "rpm":
                 updateRPM(data[key]);
                 break;
