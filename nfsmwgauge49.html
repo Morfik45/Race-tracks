@@ -168,8 +168,8 @@
             <div class="input-group mb-3">
               <label class="input-group-text" for="speedUnit">Speed Unit</label>
               <select class="form-select bg-dark" id="speedUnit">
+                <option value="kmh">Kilometers per Hour (km/h)</option>
                 <option value="mph">Miles per Hour (mph)</option>
-                <option value="km/h">Kilometers per Hour (km/h)</option>
               </select>
             </div>
           </div>
@@ -220,12 +220,12 @@ window.addEventListener("load", async () => {
     const speedometerContainer = document.getElementById('speedometerContainer');
     restoreSpeedoPosition(speedometerContainer);
     makeSpeedometerDraggable(speedometerContainer);
-    generateSpeedTicks(localStorage.getItem('speedUnit') || 'km/h');
+    generateSpeedTicks(localStorage.getItem('speedUnit') || 'kmh');
     generateRpmTicks();
 
-    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
-    document.getElementById('speedDisplayUnit').innerText = speedUnit;
-    document.getElementById('speedUnit').value = speedUnit;
+const speedUnit = localStorage.getItem('speedUnit') || 'kmh';
+document.getElementById('speedDisplayUnit').innerText = speedUnit === 'mph' ? 'mph' : 'km/h';
+document.getElementById('speedUnit').value = speedUnit;
 });
 
 const userDetailsInterval = setInterval(() => {
@@ -418,14 +418,14 @@ if (triangle) {
 }
 
 function updateSpeed(speed) {
-    const speedUnit = localStorage.getItem('speedUnit') || 'km/h';
-    let displayUnit = 'km/h';
+    const speedUnit = localStorage.getItem('speedUnit') || 'kmh';
+    let displayUnit = 'kmh';
     if (speedUnit === 'mph') {
         speed = speed * 2.23694;
         displayUnit = 'mph';
     } else {
         speed = speed * 3.6;
-        displayUnit = 'km/h';
+        displayUnit = 'kmh';
     }
 
     const speedDisplay = document.getElementById('speedDisplay');
@@ -533,7 +533,25 @@ function generateRpmTicks() {
         ticksContainer.appendChild(tick);
     }
 }
+document.getElementById('saveSettings').addEventListener('click', () => {
+    const selectedUnit = document.getElementById('speedUnit').value;
 
+    // Save to localStorage
+    localStorage.setItem('speedUnit', selectedUnit);
+
+    // Regenerate ticks based on unit
+    generateSpeedTicks(selectedUnit);
+
+    // Force UI refresh
+    document.getElementById('speedDisplayUnit').innerText = selectedUnit === 'mph' ? 'mph' : 'km/h';
+
+    // Optionally notify
+    sendNotification(`Speed unit set to ${selectedUnit.toUpperCase()}`);
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+    modal.hide();
+});
     </script>
   </main>
 
