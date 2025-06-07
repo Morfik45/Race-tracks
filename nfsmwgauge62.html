@@ -302,10 +302,10 @@ const GearEstimator = (function () {
     return function (rpm) {
         const now = Date.now();
 
-        // Always show "1" for EVs (or return "D" if your UI supports it)
-        if (userDetails.vehicleClassName === "EVs") {
-            return '1'; // Or 'D' if your UI supports that
-        }
+  const alwaysFirstGearClasses = ["EVs", "Cycles", "Planes", "Helicopters", "Boats"];
+    if (alwaysFirstGearClasses.includes(userDetails.vehicleClassName)) {
+    return '1'; 
+}
 
         // Simulate neutral if RPM is too low
         if (rpm < 0.2) {
