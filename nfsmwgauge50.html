@@ -160,14 +160,10 @@
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
       <div class="modal-dialog bg-dark rounded" style="z-index: 2500;">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="settingsModalLabel">Speedometer Settings</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
           <div class="modal-body">
             <div class="input-group mb-3">
               <label class="input-group-text" for="speedUnit">Speed Unit</label>
-              <select class="form-select bg-dark" id="speedUnit">
+              <select class="form-select bg-dark" id="speedUnit" style="color:white;">
                 <option value="kmh">Kilometers per Hour (km/h)</option>
                 <option value="mph">Miles per Hour (mph)</option>
               </select>
@@ -182,8 +178,16 @@
       </div>
     </div>
 
-    <!-- Speedometer Container -->
-    <div class="d-flex rounded position-absolute" id="speedometerContainer" style="left: 1317px; top: 680px;">
+<!-- Speedometer Container -->
+<div id="speedometerContainer" class="d-flex rounded position-absolute" style="left: 1317px; top: 680px;">
+       
+  <!-- Settings Button (only visible on hover/focus) -->
+  <button id="settingsButton" type="button" class="btn btn-outline-light d-none"
+    data-bs-toggle="modal" data-bs-target="#settingsModal">
+    ⚙️ Speedometer Settings
+  </button>
+
+</div>
 
       <!-- Speed Dial -->
       
