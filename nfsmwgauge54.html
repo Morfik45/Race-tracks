@@ -139,7 +139,7 @@
 }
 </style>
 </head>
-<body>
+<body class="" style="">
   <main class="mx-auto">
       <select id="debugScenario" class="form-select form-select-sm d-none bg-primary" style="width:auto; display:inline-block;">
         <option value="">Idle (Default)</option>
@@ -154,10 +154,14 @@
       <button onclick="brakeNow()" class="btn btn-primary px-1 py-0 d-none" id="brakeButton" title="Brake">
         <i class="bi bi-sign-stop"></i>
       </button>
-    
+    <div class="top-bar" style="position: absolute; bottom: 10px; right: 10px; z-index: 9999;">
+          <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#settingsModal">
+    ⚙️ Settings
+          </button>
+        </div>
 
     <!-- Settings Modal -->
-    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" style="display: none;" aria-hidden="true">
       <div class="modal-dialog bg-dark rounded" style="z-index: 2500;">
         <div class="modal-content">
           <div class="modal-header">
@@ -167,7 +171,7 @@
           <div class="modal-body">
             <div class="input-group mb-3">
               <label class="input-group-text" for="speedUnit">Speed Unit</label>
-              <select class="form-select bg-dark" id="speedUnit">
+              <select class="form-select bg-dark" id="speedUnit" style="color:white;">
                 <option value="kmh">Kilometers per Hour (km/h)</option>
                 <option value="mph">Miles per Hour (mph)</option>
               </select>
@@ -191,7 +195,7 @@
       <!-- RPM Dial -->
      <div style="opacity:1" class="dial rounded-circle position-relative" id="rpmDial">
      <img style="position: absolute; left:0.5%; top:0.5%; " width="300px" src="https://raw.githubusercontent.com/Morfik45/Race-tracks/refs/heads/main/nfsgauge3.png">
-        <div id="gearDisplay" style="color:black; text-align:right;transform: translate(-42.5%, 227%);font-family:digital-7 mono; font-weight:bold;font-size:1.6rem;" "="">2</div>
+        <div id="gearDisplay" style="color:black; text-align:right;transform: translate(-42.5%, 227%);font-family:digital-7 mono; font-weight:bold;font-size:1.6rem;" "="">1</div>
         <div id="rpmTriangle" style="display: none;"></div>
         <div id="rpmNeedle" class="needle rpm-needle" style="transform: rotate(-97.5deg);"> <img style="height:140px;transform: rotate(5deg); transform: translate(-40%, 6%); " src="https://raw.githubusercontent.com/Morfik45/Race-tracks/refs/heads/main/needle.png"> </div>
     <div id="speedDisplay" style="position: absolute; top:53.5%; right:38.3%; font-family:digital-7 mono; color:black; 
@@ -556,6 +560,7 @@ document.getElementById('saveSettings').addEventListener('click', () => {
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
 
