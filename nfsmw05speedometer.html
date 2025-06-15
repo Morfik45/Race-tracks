@@ -302,7 +302,7 @@ const GearEstimator = (function () {
     return function (rpm) {
         const now = Date.now();
 
-  const alwaysFirstGearClasses = ["EVs", "Cycles", "Planes", "Helicopters", "Boats"];
+  const alwaysFirstGearClasses = ["EVs", "Cycles", "Planes", "Helicopters", "Boats", "RC Cars"];
     if (alwaysFirstGearClasses.includes(userDetails.vehicleClassName)) {
     return '1'; 
 }
