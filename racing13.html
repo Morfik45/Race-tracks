@@ -203,10 +203,8 @@ document.getElementById("exportBtn").addEventListener("click", (e) => {
     lapTimeElements.forEach(p => lines.push(p.textContent));
     const fullText = lines.join("\n");
 
-    navigator.clipboard.writeText(fullText).then(() => {
-        alert("Lap times copied to clipboard!");
-    }).catch(err => {
-        alert("Failed to copy lap times: " + err);
+    navigator.clipboard.writeText(fullText).catch(err => {
+        console.error("Failed to copy lap times:", err);
     });
 
     // Remove focus to avoid blocking input
