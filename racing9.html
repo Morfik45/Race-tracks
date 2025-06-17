@@ -15,10 +15,13 @@
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
 
-        #lapTimesWindow {
+        #lapTimesContainer {
             position: absolute;
             top: 50px;
             left: 250px;
+        }
+
+        #lapTimesWindow {
             background-color: rgba(0, 0, 0, 0.7);
             padding: 10px 15px;
             border: 2px solid lightgreen;
@@ -27,7 +30,6 @@
             font-size: 1em;
             line-height: 1.4em;
             color: white;
-            z-index: 1000;
             resize: both;
             overflow: auto;
             min-width: 200px;
@@ -43,6 +45,21 @@
         #lapTimesWindow p {
             margin: 3px 0;
         }
+
+        #exportButton {
+            margin-top: 8px;
+            background: #222;
+            border: 1px solid lightgreen;
+            color: lightgreen;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        #exportButton:hover {
+            background-color: #333;
+        }
     </style>
 </head>
 <body>
@@ -57,17 +74,19 @@
     <p id="totalTime" style="color: lightgreen; font-size: 1.2em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
 </div>
 
-<div id="lapTimesWindow">
-    <h4>Lap Times</h4>
-    <div id="lapTimes"></div>
-    <button onclick="copyLapTimes()" style="margin-top: 10px;">Export</button>
+<div id="lapTimesContainer">
+    <div id="lapTimesWindow">
+        <h4>Lap Times</h4>
+        <div id="lapTimes"></div>
+    </div>
+    <button id="exportButton" onclick="copyLapTimes()">Export</button>
 </div>
 
 <script>
     const checkpoints = [
         {x: -2761.71, y: 8079.83, z: 42.83},
-        {x: -2701.71, y: 8079.83, z: 42.83},
-        {x: -2661.71, y: 8079.83, z: 42.83},
+        {x: -2741.71, y: 8079.83, z: 42.83},
+        {x: -2721.71, y: 8079.83, z: 42.83},
     ];
 
     let player_x = 0;
@@ -168,10 +187,7 @@
         const lapTimeElements = document.querySelectorAll("#lapTimes p");
         const lines = [];
 
-        lapTimeElements.forEach(p => {
-            lines.push(p.textContent);
-        });
-
+        lapTimeElements.forEach(p => lines.push(p.textContent));
         const fullText = lines.join("\n");
 
         const textarea = document.createElement("textarea");
@@ -199,12 +215,12 @@
         }
     });
 
-    // Drag handling
+    // Make Lap Times Window draggable and resizable
     const dragWindow = document.getElementById("lapTimesWindow");
     let offsetX, offsetY, isDragging = false;
 
     dragWindow.addEventListener("mousedown", (e) => {
-        if (e.target.tagName === "BUTTON") return; // allow button clicks
+        if (e.target.tagName === "BUTTON") return;
         isDragging = true;
         offsetX = e.clientX - dragWindow.offsetLeft;
         offsetY = e.clientY - dragWindow.offsetTop;
