@@ -32,6 +32,7 @@
             overflow: auto;
             min-width: 200px;
             max-width: 400px;
+            max-height: 80vh;
             cursor: move;
         }
 
@@ -45,15 +46,15 @@
             margin: 3px 0;
         }
 
-   #exportBtn {
-    background-color: lightgreen;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 10px;
-}
+        #exportBtn {
+            background-color: lightgreen;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
 
         #exportBtn:hover {
             background-color: limegreen;
@@ -75,9 +76,8 @@
 <div id="lapTimesWindow">
     <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div> 
-<button id="exportBtn">Export </button>
+    <button id="exportBtn">Export</button>
 </div>
-
 
 <script>
     const checkpoints = [
@@ -143,6 +143,11 @@
                     lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap ${lap - 1}:</span> <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
                     document.getElementById("lapTimes").appendChild(lapTimeElem);
 
+                    // Auto-resize lap window height
+                    const windowBox = document.getElementById("lapTimesWindow");
+                    const lapTimesBox = document.getElementById("lapTimes");
+                    windowBox.style.height = `${lapTimesBox.scrollHeight + 60}px`;
+
                     startTime = currentTime;
 
                     if (lap > nLaps) {
@@ -195,20 +200,28 @@
     });
 
     // Export button functionality
-document.getElementById("exportBtn").addEventListener("click", (e) => {
-    const lapTimeElements = document.querySelectorAll("#lapTimes p");
-    const lines = [];
+    document.getElementById("exportBtn").addEventListener("click", (e) => {
+        const lapTimeElements = document.querySelectorAll("#lapTimes p");
+        const lines = [];
 
-    lapTimeElements.forEach(p => lines.push(p.textContent));
-    const fullText = lines.join("\n");
+        lapTimeElements.forEach(p => lines.push(p.textContent));
+        const fullText = lines.join("\n");
 
-    navigator.clipboard.writeText(fullText).catch(err => {
-        console.error("Failed to copy lap times:", err);
+        navigator.clipboard.writeText(fullText).then(() => {
+            alert("Lap times copied to clipboard!");
+        }).catch(err => {
+            console.warn("Clipboard failed. Triggering download instead:", err);
+            const blob = new Blob([fullText], {type: "text/plain"});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "lap_times.txt";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        e.target.blur(); // Unfocus button
     });
-
-    // Remove focus to avoid blocking input
-    e.target.blur();
-});
 
     // Make lapTimesWindow draggable
     const lapWindow = document.getElementById("lapTimesWindow");
