@@ -47,7 +47,6 @@
 
         #exportBtn {
             position: absolute;
-            top: calc(50px + 180px);
             left: 250px;
             z-index: 1001;
             background-color: lightgreen;
@@ -197,20 +196,22 @@
         }
     });
 
-    // Export button functionality
-    document.getElementById("exportBtn").addEventListener("click", () => {
-        const lapTimeElements = document.querySelectorAll("#lapTimes p");
-        const lines = [];
+document.getElementById("exportBtn").addEventListener("click", (e) => {
+    const lapTimeElements = document.querySelectorAll("#lapTimes p");
+    const lines = [];
 
-        lapTimeElements.forEach(p => lines.push(p.textContent));
-        const fullText = lines.join("\n");
+    lapTimeElements.forEach(p => lines.push(p.textContent));
+    const fullText = lines.join("\n");
 
-        navigator.clipboard.writeText(fullText).then(() => {
-            alert("Lap times copied to clipboard!");
-        }).catch(err => {
-            alert("Failed to copy lap times: " + err);
-        });
+    navigator.clipboard.writeText(fullText).then(() => {
+        alert("Lap times copied to clipboard!");
+    }).catch(err => {
+        alert("Failed to copy lap times: " + err);
     });
+
+    // Remove focus to avoid blocking input
+    e.target.blur();
+});
 
     // Make lapTimesWindow draggable
     const lapWindow = document.getElementById("lapTimesWindow");
