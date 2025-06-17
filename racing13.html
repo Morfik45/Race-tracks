@@ -198,14 +198,22 @@
     });
 
     // Clipboard Export
-    document.getElementById("exportBtn").addEventListener("click", function () {
+document.getElementById("exportBtn").addEventListener("click", async () => {
+    try {
+        // Extract plain text lines of lap times
         const lapTimeElements = document.querySelectorAll("#lapTimes p");
         const lines = Array.from(lapTimeElements).map(p => p.textContent.trim());
         const textToCopy = lines.join("\n");
 
-        navigator.clipboard.writeText(textToCopy).catch(() => {});
-        this.blur();
-    });
+        // Write to clipboard
+        await navigator.clipboard.writeText(textToCopy);
+
+        // Optional: console log success (no alert)
+        console.log("Copied lap times:\n" + textToCopy);
+    } catch (err) {
+        console.error("Failed to copy text: ", err);
+    }
+});
 
     // Make lapTimesWindow draggable
     const lapWindow = document.getElementById("lapTimesWindow");
