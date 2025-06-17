@@ -6,15 +6,12 @@
         html, body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: Impact;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Impact, sans-serif;
             background-color: transparent;
             color: white;
-            overflow: hidden;
-        }
-
-        body {
             font-size: 1.5em;
             line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
@@ -22,14 +19,14 @@
 
         .container {
             position: absolute;
-            left: 410px;
-            bottom: 50px;
+            left: 20px;
+            top: 20px;
         }
 
         #lapTimesWindow {
             position: absolute;
             top: 20px;
-            right: 10px;
+            right: 20px;
             background-color: rgba(0, 0, 0, 0.7);
             padding: 10px 15px;
             border: 2px solid lightgreen;
@@ -43,10 +40,9 @@
             overflow: auto;
             min-width: 200px;
             max-width: 400px;
-            cursor: move;
         }
 
-        #lapTimesWindow h4 {
+        #lapTimesHeader {
             margin: 0 0 8px 0;
             color: lightgreen;
             cursor: move;
@@ -58,15 +54,18 @@
 
         #exportButton {
             position: absolute;
-            background-color: #222;
-            color: lightgreen;
+            z-index: 999;
+            background-color: #111;
+            color: white;
             border: 2px solid lightgreen;
-            border-radius: 8px;
-            padding: 6px 14px;
-            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 6px;
             font-family: sans-serif;
-            font-size: 0.9em;
-            z-index: 1000;
+            cursor: pointer;
+        }
+
+        #exportButton:hover {
+            background-color: #1e1e1e;
         }
     </style>
 </head>
@@ -86,6 +85,7 @@
     <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div>
 </div>
+
 <button id="exportButton">Export Lap Times</button>
 
 <script>
@@ -106,9 +106,7 @@
         window.parent.postMessage({type: "sfx", sfx: num}, "*");
     };
 
-    const dist = (x1, y1, x2, y2) => {
-        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    };
+    const dist = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 
     let isPlaying = false;
 
@@ -166,13 +164,13 @@
                         document.getElementById("totalTimeValue").innerText = `${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}`;
                         document.getElementById("totalTime").style.display = "block";
                     } else {
-                        sfx(3);
+                        sfx(3); // Next lap
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(2);
+                    sfx(2); // Checkpoint
                 }
             }
 
@@ -197,38 +195,20 @@
         if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
     });
 
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            window.parent.postMessage({type: "pin"}, "*");
-        }
-    });
-
-    // Export Lap Times
-    document.getElementById("exportButton").onclick = () => {
-        const laps = document.querySelectorAll("#lapTimes p");
-        if (laps.length === 0) return;
-
-        const fullText = Array.from(laps).map(p => p.innerText).join("\n");
-        navigator.clipboard.writeText(fullText).catch(err => {
-            console.error("Failed to copy:", err);
-        });
-    };
-
-    // Move Export button with lapTimesWindow
+    // Drag logic for lap times window (header only)
     const lapBox = document.getElementById("lapTimesWindow");
     const exportBtn = document.getElementById("exportButton");
+    const header = document.getElementById("lapTimesHeader");
 
     let dragging = false, offsetX = 0, offsetY = 0;
 
-    lapBox.addEventListener("mousedown", e => {
+    header.addEventListener("mousedown", e => {
         dragging = true;
         offsetX = e.offsetX;
         offsetY = e.offsetY;
     });
 
-    document.addEventListener("mouseup", () => {
-        dragging = false;
-    });
+    document.addEventListener("mouseup", () => dragging = false);
 
     document.addEventListener("mousemove", e => {
         if (dragging) {
@@ -242,14 +222,13 @@
         }
     });
 
-    // Set initial position of export button
-    window.addEventListener("load", () => {
-        lapBox.style.right = "10px";
-        lapBox.style.left = "auto";
-        exportBtn.style.left = `${lapBox.offsetLeft}px`;
-        exportBtn.style.top = `${lapBox.offsetTop + lapBox.offsetHeight + 5}px`;
-        exportBtn.style.right = "";
+    // Export button logic
+    exportBtn.addEventListener("click", () => {
+        const lapLines = Array.from(document.getElementById("lapTimes").children).map(el => el.innerText);
+        const fullText = lapLines.join("\n");
+        navigator.clipboard.writeText(fullText);
     });
 </script>
+
 </body>
 </html>
