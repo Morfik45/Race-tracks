@@ -45,18 +45,15 @@
             margin: 3px 0;
         }
 
-        #exportBtn {
-            position: absolute;
-            top: calc(50px + 180px);
-            left: 250px;
-            z-index: 1001;
-            background-color: lightgreen;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+   #exportBtn {
+    background-color: lightgreen;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
         #exportBtn:hover {
             background-color: limegreen;
@@ -77,10 +74,10 @@
 
 <div id="lapTimesWindow">
     <h4 id="lapTimesHeader">Lap Times</h4>
-    <div id="lapTimes"></div>
+    <div id="lapTimes"></div> 
+<button id="exportBtn">Export </button>
 </div>
 
-<button id="exportBtn">Export Lap Times</button>
 
 <script>
     const checkpoints = [
