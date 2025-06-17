@@ -32,7 +32,6 @@
             overflow: auto;
             min-width: 200px;
             max-width: 400px;
-            max-height: 80vh;
             cursor: move;
         }
 
@@ -75,7 +74,7 @@
 
 <div id="lapTimesWindow">
     <h4 id="lapTimesHeader">Lap Times</h4>
-    <div id="lapTimes"></div> 
+    <div id="lapTimes"></div>
     <button id="exportBtn">Export</button>
 </div>
 
@@ -143,15 +142,14 @@
                     lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap ${lap - 1}:</span> <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
                     document.getElementById("lapTimes").appendChild(lapTimeElem);
 
-                    // Auto-resize lap window height
-                    const windowBox = document.getElementById("lapTimesWindow");
-                    const lapTimesBox = document.getElementById("lapTimes");
-                    windowBox.style.height = `${lapTimesBox.scrollHeight + 60}px`;
+                    // Resize lap window height dynamically
+                    const lapTimesWindow = document.getElementById("lapTimesWindow");
+                    lapTimesWindow.style.height = 'auto';
 
                     startTime = currentTime;
 
                     if (lap > nLaps) {
-                        sfx(5); // Finish Audio
+                        sfx(5);
                         firstCp = false;
                         isPlaying = false;
 
@@ -162,13 +160,13 @@
                         document.getElementById("totalTimeValue").innerText = `${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}`;
                         document.getElementById("totalTime").style.display = "block";
                     } else {
-                        sfx(3); // Next Lap Audio
+                        sfx(3);
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(2); // Checkpoint Audio
+                    sfx(2);
                 }
             }
 
@@ -199,28 +197,14 @@
         }
     });
 
-    // Export button functionality
-    document.getElementById("exportBtn").addEventListener("click", (e) => {
+    // Clipboard Export
+    document.getElementById("exportBtn").addEventListener("click", function () {
         const lapTimeElements = document.querySelectorAll("#lapTimes p");
-        const lines = [];
+        const lines = Array.from(lapTimeElements).map(p => p.textContent.trim());
+        const textToCopy = lines.join("\n");
 
-        lapTimeElements.forEach(p => lines.push(p.textContent));
-        const fullText = lines.join("\n");
-
-        navigator.clipboard.writeText(fullText).then(() => {
-            alert("Lap times copied to clipboard!");
-        }).catch(err => {
-            console.warn("Clipboard failed. Triggering download instead:", err);
-            const blob = new Blob([fullText], {type: "text/plain"});
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "lap_times.txt";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        e.target.blur(); // Unfocus button
+        navigator.clipboard.writeText(textToCopy).catch(() => {});
+        this.blur();
     });
 
     // Make lapTimesWindow draggable
