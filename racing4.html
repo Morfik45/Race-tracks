@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Roxwood Circuit Grand Track</title>
+  <style>
+    body {
+      font-family: impact;
+      background-color: transparent;
+      color: white;
+      position: absolute;
+      left: 410px;
+      bottom: 50px;
+      font-size: 1.5em;
+      line-height: 3px;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+    }
+
+    #lapTimesWindow {
+      position: absolute;
+      top: 50px;
+      left: 250px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border: 2px solid lightgreen;
+      border-radius: 10px;
+      font-family: sans-serif;
+      font-size: 1em;
+      line-height: 1.4em;
+      color: white;
+      z-index: 1000;
+      resize: both;
+      overflow: auto;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    #lapTimesWindow h4 {
+      margin: 0 0 8px 0;
+      color: lightgreen;
+      cursor: move;
+    }
+
+    #lapTimesWindow p {
+      margin: 3px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <button id="start">Start Race</button>
+  <button id="restart">Restart Race</button>
+  <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Grand Track</p>
+  <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
+  <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
+  <span style="color: white" id="timer">00:00:000</span>
+  <p id="totalTime" style="color: lightgreen; font-size: 1.2em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
+</div>
+
+<div id="lapTimesWindow">
+  <h4 id="lapTimesHeader">Lap Times</h4>
+  <div id="lapTimes"></div>
+</div>
+
+<script>
+const checkpoints = [
+  {x: -2761.71, y: 8079.83, z: 42.83},
+  {x: -2643.92, y: 8075.96, z: 44.00},
+  {x: -2553.67, y: 8089.94, z: 45.82}
+];
+
+let player_x = 0;
+let player_y = 0;
+
+const setCheckpoint = (x, y) => {
+  window.parent.postMessage({type: "setWaypoint", x, y}, "*");
+};
+
+const sfx = (num) => {
+  window.parent.postMessage({type: "sfx", sfx: num}, "*");
+};
+
+const dist = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+
+let isPlaying = false;
+
+const startGame = () => {
+  let firstCp = false;
+  let startTime = 0;
+  let nLaps = 3;
+  let lap = 1;
+  let currentCheckpoint = 0;
+  const lapTimes = [];
+
+  document.getElementById("start").style.display = "none";
+  document.getElementById("restart").style.display = "inline-block";
+  isPlaying = true;
+
+  setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+
+  const gameInterval = setInterval(() => {
+    if (!isPlaying) return clearInterval(gameInterval);
+
+    if (dist(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
+      if (!firstCp) startTime = Date.now();
+      firstCp = true;
+      currentCheckpoint++;
+
+      if (currentCheckpoint >= checkpoints.length) {
+        lap++;
+        const now = Date.now();
+        const lapTime = now - startTime;
+        lapTimes.push(lapTime);
+
+        const lapTimeElem = document.createElement("p");
+        const minutes = Math.floor(lapTime / 60000);
+        const seconds = Math.floor((lapTime % 60000) / 1000);
+        const millis = lapTime % 1000;
+        lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap ${lap - 1}:</span> <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
+        document.getElementById("lapTimes").appendChild(lapTimeElem);
+
+        startTime = now;
+
+        if (lap > nLaps) {
+          sfx(5);
+          firstCp = false;
+          isPlaying = false;
+          const totalTime = lapTimes.reduce((a, b) => a + b, 0);
+          const totalMinutes = Math.floor(totalTime / 60000);
+          const totalSeconds = Math.floor((totalTime % 60000) / 1000);
+          const totalMillis = totalTime % 1000;
+          document.getElementById("totalTimeValue").innerText = `${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}`;
+          document.getElementById("totalTime").style.display = "block";
+        } else {
+          sfx(3);
+          currentCheckpoint = 0;
+          setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+        }
+      } else {
+        setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+        sfx(2);
+      }
+    }
+
+    if (firstCp) {
+      document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+      let time = Date.now() - startTime;
+      const minutes = Math.floor(time / 60000);
+      time %= 60000;
+      const seconds = Math.floor(time / 1000);
+      const millis = time % 1000;
+      document.getElementById("timer").innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}`;
+    }
+  }, 10);
+};
+
+document.getElementById("start").onclick = startGame;
+document.getElementById("restart").onclick = () => location.reload();
+
+window.addEventListener("message", (event) => {
+  if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
+  if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    window.parent.postMessage({type: "pin"}, "*");
+  }
+});
+
+// Drag support
+(function enableLapTimeDrag() {
+  const dragElement = document.getElementById("lapTimesWindow");
+  const dragHeader = document.getElementById("lapTimesHeader");
+
+  let offsetX = 0, offsetY = 0, isDragging = false;
+
+  dragHeader.onmousedown = function(e) {
+    e.preventDefault();
+    offsetX = e.clientX - dragElement.offsetLeft;
+    offsetY = e.clientY - dragElement.offsetTop;
+    isDragging = true;
+
+    document.onmouseup = () => isDragging = false;
+
+    document.onmousemove = function(e) {
+      if (isDragging) {
+        dragElement.style.left = (e.clientX - offsetX) + "px";
+        dragElement.style.top = (e.clientY - offsetY) + "px";
+      }
+    };
+  };
+})();
+</script>
+
+</body>
+</html>
