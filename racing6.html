@@ -205,6 +205,25 @@
             setTimeout(() => msg.style.display = "none", 1500);
         });
     };
+    // Dragging logic for lapTimesWindow
+const dragElem = document.getElementById("lapTimesWindow");
+let isDragging = false, offsetX = 0, offsetY = 0;
+
+dragElem.addEventListener("mousedown", function(e) {
+    if (e.target.tagName === "BUTTON") return; // Don't drag if clicking buttons
+    isDragging = true;
+    offsetX = e.clientX - dragElem.offsetLeft;
+    offsetY = e.clientY - dragElem.offsetTop;
+});
+
+document.addEventListener("mouseup", () => isDragging = false);
+
+document.addEventListener("mousemove", function(e) {
+    if (isDragging) {
+        dragElem.style.left = (e.clientX - offsetX) + "px";
+        dragElem.style.top = (e.clientY - offsetY) + "px";
+    }
+});
 </script>
 
 </body>
