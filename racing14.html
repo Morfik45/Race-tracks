@@ -38,25 +38,10 @@
         #lapTimesWindow h4 {
             margin: 0 0 8px 0;
             color: lightgreen;
-            cursor: move;
         }
 
         #lapTimesWindow p {
             margin: 3px 0;
-        }
-
-        #exportBtn {
-            background-color: lightgreen;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        #exportBtn:hover {
-            background-color: limegreen;
         }
     </style>
 </head>
@@ -64,7 +49,7 @@
 
 <div class="container">
     <button id="start">Start Race</button>
-    <button id="restart">Restart Race</button>
+    <button id="restart" style="display:none;">Restart Race</button>
     <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Grand Track</p>
     <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
@@ -73,16 +58,16 @@
 </div>
 
 <div id="lapTimesWindow">
-    <h4 id="lapTimesHeader">Lap Times</h4>
+    <h4>Lap Times</h4>
     <div id="lapTimes"></div>
-    <button id="exportBtn">Export</button>
+    <button onclick="copyLapTimes()" style="margin-top: 10px;">Export</button>
 </div>
 
 <script>
     const checkpoints = [
         {x: -2761.71, y: 8079.83, z: 42.83},
-        {x: -2731.71, y: 8079.83, z: 42.83},
-        {x: -2701.71, y: 8079.83, z: 42.83}
+        {x: -2643.92, y: 8075.96, z: 44.00},
+        {x: -2553.67, y: 8089.94, z: 45.82}
     ];
 
     let player_x = 0;
@@ -142,14 +127,10 @@
                     lapTimeElem.innerHTML = `<span style="color: lightgreen;">Lap ${lap - 1}:</span> <span style="color: white;">${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${millis.toString().padStart(3, "0")}</span>`;
                     document.getElementById("lapTimes").appendChild(lapTimeElem);
 
-                    // Resize lap window height dynamically
-                    const lapTimesWindow = document.getElementById("lapTimesWindow");
-                    lapTimesWindow.style.height = 'auto';
-
                     startTime = currentTime;
 
                     if (lap > nLaps) {
-                        sfx(5);
+                        sfx(5); // Finish Audio
                         firstCp = false;
                         isPlaying = false;
 
@@ -160,13 +141,13 @@
                         document.getElementById("totalTimeValue").innerText = `${totalMinutes.toString().padStart(2, "0")}:${totalSeconds.toString().padStart(2, "0")}:${totalMillis.toString().padStart(3, "0")}`;
                         document.getElementById("totalTime").style.display = "block";
                     } else {
-                        sfx(3);
+                        sfx(3); // Next Lap Audio
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
                     }
                 } else {
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
-                    sfx(2);
+                    sfx(2); // Checkpoint Audio
                 }
             }
 
@@ -183,6 +164,27 @@
         }, 10);
     };
 
+    function copyLapTimes() {
+        const lapTimeElements = document.querySelectorAll("#lapTimes p");
+        const lines = [];
+
+        lapTimeElements.forEach(p => {
+            lines.push(p.textContent);
+        });
+
+        const fullText = lines.join("\n");
+
+        const textarea = document.createElement("textarea");
+        textarea.value = fullText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+
+        alert("Lap times copied to clipboard!");
+    }
+
     document.getElementById("start").onclick = startGame;
     document.getElementById("restart").onclick = () => location.reload();
 
@@ -197,45 +199,23 @@
         }
     });
 
-    // Clipboard Export
-document.getElementById("exportBtn").addEventListener("click", async () => {
-    try {
-        // Extract plain text lines of lap times
-        const lapTimeElements = document.querySelectorAll("#lapTimes p");
-        const lines = Array.from(lapTimeElements).map(p => p.textContent.trim());
-        const textToCopy = lines.join("\n");
+    // Drag handling
+    const dragWindow = document.getElementById("lapTimesWindow");
+    let offsetX, offsetY, isDragging = false;
 
-        // Write to clipboard
-        await navigator.clipboard.writeText(textToCopy);
-
-        // Optional: console log success (no alert)
-        console.log("Copied lap times:\n" + textToCopy);
-    } catch (err) {
-        console.error("Failed to copy text: ", err);
-    }
-});
-
-    // Make lapTimesWindow draggable
-    const lapWindow = document.getElementById("lapTimesWindow");
-    let isDragging = false, dragOffsetX, dragOffsetY;
-
-    lapWindow.addEventListener("mousedown", (e) => {
+    dragWindow.addEventListener("mousedown", (e) => {
+        if (e.target.tagName === "BUTTON") return; // allow button clicks
         isDragging = true;
-        dragOffsetX = e.clientX - lapWindow.offsetLeft;
-        dragOffsetY = e.clientY - lapWindow.offsetTop;
-        document.body.style.userSelect = "none";
+        offsetX = e.clientX - dragWindow.offsetLeft;
+        offsetY = e.clientY - dragWindow.offsetTop;
     });
 
-    document.addEventListener("mouseup", () => {
-        isDragging = false;
-        document.body.style.userSelect = "auto";
-    });
+    document.addEventListener("mouseup", () => isDragging = false);
 
     document.addEventListener("mousemove", (e) => {
-        if (isDragging) {
-            lapWindow.style.left = `${e.clientX - dragOffsetX}px`;
-            lapWindow.style.top = `${e.clientY - dragOffsetY}px`;
-        }
+        if (!isDragging) return;
+        dragWindow.style.left = `${e.clientX - offsetX}px`;
+        dragWindow.style.top = `${e.clientY - offsetY}px`;
     });
 </script>
 
