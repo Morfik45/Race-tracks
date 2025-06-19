@@ -229,7 +229,7 @@
 
     function copyLapTimes() {
         const lapTimeElements = document.querySelectorAll("#lapTimes p");
-        const lines = ["LAP TIMES - ${userDetails.vehicleName}"];
+        const lines = [`LAP TIMES - ${userDetails.vehicleName}`];
         lapTimeElements.forEach(p => lines.push(p.textContent));
 
         const total = document.getElementById("totalTime").style.display !== "none"
