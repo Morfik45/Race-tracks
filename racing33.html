@@ -371,8 +371,10 @@ function copyLapTimes(){
     setTimeout(()=>{btn.textContent=orig;btn.disabled=false},1000);
 }
 
-hideRaceDetails();
-buildTrackList();
+document.addEventListener("DOMContentLoaded", () => {
+    hideRaceDetails();
+    buildTrackList();
+});
 </script>
 
 </body>
