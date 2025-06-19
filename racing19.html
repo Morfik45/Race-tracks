@@ -279,7 +279,7 @@
 
 window.addEventListener("message", (event) => {
     const data = event.data.data;
-    if (!data || Object.keys(data).length === 0) return;
+    if (!data || data === "" || data === []) return;
 
     for (const key in data) {
         switch (key) {
@@ -293,7 +293,7 @@ window.addEventListener("message", (event) => {
                 userDetails.vehicleName = data[key];
                 const header = document.getElementById("lapTimesHeader");
                 if (header && userDetails.vehicleName) {
-                    header.textContent = `Lap Times : ${userDetails.vehicleName}`;
+                    header.textContent = `Lap Times ${userDetails.vehicleName}`;
                 }
                 break;
         }
