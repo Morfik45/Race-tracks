@@ -293,7 +293,7 @@ window.addEventListener("message", (event) => {
                 userDetails.vehicleName = data[key];
                 const header = document.getElementById("lapTimesHeader");
                 if (header && userDetails.vehicleName) {
-                    header.textContent = `Lap Times (${userDetails.vehicleName})`;
+                    header.textContent = `Lap Times : ${userDetails.vehicleName}`;
                 }
                 break;
         }
