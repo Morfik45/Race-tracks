@@ -211,8 +211,9 @@ function hideRaceDetails(){
     document.getElementById("start").style.display="none";
 }
 
-document.getElementById("selectTrackBtn").onclick = () => {
-    document.getElementById("trackSelectionMenu").style.display = "block";
+    document.getElementById("selectTrackBtn").onclick = () => {
+        buildTrackList(); // ← rebuilds the list freshly
+        document.getElementById("trackSelectionMenu").style.display = "block";
 };
 
 document.getElementById("confirmTrackBtn").onclick = () => {
