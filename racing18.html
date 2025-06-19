@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Roxwood Circuit Grand Track</title>
+<html><head>
+    <title>Custom Racing</title>
     <style>
         body {
             font-family: impact;
@@ -63,14 +61,16 @@
 
         #audioSettingsMenu {
             position: absolute;
-            top: 10px;
-            left: 340px;
+            top: -120px;
+            left: 40px;
             background-color: rgba(0, 0, 0, 0.8);
             border: 1px solid lightgreen;
             padding: 8px 10px;
             border-radius: 8px;
             font-family: sans-serif;
-            font-size: 0.9em;
+            font-size: 0.8em;
+            line-height: 20px;
+            white-space: nowrap;
             color: white;
             z-index: 1001;
         }
@@ -88,9 +88,10 @@
     <button id="restart" style="display:none;">Restart Race</button>
     <button id="audioSettingsBtn">Audio Settings</button>
     <div id="audioSettingsMenu" style="display: none;">
-        <label><input type="checkbox" id="sfxFinish" checked> Finish Audio</label>
-        <label><input type="checkbox" id="sfxNextLap" checked> Next Lap Audio</label>
-        <label><input type="checkbox" id="sfxCheckpoint" checked> Checkpoint Audio</label>
+        <label><input type="checkbox" id="sfxFinish" checked="">
+ Finish Audio</label>
+        <label><input type="checkbox" id="sfxNextLap" checked=""> Next Lap Audio</label>
+        <label><input type="checkbox" id="sfxCheckpoint" checked=""> Checkpoint Audio</label>
     </div>
     <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Grand Track</p>
     <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
@@ -98,7 +99,7 @@
     <span style="color: white" id="timer">00:00:000</span>
 </div>
 
-<div id="lapTimesWindow">
+<div id="lapTimesWindow" style="left: 1213px; top: -743px;">
     <h4>Lap Times</h4>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
@@ -304,5 +305,6 @@
     });
 </script>
 
-</body>
-</html>
+
+
+</body></html>
