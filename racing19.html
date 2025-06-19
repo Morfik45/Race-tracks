@@ -100,13 +100,14 @@
 </div>
 
 <div id="lapTimesWindow" style="left: 1213px; top: -743px;">
-    <h4>Lap Times</h4>
+    <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
     <button id="exportBtn" onclick="copyLapTimes()">Export</button>
 </div>
 
 <script>
+    const userDetails = {};
     const checkpoints = [
         {x: -2761.71, y: 8079.83, z: 42.83},
         {x: -2731.71, y: 8079.83, z: 42.83},
@@ -276,10 +277,28 @@
         }
     });
 
-    window.addEventListener("message", (event) => {
-        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
-        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
-    });
+window.addEventListener("message", (event) => {
+    const data = event.data.data;
+    if (!data || data === "" || data === []) return;
+
+    for (const key in data) {
+        switch (key) {
+            case "pos_x":
+                player_x = data[key];
+                break;
+            case "pos_y":
+                player_y = data[key];
+                break;
+            case "vehicleName":
+                userDetails.vehicleName = data[key];
+                const header = document.getElementById("lapTimesHeader");
+                if (header && userDetails.vehicleName) {
+                    header.textContent = `Lap Times (${userDetails.vehicleName})`;
+                }
+                break;
+        }
+    }
+});
 
     window.addEventListener('keydown', (e) => {
         if (e.key === "Escape") {
