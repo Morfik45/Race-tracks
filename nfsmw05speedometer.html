@@ -302,9 +302,13 @@ const GearEstimator = (function () {
     return function (rpm) {
         const now = Date.now();
 
-  const alwaysFirstGearClasses = ["EVs", "Cycles", "Planes", "Helicopters", "Boats", "RC Cars", "11"];
-    if (alwaysFirstGearClasses.includes(userDetails.vehicleClassName)) {
-    return '1'; 
+const alwaysFirstGearClasses = ["EVs", "Cycles", "Planes", "Helicopters", "Boats", "RC Cars"];
+const alwaysFirstGearVehicles = ["Forklift"]; 
+if (
+  alwaysFirstGearClasses.includes(userDetails.vehicleClassName) ||
+  alwaysFirstGearVehicles.includes(userDetails.vehicle)
+) {
+  return '1';
 }
 
         // Simulate neutral if RPM is too low
