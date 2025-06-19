@@ -136,6 +136,7 @@
             {x:-2741.71,y:8079.83,z:42.83},{x:-2711.71,y:8079.83,z:42.83},{x:-2681.71,y:8079.83,z:42.83}
         ]}
     ];
+
     let selectedTrack = null, nLaps = 0, checkpoints = [];
     const userDetails = {};
     let player_x = 0, player_y = 0, isPlaying = false;
@@ -202,11 +203,10 @@
         isPlaying = true;
         let firstCp=false, startTime=0, lap=1, currentCp=0, lapTimes=[];
 
-        setCheckpoint(...checkpoints[0]);
+        setCheckpoint(checkpoints[0].x, checkpoints[0].y);
 
         const gameInt = setInterval(()=>{
             if(!isPlaying){clearInterval(gameInt);return;}
-            if(dist(player_x,player_y,checkpoint...)) return;
             if(dist(player_x, player_y, checkpoints[currentCp].x, checkpoints[currentCp].y) < 25) {
                 if(!firstCp) startTime = Date.now();
                 firstCp = true;
@@ -235,10 +235,10 @@
                     } else {
                         safeSFX(3);
                         currentCp=0;
-                        setCheckpoint(...checkpoints[0]);
+                        setCheckpoint(checkpoints[0].x, checkpoints[0].y);
                     }
                 } else {
-                    setCheckpoint(checkpoints[currentCp].x,checkpoints[currentCp].y);
+                    setCheckpoint(checkpoints[currentCp].x, checkpoints[currentCp].y);
                     safeSFX(2);
                 }
             }
