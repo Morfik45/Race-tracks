@@ -279,7 +279,7 @@
 
 window.addEventListener("message", (event) => {
     const data = event.data.data;
-    if (!data || data === "" || data === []) return;
+    if (!data || Object.keys(data).length === 0) return;
 
     for (const key in data) {
         switch (key) {
