@@ -1,5 +1,5 @@
 <html><head>
-    <title>Luzak Car Test</title>
+    <title>Wielki Test Aut Luzaka</title>
     <style>
         body {
             font-family: impact;
@@ -100,13 +100,14 @@
 </div>
 
 <div id="lapTimesWindow" style="left: 1213px; top: -743px;">
-    <h4>Lap Times</h4>
+    <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
     <button id="exportBtn" onclick="copyLapTimes()">Export</button>
 </div>
 
 <script>
+    const userDetails = {};
     const checkpoints = [
        {x: -2800.71875, y: 8083.9716796875, z: 43.0833854675293},
 {x: -2700.2587890625, y: 8078.7744140625, z: 42.83058929443359},
@@ -141,7 +142,7 @@
 {x: -3199.437255859375, y: 8183.6875, z: 43.85306167602539},
 {x: -3095.748779296875, y: 8117.24169921875, z: 44.32094573974609},
 {x: -2964.5615234375, y: 8107.1123046875, z: 44.19239044189453},
-{x: -2800.71875, y: 8083.9716796875, z: 43.0833854675293}
+{x: -2800.71875, y: 8083.9716796875, z: 43.0833854675293},
     ];
 
     let player_x = 0;
@@ -183,7 +184,7 @@
     const startGame = () => {
         let firstCp = false;
         let startTime = 0;
-        let nLaps = 10;
+        let nLaps = 3;
         let lap = 1;
         let currentCheckpoint = 0;
         const lapTimes = [];
@@ -307,10 +308,28 @@
         }
     });
 
-    window.addEventListener("message", (event) => {
-        if (event.data.data["pos_x"]) player_x = event.data.data["pos_x"];
-        if (event.data.data["pos_y"]) player_y = event.data.data["pos_y"];
-    });
+window.addEventListener("message", (event) => {
+    const data = event.data.data;
+    if (!data || data === "" || data === []) return;
+
+    for (const key in data) {
+        switch (key) {
+            case "pos_x":
+                player_x = data[key];
+                break;
+            case "pos_y":
+                player_y = data[key];
+                break;
+            case "vehicleName":
+                userDetails.vehicleName = data[key];
+                const header = document.getElementById("lapTimesHeader");
+                if (header && userDetails.vehicleName) {
+                    header.textContent = `Lap Times : ${userDetails.vehicleName}`;
+                }
+                break;
+        }
+    }
+});
 
     window.addEventListener('keydown', (e) => {
         if (e.key === "Escape") {
