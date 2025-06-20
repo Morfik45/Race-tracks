@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Custom Racing</title>
+    <style>
+        body {
+            font-family: impact;
+            background-color: transparent;
+            color: white;
+            position: absolute;
+            left: 410px;
+            bottom: 50px;
+            font-size: 1.5em;
+            line-height: 3px;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
+        #trackSelectionMenu {
+            display: none;
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid lightgreen;
+            padding: 20px;
+            border-radius: 10px;
+            width: 450px;
+            z-index: 1001;
+            color: white;
+        }
+        #trackPreview {
+            height: 200px;
+            background: #222;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: gray;
+        }
+        #trackList {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border: 1px solid lightgreen;
+            padding: 5px;
+            background-color: #111;
+        }
+        #trackList button {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+            background: none;
+            border: 1px solid lightgreen;
+            color: lightgreen;
+            padding: 5px;
+            cursor: pointer;
+            text-align: left;
+        }
+        #trackList button:hover {
+            background-color: rgba(144, 238, 144, 0.1);
+        }
+        #lapTimesWindow {
+            position: absolute;
+            top: 50px;
+            left: 250px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border: 2px solid lightgreen;
+            border-radius: 10px;
+            font-family: sans-serif;
+            font-size: 1em;
+            line-height: 1.4em;
+            color: white;
+            z-index: 1000;
+            overflow: auto;
+            min-width: 200px;
+            max-width: 400px;
+            cursor: move;
+        }
+        #lapTimesWindow h4 {
+            margin: 0 0 8px;
+            color: lightgreen;
+        }
+        #lapTimesWindow p {
+            margin: 3px 0;
+        }
+        #exportBtn {
+            margin-top: 10px;
+            color: lightgreen;
+            background: transparent;
+            border: 1px solid lightgreen;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        #exportBtn:hover {
+            background-color: rgba(144, 238, 144, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button id="selectTrackBtn">Select Race Track</button>
+    <button id="start" style="display:none;">Start Race</button>
+    <button id="restart" style="display:none;">Restart Race</button>
+
+    <p id="raceName"></p>
+    <p id="raceAuthor" style="display:none;">Author: <span></span></p>
+    <p style="color:lightgreen; display:none;">Lap: <span style="color:white" id="rlap">0/0</span></p>
+    <span id="timer" style="color:white; display:none;">00:00:000</span>
+</div>
+
+<div id="lapTimesWindow">
+    <h4 id="lapTimesHeader">Lap Times</h4>
+    <div id="lapTimes"></div>
+    <p id="totalTime" style="color:lightgreen; font-size:1em; display:none;">
+        Total Time: <span style="color:white;" id="totalTimeValue"></span>
+    </p>
+    <button id="exportBtn" onclick="copyLapTimes()">Export</button>
+</div>
+
+<div id="trackSelectionMenu">
+    <div id="trackPreview">Track Image Preview</div>
+    <div id="trackList"></div>
+    <label>
+        Lap Count:
+        <input type="number" id="lapCountInput" min="1" value="3" style="width:50px; margin-left:10px;">
+    </label>
+    <button id="confirmTrackBtn" style="margin-top:10px;">Confirm Selection</button>
+    <button id="closeTrackMenuBtn" style="margin-top:10px; background:red; border:none; padding:5px 10px; color:white; cursor:pointer;">Close</button>
+</div>
+
+<script>
+const raceTracks = [
+    {
+        name: "Roxwood Circuit Grand Track",
+        author: "Morfik",
+        checkpoints: [
+            {x:-2761.71,y:8079.83,z:42.83},
+            {x:-2731.71,y:8079.83,z:42.83},
+            {x:-2701.71,y:8079.83,z:42.83}
+        ]
+    },
+    {
+        name: "Roxwood Reverse",
+        author: "Morfik",
+        checkpoints: [
+            {x:-2741.71,y:8079.83,z:42.83},
+            {x:-2711.71,y:8079.83,z:42.83},
+            {x:-2681.71,y:8079.83,z:42.83}
+        ]
+    },
+    {
+        name: "New Test Track",
+        author: "YourName",
+        checkpoints: [
+            {x:-2741.71,y:8100.00,z:42.83},
+            {x:-2721.71,y:8100.00,z:42.83},
+            {x:-2701.71,y:8100.00,z:42.83}
+        ]
+    }
+];
+
+let selectedTrack = null;
+let nLaps = 0;
+let checkpoints = [];
+
+function hideRaceDetails(){
+    document.getElementById("raceName").textContent = "";
+    document.getElementById("raceAuthor").style.display = "none";
+    document.querySelector("#raceAuthor span").textContent = "";
+    document.querySelector("p[style*='Lap:']").style.display = "none";
+    document.getElementById("timer").style.display = "none";
+    document.getElementById("start").style.display = "none";
+}
+
+function buildTrackList(){
+    const trackList = document.getElementById("trackList");
+    trackList.innerHTML = "";
+    selectedTrack = raceTracks[0]; // Auto-select first track
+    document.getElementById("trackPreview").textContent = selectedTrack.name;
+
+    raceTracks.forEach(track => {
+        const btn = document.createElement("button");
+        btn.textContent = track.name;
+        btn.onclick = () => {
+            selectedTrack = track;
+            document.getElementById("trackPreview").textContent = track.name;
+        };
+        trackList.appendChild(btn);
+    });
+}
+
+function hideTrackMenu(){
+    document.getElementById("trackSelectionMenu").style.display = "none";
+}
+
+document.getElementById("selectTrackBtn").onclick = () => {
+    buildTrackList();
+    document.getElementById("trackSelectionMenu").style.display = "block";
+};
+
+document.getElementById("confirmTrackBtn").onclick = () => {
+    if (!selectedTrack) return alert("Select a track");
+    nLaps = parseInt(document.getElementById("lapCountInput").value) || 1;
+    checkpoints = selectedTrack.checkpoints;
+    hideTrackMenu();
+
+    document.getElementById("raceName").textContent = selectedTrack.name;
+    document.querySelector("#raceAuthor span").textContent = selectedTrack.author;
+    document.getElementById("raceAuthor").style.display = "block";
+    document.querySelector("p[style*='Lap:']").style.display = "block";
+    document.getElementById("timer").style.display = "inline-block";
+    document.getElementById("start").style.display = "inline-block";
+};
+
+document.getElementById("closeTrackMenuBtn").onclick = () => {
+    hideTrackMenu();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    hideRaceDetails();
+    buildTrackList();
+});
+</script>
+
+</body>
+</html>
