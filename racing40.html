@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Racing</title>
+  <style>
+    body {
+      font-family: impact;
+      background-color: transparent;
+      color: white;
+      position: absolute;
+      left: 410px;
+      bottom: 50px;
+      font-size: 1.5em;
+      line-height: 3px;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+    }
+
+    #lapTimesWindow {
+      position: absolute;
+      top: 50px;
+      left: 250px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border: 2px solid lightgreen;
+      border-radius: 10px;
+      font-family: sans-serif;
+      font-size: 1em;
+      line-height: 1.4em;
+      color: white;
+      z-index: 1000;
+      overflow: auto;
+      min-width: 200px;
+      max-width: 400px;
+      cursor: move;
+    }
+
+    #lapTimesWindow h4 {
+      margin: 0 0 8px 0;
+      color: lightgreen;
+    }
+
+    #lapTimesWindow p {
+      margin: 3px 0;
+    }
+
+    #exportBtn {
+      margin-top: 10px;
+      color: lightgreen;
+      background: transparent;
+      border: 1px solid lightgreen;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    #exportBtn:hover {
+      background-color: rgba(144, 238, 144, 0.1);
+    }
+
+    #audioSettingsBtn {
+      margin-left: 10px;
+    }
+
+    #audioSettingsMenu {
+      position: absolute;
+      top: -120px;
+      left: 40px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 1px solid lightgreen;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-family: sans-serif;
+      font-size: 0.8em;
+      line-height: 20px;
+      white-space: nowrap;
+      color: white;
+      z-index: 1001;
+      display: none;
+    }
+
+    #audioSettingsMenu label {
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button id="start">Start Race</button>
+    <button id="restart" style="display:none;">Restart Race</button>
+    <button id="audioSettingsBtn">Audio Settings</button>
+
+    <div id="audioSettingsMenu">
+      <label><input type="checkbox" id="sfxFinish" checked> Finish Audio</label>
+      <label><input type="checkbox" id="sfxNextLap" checked> Next Lap Audio</label>
+      <label><input type="checkbox" id="sfxCheckpoint" checked> Checkpoint Audio</label>
+    </div>
+
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Grand Track</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
+    <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
+    <span style="color: white" id="timer">00:00:000</span>
+  </div>
+
+  <div id="lapTimesWindow">
+    <h4 id="lapTimesHeader">Lap Times</h4>
+    <div id="lapTimes"></div>
+    <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
+    <button id="exportBtn">Export</button>
+  </div>
+
+  <script>
+    const userDetails = {};
+    const checkpoints = [
+      {x: -2761.71, y: 8079.83, z: 42.83},
+      {x: -2731.71, y: 8079.83, z: 42.83},
+      {x: -2701.71, y: 8079.83, z: 42.83}
+    ];
+    let player_x = 0, player_y = 0, isPlaying = false;
+
+    const setCheckpoint = (x, y) => window.parent.postMessage({type: "setWaypoint", x, y}, "*");
+    const sfx = num => window.parent.postMessage({type: "sfx", sfx: num}, "*");
+
+    const audioPrefs = { finish: true, nextLap: true, checkpoint: true };
+    const safeSFX = type => {
+      const m = {5: audioPrefs.finish, 3: audioPrefs.nextLap, 2: audioPrefs.checkpoint};
+      sfx(m[type] ? type : 0);
+    };
+
+    const dist = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
+
+    function startGame() {
+      document.getElementById("start").style.display = "none";
+      document.getElementById("restart").style.display = "inline-block";
+      isPlaying = true;
+      let firstCp = false, startTime = 0, lap = 1, currentCp = 0, lapTimes = [], nLaps = 3;
+      setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+
+      const gameInt = setInterval(() => {
+        if (!isPlaying) return clearInterval(gameInt);
+        if (dist(player_x, player_y, checkpoints[currentCp].x, checkpoints[currentCp].y) < 25) {
+          if (!firstCp) startTime = Date.now();
+          firstCp = true;
+          currentCp++;
+          if (currentCp >= checkpoints.length) {
+            const lapTime = Date.now() - startTime;
+            lapTimes.push(lapTime);
+            const p = document.createElement("p");
+            const m = Math.floor(lapTime / 60000), s = Math.floor((lapTime % 60000) / 1000), ms = lapTime % 1000;
+            p.innerHTML = `<span style="color: lightgreen;">Lap ${lap}:</span> <span style="color: white;">${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}:${String(ms).padStart(3,"0")}</span>`;
+            document.getElementById("lapTimes").appendChild(p);
+            lap++;
+            startTime = Date.now();
+            if (lap > nLaps) {
+              safeSFX(5);
+              isPlaying = false;
+              const total = lapTimes.reduce((a,b) => a+b, 0),
+                    tm = Math.floor(total / 60000),
+                    ts = Math.floor((total % 60000) / 1000),
+                    tms = total % 1000;
+              document.getElementById("totalTimeValue").innerText = `${String(tm).padStart(2,"0")}:${String(ts).padStart(2,"0")}:${String(tms).padStart(3,"0")}`;
+              document.getElementById("totalTime").style.display = "block";
+            } else {
+              safeSFX(3);
+              currentCp = 0;
+              setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+            }
+          } else {
+            setCheckpoint(checkpoints[currentCp].x, checkpoints[currentCp].y);
+            safeSFX(2);
+          }
+        }
+        if (firstCp) {
+          const elapsed = Date.now() - startTime;
+          const m = Math.floor(elapsed / 60000), s = Math.floor((elapsed % 60000) / 1000), ms = elapsed % 1000;
+          document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+          document.getElementById("timer").innerText = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}:${String(ms).padStart(3,"0")}`;
+        }
+      }, 10);
+    }
+
+    function copyLapTimes() {
+      const lapTimeElements = document.querySelectorAll("#lapTimes p");
+      const lines = [`LAP TIMES - ${userDetails.vehicleName || "Vehicle"}`];
+      lapTimeElements.forEach(p => lines.push(p.textContent));
+      const totalTimeEl = document.getElementById("totalTime");
+      if (totalTimeEl.style.display !== "none") lines.push(totalTimeEl.textContent.trim());
+      const ta = document.createElement("textarea");
+      ta.value = lines.join("\n");
+      document.body.appendChild(ta);
+      ta.select(); document.execCommand("copy");
+      document.body.removeChild(ta);
+      const btn = document.getElementById("exportBtn");
+      btn.textContent = "Copied!"; btn.disabled = true;
+      setTimeout(() => { btn.textContent = "Export"; btn.disabled = false; }, 1000);
+    }
+
+    function setupEvents() {
+      document.getElementById("start").onclick = startGame;
+      document.getElementById("restart").onclick = () => location.reload();
+      document.getElementById("exportBtn").onclick = copyLapTimes;
+
+      document.getElementById("audioSettingsBtn").onclick = () => {
+        const menu = document.getElementById("audioSettingsMenu");
+        menu.style.display = menu.style.display === "none" ? "block" : "none";
+      };
+
+      document.getElementById("sfxFinish").onchange = e => audioPrefs.finish = e.target.checked;
+      document.getElementById("sfxNextLap").onchange = e => audioPrefs.nextLap = e.target.checked;
+      document.getElementById("sfxCheckpoint").onchange = e => audioPrefs.checkpoint = e.target.checked;
+
+      document.addEventListener("click", (e) => {
+        const menu = document.getElementById("audioSettingsMenu");
+        if (!menu.contains(e.target) && e.target.id !== "audioSettingsBtn") {
+          menu.style.display = "none";
+        }
+      });
+
+      // Lap window drag
+      const dragWindow = document.getElementById("lapTimesWindow");
+      let isDragging = false, offsetX = 0, offsetY = 0;
+      dragWindow.addEventListener("mousedown", e => {
+        if (e.target.tagName === "BUTTON") return;
+        isDragging = true;
+        offsetX = e.clientX - dragWindow.offsetLeft;
+        offsetY = e.clientY - dragWindow.offsetTop;
+      });
+      document.addEventListener("mouseup", () => isDragging = false);
+      document.addEventListener("mousemove", e => {
+        if (!isDragging) return;
+        dragWindow.style.left = `${e.clientX - offsetX}px`;
+        dragWindow.style.top = `${e.clientY - offsetY}px`;
+      });
+
+      // Position listener
+      window.addEventListener("message", (event) => {
+        const data = event.data.data;
+        if (!data) return;
+        for (const key in data) {
+          if (key === "pos_x") player_x = data[key];
+          if (key === "pos_y") player_y = data[key];
+          if (key === "vehicleName") {
+            userDetails.vehicleName = data[key];
+            document.getElementById("lapTimesHeader").textContent = `Lap Times ${userDetails.vehicleName}`;
+          }
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", setupEvents);
+  </script>
+</body>
+</html>
