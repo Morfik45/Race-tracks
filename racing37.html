@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Racing</title>
+  <style>
+    body {
+      font-family: impact;
+      background-color: transparent;
+      color: white;
+      position: absolute;
+      left: 410px;
+      bottom: 50px;
+      font-size: 1.5em;
+      line-height: 3px;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+    }
+    #lapTimesWindow {
+      position: absolute;
+      top: 50px;
+      left: 250px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border: 2px solid lightgreen;
+      border-radius: 10px;
+      font-family: sans-serif;
+      font-size: 1em;
+      line-height: 1.4em;
+      color: white;
+      z-index: 1000;
+      overflow: auto;
+      min-width: 200px;
+      max-width: 400px;
+      cursor: move;
+    }
+    #lapTimesWindow h4 {
+      margin: 0 0 8px 0;
+      color: lightgreen;
+    }
+    #lapTimesWindow p {
+      margin: 3px 0;
+    }
+    #exportBtn {
+      margin-top: 10px;
+      color: lightgreen;
+      background: transparent;
+      border: 1px solid lightgreen;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    #audioSettingsBtn {
+      margin-left: 10px;
+    }
+    #audioSettingsMenu {
+      position: absolute;
+      top: -120px;
+      left: 40px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 1px solid lightgreen;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-family: sans-serif;
+      font-size: 0.8em;
+      line-height: 20px;
+      white-space: nowrap;
+      color: white;
+      z-index: 1001;
+      display: none;
+    }
+    #audioSettingsMenu label {
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button id="start">Start Race</button>
+    <button id="restart" style="display:none;">Restart Race</button>
+    <button id="audioSettingsBtn">Audio Settings</button>
+    <div id="audioSettingsMenu">
+      <label><input type="checkbox" id="sfxFinish" checked> Finish Audio</label>
+      <label><input type="checkbox" id="sfxNextLap" checked> Next Lap Audio</label>
+      <label><input type="checkbox" id="sfxCheckpoint" checked> Checkpoint Audio</label>
+    </div>
+    <p style="color:#f0c850; font-size: 1.15em;">Roxwood Circuit Grand Track</p>
+    <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
+    <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
+    <span id="timer">00:00:000</span>
+  </div>
+
+  <div id="lapTimesWindow">
+    <h4 id="lapTimesHeader">Lap Times</h4>
+    <div id="lapTimes"></div>
+    <p id="totalTime" style="display:none;">Total Time: <span id="totalTimeValue"></span></p>
+    <button id="exportBtn">Export</button>
+  </div>
+
+  <script>
+    const checkpoints = [
+      { x: -2761.71, y: 8079.83 },
+      { x: -2731.71, y: 8079.83 },
+      { x: -2701.71, y: 8079.83 }
+    ];
+    let player_x = 0, player_y = 0;
+    let isPlaying = false;
+    let audioPrefs = { finish: true, nextLap: true, checkpoint: true };
+    let userDetails = {};
+
+    function setCheckpoint(x, y) {
+      window.parent.postMessage({ type: "setWaypoint", x, y }, "*");
+    }
+
+    function sfx(num) {
+      window.parent.postMessage({ type: "sfx", sfx: num }, "*");
+    }
+
+    function safeSFX(type) {
+      if ((type === 5 && audioPrefs.finish) ||
+          (type === 3 && audioPrefs.nextLap) ||
+          (type === 2 && audioPrefs.checkpoint)) {
+        sfx(type);
+      }
+    }
+
+    function distance(x1, y1, x2, y2) {
+      return Math.hypot(x2 - x1, y2 - y1);
+    }
+
+    function startGame() {
+      let lap = 1, nLaps = 3;
+      let startTime = 0, firstCp = false, currentCheckpoint = 0;
+      let lapTimes = [];
+
+      document.getElementById("start").style.display = "none";
+      document.getElementById("restart").style.display = "inline-block";
+      isPlaying = true;
+      setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+
+      const interval = setInterval(() => {
+        if (!isPlaying) return clearInterval(interval);
+
+        if (distance(player_x, player_y, checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y) < 25) {
+          if (!firstCp) startTime = Date.now();
+          firstCp = true;
+          currentCheckpoint++;
+
+          if (currentCheckpoint >= checkpoints.length) {
+            const now = Date.now();
+            lapTimes.push(now - startTime);
+
+            const p = document.createElement("p");
+            const t = now - startTime;
+            p.textContent = `Lap ${lap}: ${new Date(t).toISOString().substr(14, 9)}`;
+            document.getElementById("lapTimes").appendChild(p);
+
+            lap++;
+            startTime = now;
+            currentCheckpoint = 0;
+
+            if (lap > nLaps) {
+              isPlaying = false;
+              safeSFX(5);
+              const total = lapTimes.reduce((a, b) => a + b, 0);
+              document.getElementById("totalTime").style.display = "block";
+              document.getElementById("totalTimeValue").textContent = new Date(total).toISOString().substr(14, 9);
+            } else {
+              safeSFX(3);
+              setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+            }
+          } else {
+            safeSFX(2);
+            setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
+          }
+        }
+
+        if (firstCp) {
+          document.getElementById("rlap").textContent = `${lap}/${nLaps}`;
+          const now = Date.now() - startTime;
+          document.getElementById("timer").textContent = new Date(now).toISOString().substr(14, 9);
+        }
+      }, 10);
+    }
+
+    function copyLapTimes() {
+      const lines = Array.from(document.querySelectorAll("#lapTimes p")).map(p => p.textContent);
+      const total = document.getElementById("totalTime").style.display !== "none"
+        ? document.getElementById("totalTime").textContent
+        : "";
+      const full = [...lines, total].join("\\n");
+
+      const ta = document.createElement("textarea");
+      ta.value = full;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+
+      const btn = document.getElementById("exportBtn");
+      btn.textContent = "Copied!";
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = "Export";
+        btn.disabled = false;
+      }, 1000);
+    }
+
+    document.getElementById("start").onclick = startGame;
+    document.getElementById("restart").onclick = () => location.reload();
+    document.getElementById("exportBtn").onclick = copyLapTimes;
+    document.getElementById("audioSettingsBtn").onclick = () => {
+      const menu = document.getElementById("audioSettingsMenu");
+      menu.style.display = menu.style.display === "none" ? "block" : "none";
+    };
+    document.getElementById("sfxFinish").onchange = (e) => audioPrefs.finish = e.target.checked;
+    document.getElementById("sfxNextLap").onchange = (e) => audioPrefs.nextLap = e.target.checked;
+    document.getElementById("sfxCheckpoint").onchange = (e) => audioPrefs.checkpoint = e.target.checked;
+
+    document.addEventListener("click", (e) => {
+      const menu = document.getElementById("audioSettingsMenu");
+      const button = document.getElementById("audioSettingsBtn");
+      if (!menu.contains(e.target) && e.target !== button) {
+        menu.style.display = "none";
+      }
+    });
+
+    window.addEventListener("message", (event) => {
+      const data = event.data.data;
+      if (!data) return;
+      if (data.pos_x !== undefined) player_x = data.pos_x;
+      if (data.pos_y !== undefined) player_y = data.pos_y;
+      if (data.vehicleName) {
+        userDetails.vehicleName = data.vehicleName;
+        document.getElementById("lapTimesHeader").textContent = `Lap Times ${data.vehicleName}`;
+      }
+    });
+
+    // Draggable window
+    const drag = document.getElementById("lapTimesWindow");
+    let offsetX = 0, offsetY = 0, isDragging = false;
+    drag.addEventListener("mousedown", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      isDragging = true;
+      offsetX = e.clientX - drag.offsetLeft;
+      offsetY = e.clientY - drag.offsetTop;
+    });
+    document.addEventListener("mouseup", () => isDragging = false);
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      drag.style.left = `${e.clientX - offsetX}px`;
+      drag.style.top = `${e.clientY - offsetY}px`;
+    });
+  </script>
+</body>
+</html>
