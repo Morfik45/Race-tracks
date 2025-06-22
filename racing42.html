@@ -134,6 +134,15 @@
 <div class="container">
     <button id="start">Start Race</button>
     <button id="restart" style="display:none;">Restart Race</button>
+    <button id="changeTrackBtn">Change Race Track</button>
+<div id="trackMenu" style="display: none;">
+    <h4 style="text-align: center; margin-bottom: 10px;">Select a Track</h4>
+    <div id="trackList">
+        <button onclick="location.href='https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html'">Roxwood Circuit Drift</button>
+    </div>
+    <button onclick="document.getElementById('trackMenu').style.display='none'" style="margin-top: 10px;">Close</button>
+</div>
+
     <button id="audioSettingsBtn">Audio Settings</button>
     <div id="audioSettingsMenu" style="display: none;">
         <label><input type="checkbox" id="sfxFinish" checked="">
