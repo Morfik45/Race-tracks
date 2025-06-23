@@ -1,4 +1,5 @@
-<html><head>
+<html>
+<head>
     <title>Custom Racing</title>
     <style>
         body {
@@ -80,45 +81,41 @@
             margin-bottom: 5px;
         }
 
+        #trackMenu {
+            position: absolute;
+            top: 100px;
+            left: 500px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid lightgreen;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1001;
+            color: white;
+            font-family: sans-serif;
+            font-size: 1em;
+            width: 300px;
+        }
 
+        #trackList {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-#trackMenu {
-    position: absolute;
-    top: 100px;
-    left: 500px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border: 2px solid lightgreen;
-    border-radius: 10px;
-    padding: 15px;
-    z-index: 1001;
-    color: white;
-    font-family: sans-serif;
-    font-size: 1em;
-    width: 300px;
-}
+        #trackList button {
+            color: white;
+            background-color: transparent;
+            border: 1px solid lightgreen;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: sans-serif;
+        }
 
-#trackList {
-    max-height: 200px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-#trackList button {
-    color: white;
-    background-color: transparent;
-    border: 1px solid lightgreen;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-family: sans-serif;
-}
-
-#trackList button:hover {
-    background-color: rgba(144, 238, 144, 0.1);
-}
-
-        
+        #trackList button:hover {
+            background-color: rgba(144, 238, 144, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -126,19 +123,22 @@
 <div class="container">
     <button id="start">Start Race</button>
     <button id="restart" style="display:none;">Restart Race</button>
-    <button id="changeTrackBtn">Change Race Track</button>
-<div id="trackMenu" style="display: none;">
-    <h4 style="text-align: center; margin-bottom: 10px;">Select a Track</h4>
-    <div id="trackList">
-        <button onclick="location.href='https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html'">Roxwood Circuit Drift</button>
+    <div style="margin-top: 8px;">
+        <input type="number" id="lapInput" value="3" min="1" style="width: 60px; font-size: 1em; font-family: sans-serif;">
+        <button id="setLapsBtn">Set Lap Number</button>
     </div>
-    <button onclick="document.getElementById('trackMenu').style.display='none'" style="margin-top: 10px;">Close</button>
-</div>
+    <button id="changeTrackBtn">Change Race Track</button>
+    <div id="trackMenu" style="display: none;">
+        <h4 style="text-align: center; margin-bottom: 10px;">Select a Track</h4>
+        <div id="trackList">
+            <button onclick="location.href='https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html'">Roxwood Circuit Drift</button>
+        </div>
+        <button onclick="document.getElementById('trackMenu').style.display='none'" style="margin-top: 10px;">Close</button>
+    </div>
 
     <button id="audioSettingsBtn">Audio Settings</button>
     <div id="audioSettingsMenu" style="display: none;">
-        <label><input type="checkbox" id="sfxFinish" checked="">
- Finish Audio</label>
+        <label><input type="checkbox" id="sfxFinish" checked=""> Finish Audio</label>
         <label><input type="checkbox" id="sfxNextLap" checked=""> Next Lap Audio</label>
         <label><input type="checkbox" id="sfxCheckpoint" checked=""> Checkpoint Audio</label>
     </div>
@@ -166,6 +166,7 @@
     let player_x = 0;
     let player_y = 0;
     let isPlaying = false;
+    let nLaps = parseInt(document.getElementById("lapInput").value) || 3;
 
     const setCheckpoint = (x, y) => {
         window.parent.postMessage({type: "setWaypoint", x: x, y: y}, "*");
@@ -202,7 +203,6 @@
     const startGame = () => {
         let firstCp = false;
         let startTime = 0;
-        let nLaps = 3;
         let lap = 1;
         let currentCheckpoint = 0;
         const lapTimes = [];
@@ -276,6 +276,13 @@
         }, 10);
     };
 
+    document.getElementById("setLapsBtn").onclick = () => {
+        const input = parseInt(document.getElementById("lapInput").value);
+        nLaps = isNaN(input) || input < 1 ? 1 : input;
+        document.getElementById("lapInput").value = nLaps;
+        document.getElementById("rlap").innerText = `1/${nLaps}`;
+    };
+
     function copyLapTimes() {
         const lapTimeElements = document.querySelectorAll("#lapTimes p");
         const lines = [`LAP TIMES - ${userDetails.vehicleName}`];
@@ -326,28 +333,28 @@
         }
     });
 
-window.addEventListener("message", (event) => {
-    const data = event.data.data;
-    if (!data || data === "" || data === []) return;
+    window.addEventListener("message", (event) => {
+        const data = event.data.data;
+        if (!data || data === "" || data === []) return;
 
-    for (const key in data) {
-        switch (key) {
-            case "pos_x":
-                player_x = data[key];
-                break;
-            case "pos_y":
-                player_y = data[key];
-                break;
-            case "vehicleName":
-                userDetails.vehicleName = data[key];
-                const header = document.getElementById("lapTimesHeader");
-                if (header && userDetails.vehicleName) {
-                    header.textContent = `Lap Times ${userDetails.vehicleName}`;
-                }
-                break;
+        for (const key in data) {
+            switch (key) {
+                case "pos_x":
+                    player_x = data[key];
+                    break;
+                case "pos_y":
+                    player_y = data[key];
+                    break;
+                case "vehicleName":
+                    userDetails.vehicleName = data[key];
+                    const header = document.getElementById("lapTimesHeader");
+                    if (header && userDetails.vehicleName) {
+                        header.textContent = `Lap Times ${userDetails.vehicleName}`;
+                    }
+                    break;
+            }
         }
-    }
-});
+    });
 
     window.addEventListener('keydown', (e) => {
         if (e.key === "Escape") {
@@ -372,12 +379,9 @@ window.addEventListener("message", (event) => {
         dragWindow.style.top = `${e.clientY - offsetY}px`;
     });
 
-document.getElementById("changeTrackBtn").onclick = () => {
-    document.getElementById("trackMenu").style.display = "block";
-};
-    
+    document.getElementById("changeTrackBtn").onclick = () => {
+        document.getElementById("trackMenu").style.display = "block";
+    };
 </script>
-
-
-
-</body></html>
+</body>
+</html>
