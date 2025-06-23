@@ -1,25 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Racing Timer</title>
+  <title>Track Selector</title>
   <style>
     body {
       background: black;
       color: white;
       font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
     }
 
     #trackMenu {
       display: none;
       position: fixed;
       top: 100px;
-      left: 100px;
-      background: rgba(0, 0, 0, 0.9);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.95);
       border: 2px solid lightgreen;
       padding: 20px;
       border-radius: 10px;
-      z-index: 1000;
+      z-index: 1001;
       width: 300px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
     }
 
     #trackPreview {
@@ -74,6 +89,9 @@
   <h2>Racing Timer</h2>
   <button id="changeTrackBtn">Change Track</button>
 
+  <!-- Background Overlay -->
+  <div id="overlay"></div>
+
   <!-- Track Selector Menu -->
   <div id="trackMenu">
     <h3 style="text-align: center; margin-bottom: 10px;">Select a Track</h3>
@@ -99,29 +117,28 @@
     const confirmTrackBtn = document.getElementById("confirmTrackBtn");
     const preview = document.getElementById("trackPreview");
     const trackButtons = document.querySelectorAll("#trackList button");
+    const overlay = document.getElementById("overlay");
 
     let selectedTrackUrl = null;
     let selectedButton = null;
 
     // Show menu
     changeTrackBtn.onclick = () => {
+      overlay.style.display = "block";
       trackMenu.style.display = "block";
     };
 
     // Handle selection
     trackButtons.forEach(btn => {
       btn.addEventListener("click", () => {
-        // Unhighlight previous
         if (selectedButton) {
           selectedButton.style.backgroundColor = "transparent";
         }
 
-        // Set selected
         selectedTrackUrl = btn.getAttribute("data-url");
         selectedButton = btn;
         btn.style.backgroundColor = "rgba(144, 238, 144, 0.3)";
 
-        // Set image preview
         const img = btn.getAttribute("data-img");
         if (img) {
           preview.innerHTML = `<img src="${img}" style="max-width:100%; max-height:100%;">`;
@@ -136,6 +153,12 @@
       if (selectedTrackUrl) {
         location.href = selectedTrackUrl;
       }
+    };
+
+    // Hide menu when clicking outside
+    overlay.onclick = () => {
+      overlay.style.display = "none";
+      trackMenu.style.display = "none";
     };
   </script>
 
