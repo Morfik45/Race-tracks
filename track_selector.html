@@ -1,1 +1,42 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Track</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        button {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid lightgreen;
+            background-color: transparent;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: rgba(144, 238, 144, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h2>Select a Track</h2>
+
+    <button onclick="selectTrack('https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html')">
+        Roxwood Circuit Drift
+    </button>
+
+    <!-- Add more tracks here -->
+
+    <script>
+        function selectTrack(url) {
+            window.opener.postMessage({ selectedTrackUrl: url }, "https://morfik45.github.io");
+            window.close();
+        }
+    </script>
+</body>
+</html>
