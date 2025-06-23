@@ -4,7 +4,7 @@
   <title>Track Selector</title>
   <style>
     body {
-      background: black;
+      background: transparent;
       color: white;
       font-family: sans-serif;
       margin: 0;
@@ -12,7 +12,7 @@
     }
 
     #trackMenu {
-      display: none;
+      display: block;
       position: fixed;
       top: 100px;
       left: 50%;
@@ -86,9 +86,6 @@
 </head>
 <body>
 
-  <h2>Racing Timer</h2>
-  <button id="changeTrackBtn">Change Track</button>
-
   <!-- Background Overlay -->
   <div id="overlay"></div>
 
@@ -121,12 +118,6 @@
 
     let selectedTrackUrl = null;
     let selectedButton = null;
-
-    // Show menu
-    changeTrackBtn.onclick = () => {
-      overlay.style.display = "block";
-      trackMenu.style.display = "block";
-    };
 
     // Handle selection
     trackButtons.forEach(btn => {
