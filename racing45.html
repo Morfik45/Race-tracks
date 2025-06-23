@@ -1,5 +1,4 @@
-<html>
-<head>
+<html><head>
     <title>Custom Racing</title>
     <style>
         body {
@@ -124,7 +123,7 @@
     <button id="start">Start Race</button>
     <button id="restart" style="display:none;">Restart Race</button>
     <div style="margin-top: 8px;">
-        <input type="number" id="lapInput" value="3" min="1" style="width: 60px; font-size: 1em; font-family: sans-serif;">
+        <input type="number" id="lapInput" value="3" min="1" style="width: 40px; height: 20px; text-align: center; font-weight: bold; font-size: 0.8em; font-family: sans-serif;">
         <button id="setLapsBtn">Set Lap Number</button>
     </div>
     <button id="changeTrackBtn">Change Race Track</button>
@@ -149,7 +148,7 @@
 </div>
 
 <div id="lapTimesWindow" style="left: 1213px; top: -743px;">
-    <h4 id="lapTimesHeader">Lap Times</h4>
+    <h4 id="lapTimesHeader">Lap Times Drift Yosemite</h4>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
     <button id="exportBtn" onclick="copyLapTimes()">Export</button>
@@ -383,5 +382,6 @@
         document.getElementById("trackMenu").style.display = "block";
     };
 </script>
-</body>
-</html>
+
+
+</body></html>
