@@ -54,9 +54,12 @@
             border-radius: 10px;
             font-family: sans-serif;
             font-size: 1em;
+            line-height: 1.4em;
             color: white;
             z-index: 1000;
             overflow: auto;
+            min-width: 200px;
+            max-width: 400px;
             cursor: move;
         }
 
@@ -115,9 +118,9 @@
 </div>
 
 <div id="lapTimesWindow">
-    <h4 id="lapTimesHeader">Lap Times Drift Yosemite</h4>
+    <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div>
-    <p id="totalTime" style="display: none;">Total Time: <span id="totalTimeValue"></span></p>
+    <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
     <button id="exportBtn" onclick="copyLapTimes()">Export</button>
 </div>
 
@@ -197,7 +200,7 @@
         const total = document.getElementById("totalTime").style.display !== "none"
             ? `\n${document.getElementById("totalTime").textContent.trim()}`
             : "";
-        const fullText = [`LAP TIMES - ${userDetails.vehicleName}`, ...lines].join("\n") + total;
+        const fullText = [`LAP TIMES - ${userDetails.vehicleName || "Unknown"}`, ...lines].join("\n") + total;
 
         const textarea = document.createElement("textarea");
         textarea.value = fullText;
@@ -228,8 +231,13 @@
         menu.style.display = menu.style.display === "none" ? "block" : "none";
     };
 
+    // ✅ Updated: Open selector in new window (popup)
     document.getElementById("changeTrackBtn").onclick = () => {
-        window.open("https://morfik45.github.io/Race-tracks/track_selector.html", "_blank");
+        window.open(
+            "https://morfik45.github.io/Race-tracks/track_selector.html",
+            "TrackSelector",
+            "width=400,height=500"
+        );
     };
 
     // Audio settings
@@ -255,6 +263,7 @@
         dragWindow.style.top = `${e.clientY - offsetY}px`;
     });
 
+    // Receive vehicle name
     window.addEventListener("message", (event) => {
         const data = event.data.data;
         if (!data) return;
@@ -264,8 +273,7 @@
             if (key === "pos_y") player_y = data[key];
             if (key === "vehicleName") {
                 userDetails.vehicleName = data[key];
-                const header = document.getElementById("lapTimesHeader");
-                header.textContent = `Lap Times ${userDetails.vehicleName}`;
+                document.getElementById("lapTimesHeader").textContent = `Lap Times ${data[key]}`;
             }
         }
     });
