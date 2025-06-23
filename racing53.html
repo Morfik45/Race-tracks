@@ -13,7 +13,7 @@
             font-size: 1.5em;
             line-height: 3px;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
-             overflow:hidden;
+            overflow: hidden;
         }
 
         #settingsMenu {
@@ -103,9 +103,9 @@
 
         <div>
             <button id="changeTrackBtn"
-        data-url="https://morfik45.github.io/Race-tracks/track_selector.html">
-  Change Track
-</button>
+                    data-url="https://morfik45.github.io/Race-tracks/track_selector.html">
+                Change Track
+            </button>
         </div>
 
         <div id="audioSettingsMenu">
@@ -121,7 +121,7 @@
     <span style="color: white" id="timer">00:00:000</span>
 </div>
 
-<div id="lapTimesWindow" style="left: 1201px; top: -727px;">
+<div id="lapTimesWindow" style="left: 250px; top: 50px;">
     <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
@@ -133,6 +133,16 @@
     let player_x = 0, player_y = 0;
     let isPlaying = false;
     let nLaps = 3;
+
+    // On load, restore saved laps if any
+    window.onload = () => {
+        const saved = localStorage.getItem("savedLaps");
+        if (saved) {
+            nLaps = parseInt(saved);
+            document.getElementById("lapInput").value = nLaps;
+            document.getElementById("rlap").innerText = `1/${nLaps}`;
+        }
+    };
 
     const checkpoints = [
         {x: -2761.71, y: 8079.83}, {x: -2731.71, y: 8079.83}, {x: -2701.71, y: 8079.83}
@@ -163,26 +173,25 @@
 
                 if (currentCheckpoint >= checkpoints.length) {
                     const lapTime = Date.now() - startTime;
-lapTimes.push(lapTime);
+                    lapTimes.push(lapTime);
+                    document.getElementById("lapTimes").innerHTML +=
+                        `<p><span style="color: lightgreen;">Lap ${lap}:</span> <span style="color: white;">${formatTime(lapTime)}</span></p>`;
 
-document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgreen;">Lap ${lap}:</span> <span style="color: white;">${formatTime(lapTime)}</span></p>`;
-
-        if (lap >= nLaps) {
-                    safeSFX(5);
-                    isPlaying = false;
-                    document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
-                    const total = lapTimes.reduce((a, b) => a + b, 0);
-                    document.getElementById("totalTime").style.display = "block";
-                    document.getElementById("totalTimeValue").innerText = formatTime(total);
-                } else {
-                    lap++; // only increment here
-                    safeSFX(3);
-                    currentCheckpoint = 0;
-                    setCheckpoint(checkpoints[0].x, checkpoints[0].y);
-                    document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
-                    startTime = Date.now();
+                    if (lap >= nLaps) {
+                        safeSFX(5);
+                        isPlaying = false;
+                        document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+                        const total = lapTimes.reduce((a, b) => a + b, 0);
+                        document.getElementById("totalTime").style.display = "block";
+                        document.getElementById("totalTimeValue").innerText = formatTime(total);
+                    } else {
+                        lap++; // increment only here
+                        safeSFX(3);
+                        currentCheckpoint = 0;
+                        setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+                        document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+                        startTime = Date.now();
                     }
-
                 } else {
                     safeSFX(2);
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
@@ -190,7 +199,6 @@ document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgr
             }
 
             if (firstCp) {
-                document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
                 document.getElementById("timer").innerText = formatTime(Date.now() - startTime);
             }
         }, 10);
@@ -227,11 +235,15 @@ document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgr
     }
 
     document.getElementById("start").onclick = startGame;
-    document.getElementById("restart").onclick = () => location.reload();
+    document.getElementById("restart").onclick = () => {
+        // Reload page, laps are remembered by localStorage
+        location.reload();
+    };
     document.getElementById("setLapsBtn").onclick = () => {
         const val = parseInt(document.getElementById("lapInput").value);
         nLaps = isNaN(val) || val < 1 ? 1 : val;
         document.getElementById("rlap").innerText = `1/${nLaps}`;
+        localStorage.setItem("savedLaps", nLaps);
     };
 
     document.getElementById("settingsBtn").onclick = () => {
@@ -240,12 +252,12 @@ document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgr
     };
 
     // Track Selector
-   document.getElementById("changeTrackBtn").onclick = function () {
-  const url = this.getAttribute("data-url");
-  if (url) {
-    location.href = url;
-  }
-};
+    document.getElementById("changeTrackBtn").onclick = function () {
+        const url = this.getAttribute("data-url");
+        if (url) {
+            location.href = url;
+        }
+    };
 
     // Audio settings
     document.getElementById("sfxFinish").onchange = (e) => audioPrefs.finish = e.target.checked;
@@ -286,10 +298,10 @@ document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgr
     });
 
     window.addEventListener('keydown', (e) => {
-    if (e.key === "Escape") {
-        window.parent.postMessage({type: "pin"}, "*");
-    }
-});
+        if (e.key === "Escape") {
+            window.parent.postMessage({type: "pin"}, "*");
+        }
+    });
 </script>
 </body>
 </html>
