@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
+<html><head>
     <title>Custom Racing</title>
     <style>
         body {
@@ -102,16 +100,15 @@
         </div>
 
         <div>
-            <button id="changeTrackBtn"
-                    data-url="https://morfik45.github.io/Race-tracks/track_selector.html">
+            <button id="changeTrackBtn" data-url="https://morfik45.github.io/Race-tracks/track_selector.html">
                 Change Track
             </button>
         </div>
 
         <div id="audioSettingsMenu">
-            <label><input type="checkbox" id="sfxFinish" checked> Finish Audio</label>
-            <label><input type="checkbox" id="sfxNextLap" checked> Next Lap Audio</label>
-            <label><input type="checkbox" id="sfxCheckpoint" checked> Checkpoint Audio</label>
+            <label><input type="checkbox" id="sfxFinish" checked=""> Finish Audio</label>
+            <label><input type="checkbox" id="sfxNextLap" checked=""> Next Lap Audio</label>
+            <label><input type="checkbox" id="sfxCheckpoint" checked=""> Checkpoint Audio</label>
         </div>
     </div>
 
@@ -121,7 +118,7 @@
     <span style="color: white" id="timer">00:00:000</span>
 </div>
 
-<div id="lapTimesWindow" style="left: 250px; top: 50px;">
+<div id="lapTimesWindow" style="left: 1245px; top: -737px;">
     <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
@@ -303,5 +300,6 @@
         }
     });
 </script>
-</body>
-</html>
+
+
+</body></html>
