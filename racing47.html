@@ -413,10 +413,14 @@ trackButtons.forEach(btn => {
         selectedButton = btn;
         btn.style.backgroundColor = 'rgba(144, 238, 144, 0.3)';
 
-        // Optional: Replace preview content here
+        // 🟢 Set image preview
         const preview = document.getElementById('trackPreview');
-        preview.innerText = btn.textContent;
-        // preview.innerHTML = `<img src="your-image-url.jpg" style="max-width:100%; max-height:100%;">`;
+        const imgUrl = btn.getAttribute('data-img');
+        if (imgUrl) {
+            preview.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:100%;">`;
+        } else {
+            preview.innerHTML = "<em>No preview available</em>";
+        }
     });
 });
 
