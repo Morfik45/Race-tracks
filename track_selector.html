@@ -4,71 +4,130 @@
     <title>Select Track</title>
     <style>
         body {
-            margin: 0;
-            background-color: rgba(0, 0, 0, 0.85);
-            font-family: sans-serif;
+            background-color: rgba(0,0,0,0.85);
             color: white;
+            font-family: sans-serif;
+            margin: 0;
         }
 
         #trackMenu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(10, 10, 10, 0.95);
+            background-color: rgba(10,10,10,0.95);
             border: 2px solid lightgreen;
             border-radius: 12px;
             padding: 20px;
-            width: 320px;
-            max-height: 90vh;
-            box-shadow: 0 0 15px #00ff00a0;
+            margin: 30px auto;
+            width: 90%;
+            max-width: 340px;
+            box-shadow: 0 0 10px #0f0;
         }
 
-        #trackMenu h2 {
+        #trackMenu h4 {
             text-align: center;
             color: lightgreen;
             margin-bottom: 12px;
         }
 
+        #trackPreview {
+            width: 100%;
+            height: 140px;
+            background-color: #111;
+            border: 1px solid lightgreen;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+        }
+
         #trackList {
-            max-height: 300px;
+            max-height: 200px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        .trackBtn {
-            border: 1px solid lightgreen;
-            background: transparent;
+        #trackList button {
             color: white;
-            padding: 10px;
-            font-size: 1em;
+            background-color: transparent;
+            border: 1px solid lightgreen;
+            padding: 8px 10px;
             cursor: pointer;
-            text-align: left;
+            font-family: sans-serif;
         }
 
-        .trackBtn:hover {
+        #trackList button:hover {
             background-color: rgba(144, 238, 144, 0.1);
+        }
+
+        .selected {
+            background-color: rgba(144, 238, 144, 0.3) !important;
+        }
+
+        #buttons {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #buttons button {
+            flex: 1;
+            margin: 0 5px;
         }
     </style>
 </head>
 <body>
     <div id="trackMenu">
-        <h2>Select a Track</h2>
+        <h4>Select a Track</h4>
+
+        <div id="trackPreview"><em>Track preview will go here</em></div>
+
         <div id="trackList">
-            <button class="trackBtn" onclick="selectTrack('https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html')">
+            <button 
+                data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html" 
+                data-img="Images/drift_roxwood.png">
                 Roxwood Circuit Drift
             </button>
-            <!-- Add more tracks here as needed -->
+            <!-- Add more tracks here -->
+        </div>
+
+        <div id="buttons">
+            <button id="confirmTrackBtn">Confirm</button>
+            <button onclick="window.close()">Close</button>
         </div>
     </div>
 
     <script>
-        function selectTrack(url) {
-            window.opener.postMessage({ selectedTrackUrl: url }, "https://morfik45.github.io");
-            window.close();
-        }
+        let selectedTrackUrl = null;
+        let selectedButton = null;
+
+        const trackButtons = document.querySelectorAll('#trackList button');
+        trackButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (selectedButton) {
+                    selectedButton.classList.remove('selected');
+                }
+
+                selectedTrackUrl = btn.getAttribute('data-url');
+                selectedButton = btn;
+                btn.classList.add('selected');
+
+                const preview = document.getElementById('trackPreview');
+                const imgUrl = btn.getAttribute('data-img');
+                if (imgUrl) {
+                    preview.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:100%;">`;
+                } else {
+                    preview.innerHTML = "<em>No preview available</em>";
+                }
+            });
+        });
+
+        document.getElementById("confirmTrackBtn").onclick = () => {
+            if (selectedTrackUrl) {
+                window.opener.postMessage({ selectedTrackUrl }, "https://morfik45.github.io");
+                window.close();
+            }
+        };
     </script>
 </body>
 </html>
