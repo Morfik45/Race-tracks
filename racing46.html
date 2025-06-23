@@ -127,13 +127,30 @@
         <button id="setLapsBtn">Set Lap Number</button>
     </div>
     <button id="changeTrackBtn">Change Race Track</button>
-    <div id="trackMenu" style="display: none;">
-        <h4 style="text-align: center; margin-bottom: 10px;">Select a Track</h4>
-        <div id="trackList">
-            <button onclick="location.href='https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html'">Roxwood Circuit Drift</button>
-        </div>
-        <button onclick="document.getElementById('trackMenu').style.display='none'" style="margin-top: 10px;">Close</button>
+   <!-- TRACK MENU -->
+<div id="trackMenu" style="display: none;">
+    <h4 style="text-align: center; margin-bottom: 10px;">Select a Track</h4>
+
+    <!-- Preview Area -->
+    <div id="trackPreview" style="width: 100%; height: 140px; background-color: #111; border: 1px solid lightgreen; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: gray;">
+        Track preview will go here
     </div>
+
+    <div id="trackList">
+       <button 
+  data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html" 
+  data-img="https://media.discordapp.net/attachments/1362012505186111648/1362012936419283177/Roxwood_Drift_Track.png">
+  Roxwood Circuit Drift
+</button>
+        
+        <!-- Add more buttons here as needed -->
+    </div>
+
+    <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+        <button id="confirmTrackBtn">Confirm</button>
+        <button onclick="document.getElementById('trackMenu').style.display='none'">Close</button>
+    </div>
+</div>
 
     <button id="audioSettingsBtn">Audio Settings</button>
     <div id="audioSettingsMenu" style="display: none;">
@@ -381,6 +398,36 @@
     document.getElementById("changeTrackBtn").onclick = () => {
         document.getElementById("trackMenu").style.display = "block";
     };
+
+    let selectedTrackUrl = null;
+let selectedButton = null;
+
+const trackButtons = document.querySelectorAll('#trackList button');
+trackButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (selectedButton) {
+            selectedButton.style.backgroundColor = 'transparent';
+        }
+
+        selectedTrackUrl = btn.getAttribute('data-url');
+        selectedButton = btn;
+        btn.style.backgroundColor = 'rgba(144, 238, 144, 0.3)';
+
+        // Optional: Replace preview content here
+        const preview = document.getElementById('trackPreview');
+        preview.innerText = btn.textContent;
+        // preview.innerHTML = `<img src="your-image-url.jpg" style="max-width:100%; max-height:100%;">`;
+    });
+});
+
+document.getElementById("confirmTrackBtn").onclick = () => {
+    if (selectedTrackUrl) {
+        location.href = selectedTrackUrl;
+    }
+    // If no track is selected, do nothing silently
+};
+
+    
 </script>
 
 
