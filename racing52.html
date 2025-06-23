@@ -162,23 +162,27 @@
                 currentCheckpoint++;
 
                 if (currentCheckpoint >= checkpoints.length) {
-                    lap++;
                     const lapTime = Date.now() - startTime;
-                    lapTimes.push(lapTime);
-                    document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgreen;">Lap ${lap - 1}:</span> <span style="color: white;">${formatTime(lapTime)}</span></p>`;
-                    startTime = Date.now();
+lapTimes.push(lapTime);
 
-                    if (lap > nLaps) {
-                        safeSFX(5);
-                        isPlaying = false;
-                        const total = lapTimes.reduce((a, b) => a + b, 0);
-                        document.getElementById("totalTime").style.display = "block";
-                        document.getElementById("totalTimeValue").innerText = formatTime(total);
-                    } else {
-                        safeSFX(3);
-                        currentCheckpoint = 0;
-                        setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+document.getElementById("lapTimes").innerHTML += `<p><span style="color: lightgreen;">Lap ${lap}:</span> <span style="color: white;">${formatTime(lapTime)}</span></p>`;
+
+        if (lap >= nLaps) {
+                    safeSFX(5);
+                    isPlaying = false;
+                    document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+                    const total = lapTimes.reduce((a, b) => a + b, 0);
+                    document.getElementById("totalTime").style.display = "block";
+                    document.getElementById("totalTimeValue").innerText = formatTime(total);
+                } else {
+                    lap++; // only increment here
+                    safeSFX(3);
+                    currentCheckpoint = 0;
+                    setCheckpoint(checkpoints[0].x, checkpoints[0].y);
+                    document.getElementById("rlap").innerText = `${lap}/${nLaps}`;
+                    startTime = Date.now();
                     }
+
                 } else {
                     safeSFX(2);
                     setCheckpoint(checkpoints[currentCheckpoint].x, checkpoints[currentCheckpoint].y);
