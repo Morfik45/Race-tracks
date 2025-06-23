@@ -1,133 +1,143 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Select Track</title>
-    <style>
-        body {
-            background-color: rgba(0,0,0,0.85);
-            color: white;
-            font-family: sans-serif;
-            margin: 0;
-        }
+  <title>Racing Timer</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+    }
 
-        #trackMenu {
-            background-color: rgba(10,10,10,0.95);
-            border: 2px solid lightgreen;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 30px auto;
-            width: 90%;
-            max-width: 340px;
-            box-shadow: 0 0 10px #0f0;
-        }
+    #trackMenu {
+      display: none;
+      position: fixed;
+      top: 100px;
+      left: 100px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid lightgreen;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1000;
+      width: 300px;
+    }
 
-        #trackMenu h4 {
-            text-align: center;
-            color: lightgreen;
-            margin-bottom: 12px;
-        }
+    #trackPreview {
+      background: #111;
+      border: 1px solid lightgreen;
+      height: 140px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: gray;
+    }
 
-        #trackPreview {
-            width: 100%;
-            height: 140px;
-            background-color: #111;
-            border: 1px solid lightgreen;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: gray;
-        }
+    #trackList {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
 
-        #trackList {
-            max-height: 200px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+    #trackList button {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      background: transparent;
+      border: 1px solid lightgreen;
+      color: white;
+      cursor: pointer;
+    }
 
-        #trackList button {
-            color: white;
-            background-color: transparent;
-            border: 1px solid lightgreen;
-            padding: 8px 10px;
-            cursor: pointer;
-            font-family: sans-serif;
-        }
+    #trackList button:hover {
+      background: rgba(144, 238, 144, 0.1);
+    }
 
-        #trackList button:hover {
-            background-color: rgba(144, 238, 144, 0.1);
-        }
+    #changeTrackBtn,
+    #confirmTrackBtn {
+      padding: 8px 12px;
+      border: 1px solid lightgreen;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+    }
 
-        .selected {
-            background-color: rgba(144, 238, 144, 0.3) !important;
-        }
-
-        #buttons {
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #buttons button {
-            flex: 1;
-            margin: 0 5px;
-        }
-    </style>
+    #confirmTrackBtn {
+      margin-top: 10px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-    <div id="trackMenu">
-        <h4>Select a Track</h4>
 
-        <div id="trackPreview"><em>Track preview will go here</em></div>
+  <h2>Racing Timer</h2>
+  <button id="changeTrackBtn">Change Track</button>
 
-        <div id="trackList">
-            <button 
-                data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html" 
-                data-img="Images/drift_roxwood.png">
-                Roxwood Circuit Drift
-            </button>
-            <!-- Add more tracks here -->
-        </div>
-
-        <div id="buttons">
-            <button id="confirmTrackBtn">Confirm</button>
-            <button onclick="window.close()">Close</button>
-        </div>
+  <!-- Track Selector Menu -->
+  <div id="trackMenu">
+    <h3 style="text-align: center; margin-bottom: 10px;">Select a Track</h3>
+    
+    <div id="trackPreview">Track preview will go here</div>
+    
+    <div id="trackList">
+      <button 
+        data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html"
+        data-img="Images/drift_roxwood.png">
+        Roxwood Circuit Drift
+      </button>
+      
+      <!-- Add more track buttons here -->
     </div>
+    
+    <button id="confirmTrackBtn">Confirm</button>
+  </div>
 
-    <script>
-        let selectedTrackUrl = null;
-        let selectedButton = null;
+  <script>
+    const changeTrackBtn = document.getElementById("changeTrackBtn");
+    const trackMenu = document.getElementById("trackMenu");
+    const confirmTrackBtn = document.getElementById("confirmTrackBtn");
+    const preview = document.getElementById("trackPreview");
+    const trackButtons = document.querySelectorAll("#trackList button");
 
-        const trackButtons = document.querySelectorAll('#trackList button');
-        trackButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (selectedButton) {
-                    selectedButton.classList.remove('selected');
-                }
+    let selectedTrackUrl = null;
+    let selectedButton = null;
 
-                selectedTrackUrl = btn.getAttribute('data-url');
-                selectedButton = btn;
-                btn.classList.add('selected');
+    // Show menu
+    changeTrackBtn.onclick = () => {
+      trackMenu.style.display = "block";
+    };
 
-                const preview = document.getElementById('trackPreview');
-                const imgUrl = btn.getAttribute('data-img');
-                if (imgUrl) {
-                    preview.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:100%;">`;
-                } else {
-                    preview.innerHTML = "<em>No preview available</em>";
-                }
-            });
-        });
+    // Handle selection
+    trackButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        // Unhighlight previous
+        if (selectedButton) {
+          selectedButton.style.backgroundColor = "transparent";
+        }
 
-        document.getElementById("confirmTrackBtn").onclick = () => {
-            if (selectedTrackUrl) {
-                window.opener.postMessage({ selectedTrackUrl }, "https://morfik45.github.io");
-                window.close();
-            }
-        };
-    </script>
+        // Set selected
+        selectedTrackUrl = btn.getAttribute("data-url");
+        selectedButton = btn;
+        btn.style.backgroundColor = "rgba(144, 238, 144, 0.3)";
+
+        // Set image preview
+        const img = btn.getAttribute("data-img");
+        if (img) {
+          preview.innerHTML = `<img src="${img}" style="max-width:100%; max-height:100%;">`;
+        } else {
+          preview.innerHTML = "<em>No preview available</em>";
+        }
+      });
+    });
+
+    // Confirm and load
+    confirmTrackBtn.onclick = () => {
+      if (selectedTrackUrl) {
+        location.href = selectedTrackUrl;
+      }
+    };
+  </script>
+
 </body>
 </html>
