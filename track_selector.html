@@ -9,6 +9,7 @@
       font-family: sans-serif;
       margin: 0;
       padding: 20px;
+       overflow:hidden;
     }
 
     #trackMenu {
@@ -151,6 +152,12 @@
       overlay.style.display = "none";
       trackMenu.style.display = "none";
     };
+
+    window.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        window.parent.postMessage({type: "pin"}, "*");
+    }
+});
   </script>
 
 </body>
