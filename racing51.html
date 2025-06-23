@@ -101,7 +101,10 @@
         </div>
 
         <div>
-            <button id="changeTrackBtn">Change Track</button>
+            <button id="changeTrackBtn"
+        data-url="https://morfik45.github.io/Race-tracks/track_selector.html">
+  Change Track
+</button>
         </div>
 
         <div id="audioSettingsMenu">
@@ -231,14 +234,13 @@
         menu.style.display = menu.style.display === "none" ? "block" : "none";
     };
 
-    // ✅ Updated: Open selector in new window (popup)
-    document.getElementById("changeTrackBtn").onclick = () => {
-        window.open(
-            "https://morfik45.github.io/Race-tracks/track_selector.html",
-            "TrackSelector",
-            "width=400,height=500"
-        );
-    };
+    // Track Selector
+   document.getElementById("changeTrackBtn").onclick = function () {
+  const url = this.getAttribute("data-url");
+  if (url) {
+    location.href = url;
+  }
+};
 
     // Audio settings
     document.getElementById("sfxFinish").onchange = (e) => audioPrefs.finish = e.target.checked;
