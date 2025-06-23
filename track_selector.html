@@ -1,36 +1,68 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Select Track</title>
     <style>
         body {
-            background-color: black;
-            color: white;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.85);
             font-family: sans-serif;
-            padding: 20px;
-        }
-        button {
-            margin: 5px 0;
-            padding: 10px;
-            border: 1px solid lightgreen;
-            background-color: transparent;
             color: white;
-            cursor: pointer;
         }
-        button:hover {
+
+        #trackMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(10, 10, 10, 0.95);
+            border: 2px solid lightgreen;
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            max-height: 90vh;
+            box-shadow: 0 0 15px #00ff00a0;
+        }
+
+        #trackMenu h2 {
+            text-align: center;
+            color: lightgreen;
+            margin-bottom: 12px;
+        }
+
+        #trackList {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .trackBtn {
+            border: 1px solid lightgreen;
+            background: transparent;
+            color: white;
+            padding: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .trackBtn:hover {
             background-color: rgba(144, 238, 144, 0.1);
         }
     </style>
 </head>
 <body>
-    <h2>Select a Track</h2>
-
-    <button onclick="selectTrack('https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html')">
-        Roxwood Circuit Drift
-    </button>
-
-    <!-- Add more tracks here -->
+    <div id="trackMenu">
+        <h2>Select a Track</h2>
+        <div id="trackList">
+            <button class="trackBtn" onclick="selectTrack('https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html')">
+                Roxwood Circuit Drift
+            </button>
+            <!-- Add more tracks here as needed -->
+        </div>
+    </div>
 
     <script>
         function selectTrack(url) {
