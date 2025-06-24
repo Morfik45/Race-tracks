@@ -110,6 +110,11 @@
         window.parent.postMessage({ type: "pin" }, "*");
       }
     });
+
+    // Auto-refresh every 2 seconds
+    setInterval(() => {
+      window.parent.postMessage({ type: "getData" }, "*");
+    }, 2000);
   </script>
 </body>
 </html>
