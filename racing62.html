@@ -209,8 +209,20 @@
     const dist = (x1, y1, x2, y2) => Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
 
     const startGame = () => {
-        window.parent.postMessage({ type: "requestVehicleInfo" }, "*");
         
+    window.addEventListener("message", (event) => {
+        const data = event.data.data;
+        if (!data) return;
+        for (const key in data) {
+            if (key === "pos_x") player_x = data[key];
+            if (key === "pos_y") player_y = data[key];
+            if (key === "vehicleName") {
+                userDetails.vehicleName = data[key];
+                document.getElementById("lapTimesHeader").textContent = `Lap Times ${data[key]}`;
+            }
+        }
+    });
+
         let startTime = 0, lap = 1, currentCheckpoint = 0, firstCp = false, lapTimes = [];
         document.getElementById("start").style.display = "none";
         document.getElementById("restart").style.display = "inline-block";
@@ -292,7 +304,7 @@
         const total = document.getElementById("totalTime").style.display !== "none"
             ? `\n${document.getElementById("totalTime").textContent.trim()}`
             : "";
-        const fullText = [`LAP TIMES - ${userDetails.vehicleName || "Unknown"}`, `Fastest Lap: ${fastest}`, ...lines].join("\n") + total;
+        const fullText = [`LAP TIMES - ${userDetails. || "Unknown"}`, `Fastest Lap: ${fastest}`, ...lines].join("\n") + total;
 
         const textarea = document.createElement("textarea");
         textarea.value = fullText;
@@ -343,19 +355,6 @@
         if (!isDragging) return;
         dragWindow.style.left = `${e.clientX - offsetX}px`;
         dragWindow.style.top = `${e.clientY - offsetY}px`;
-    });
-
-    window.addEventListener("message", (event) => {
-        const data = event.data.data;
-        if (!data) return;
-        for (const key in data) {
-            if (key === "pos_x") player_x = data[key];
-            if (key === "pos_y") player_y = data[key];
-            if (key === "vehicleName") {
-                userDetails.vehicleName = data[key];
-                document.getElementById("lapTimesHeader").textContent = `Lap Times ${data[key]}`;
-            }
-        }
     });
 
     window.addEventListener('keydown', (e) => {
