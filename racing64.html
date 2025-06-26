@@ -178,11 +178,19 @@
     window.onload = () => {
         const saved = localStorage.getItem("savedLaps");
         if (saved) {
-            nLaps = parseInt(saved);
-            document.getElementById("lapInput").value = nLaps;
-            document.getElementById("rlap").innerText = `1/${nLaps}`;
+        nLaps = parseInt(saved);
+        document.getElementById("lapInput").value = nLaps;
+        document.getElementById("rlap").innerText = `1/${nLaps}`;
         }
-    };
+    
+        const cachedName = localStorage.getItem("lastVehicleName");
+        if (cachedName) {
+        userDetails.vehicleName = cachedName;
+        document.getElementById("lapTimesHeader").textContent = `Lap Times ${cachedName}`;
+        } else {
+        document.getElementById("lapTimesHeader").textContent = `Lap Times Unknown`;
+    }
+};
 
  const checkpoints = [
      {x: -2822.16015625, y: 8087.609375, z: 43.24930572509765},
@@ -362,15 +370,7 @@
             window.parent.postMessage({type: "pin"}, "*");
         }
     });
-// Refresh after first start-up
-    window.onload = () => {
-  if (!sessionStorage.getItem("reloaded")) {
-    sessionStorage.setItem("reloaded", "true");
-    setTimeout(() => {
-      location.reload();
-    }, 2000); // 1 second delay
-  }
-};
+
 </script>
 
 </body>
