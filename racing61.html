@@ -209,6 +209,8 @@
     const dist = (x1, y1, x2, y2) => Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
 
     const startGame = () => {
+        window.parent.postMessage({ type: "requestVehicleInfo" }, "*");
+        
         let startTime = 0, lap = 1, currentCheckpoint = 0, firstCp = false, lapTimes = [];
         document.getElementById("start").style.display = "none";
         document.getElementById("restart").style.display = "inline-block";
@@ -361,15 +363,6 @@
             window.parent.postMessage({type: "pin"}, "*");
         }
     });
-// Refresh after first start-up
-    window.onload = () => {
-  if (!sessionStorage.getItem("reloaded")) {
-    sessionStorage.setItem("reloaded", "true");
-    setTimeout(() => {
-      location.reload();
-    }, 2000); // 1 second delay
-  }
-};
 </script>
 
 </body>
