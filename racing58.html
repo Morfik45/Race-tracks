@@ -93,6 +93,33 @@
         #exportBtn:hover {
             background-color: rgba(144, 238, 144, 0.1);
         }
+
+        /* For WebKit browsers */
+#lapTimes::-webkit-scrollbar {
+  width: 8px;
+}
+
+#lapTimes::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3); /* dark track */
+  border-radius: 5px;
+}
+
+#lapTimes::-webkit-scrollbar-thumb {
+  background-color: lightgreen; /* thumb color */
+  border-radius: 5px;
+  border: 2px solid rgba(0, 0, 0, 0.6); /* border around the thumb */
+}
+
+#lapTimes::-webkit-scrollbar-thumb:hover {
+  background-color: #90ee90; /* lighter green on hover */
+}
+
+/* For Firefox */
+#lapTimes {
+  scrollbar-color: lightgreen rgba(0, 0, 0, 0.3);  /* thumb and track */
+  scrollbar-width: thin;
+}
+
     </style>
 </head>
 <body>
