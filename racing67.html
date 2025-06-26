@@ -362,7 +362,12 @@
             window.parent.postMessage({type: "pin"}, "*");
         }
     });
-
+    
+setInterval(() => {
+  if (userDetails.vehicleName) {
+    document.getElementById("lapTimesHeader").textContent = `Lap Times ${trunc(userDetails.vehicleName)}`;
+  }
+}, 1000);
 </script>
 
 </body>
