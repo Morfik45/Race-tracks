@@ -182,15 +182,13 @@
         document.getElementById("lapInput").value = nLaps;
         document.getElementById("rlap").innerText = `1/${nLaps}`;
         }
-    
-        const cachedName = localStorage.getItem("lastVehicleName");
-        if (cachedName) {
-        userDetails.vehicleName = cachedName;
-        document.getElementById("lapTimesHeader").textContent = `Lap Times ${cachedName}`;
-        } else {
-        document.getElementById("lapTimesHeader").textContent = `Lap Times Unknown`;
-    }
-};
+  if (!sessionStorage.getItem("reloaded")) {
+    sessionStorage.setItem("reloaded", "true");
+    setTimeout(() => {
+      location.reload();
+    }, 2000); // 1 second delay
+  }
+}
 
  const checkpoints = [
      {x: -2822.16015625, y: 8087.609375, z: 43.24930572509765},
