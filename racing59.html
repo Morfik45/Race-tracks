@@ -358,6 +358,15 @@
             window.parent.postMessage({type: "pin"}, "*");
         }
     });
+// Refresh after first start-up
+    window.onload = () => {
+  if (!sessionStorage.getItem("reloaded")) {
+    sessionStorage.setItem("reloaded", "true");
+    setTimeout(() => {
+      location.reload();
+    }, 1000); // 1 second delay
+  }
+};
 </script>
 
 </body>
