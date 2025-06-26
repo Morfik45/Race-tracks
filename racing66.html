@@ -182,12 +182,6 @@
         document.getElementById("lapInput").value = nLaps;
         document.getElementById("rlap").innerText = `1/${nLaps}`;
         }
-  if (!sessionStorage.getItem("reloaded")) {
-    sessionStorage.setItem("reloaded", "true");
-    setTimeout(() => {
-      location.reload();
-    }, 4000); 
-  }
 }
 
  const checkpoints = [
