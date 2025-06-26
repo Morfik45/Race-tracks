@@ -132,7 +132,7 @@
     <h4 id="lapTimesHeader">Lap Times</h4>
     <div id="fastestLap" style="margin-bottom: 6px; display: none;">
       <span style="color: lightgreen;">Fastest Lap:</span>
-      <span id="fastestLapTime" style="color: rgb(37, 150, 190);"></span>
+      <span id="fastestLapTime" style="color: rgb(189, 2, 189);"></span>
     </div>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
@@ -204,11 +204,11 @@
                     const minTime = Math.min(...lapTimes);
                     const fastestIndex = lapTimes.indexOf(minTime);
                     document.getElementById("fastestLap").style.display = "block";
-                    document.getElementById("fastestLapTime").textContent = `Lap ${fastestIndex + 1} – ${formatTime(minTime)}`;
+                    document.getElementById("fastestLapTime").textContent = `Lap ${fastestIndex + 1}  ${formatTime(minTime)}`;
 
                     const timeSpans = document.querySelectorAll(".lapTimeValue");
                     timeSpans.forEach((span, i) => {
-                        span.style.color = (i === fastestIndex) ? "rgb(37, 150, 190)" : "white";
+                        span.style.color = (i === fastestIndex) ? "rgb(189, 2, 189)" : "white";
                     });
 
                     if (lap >= nLaps) {
