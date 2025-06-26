@@ -229,7 +229,10 @@
 
                     document.getElementById("lapTimes").innerHTML +=
                         `<p><span style="color: lightgreen;">Lap ${lap}:</span> <span class="lapTimeValue" style="color: white;">${formatTime(lapTime)}</span></p>`;
-
+                    // Auto scroll to bottom
+                    const lapTimesDiv = document.getElementById("lapTimes");
+                    lapTimesDiv.scrollTop = lapTimesDiv.scrollHeight;
+                    
                     // Dynamically resize lapTimesWindow for wider lap numbers
                     const lapDigits = lap.toString().length;
                     const baseWidth = 200; // min width
@@ -364,7 +367,7 @@
     sessionStorage.setItem("reloaded", "true");
     setTimeout(() => {
       location.reload();
-    }, 1000); // 1 second delay
+    }, 2000); // 1 second delay
   }
 };
 </script>
