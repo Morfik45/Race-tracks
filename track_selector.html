@@ -149,15 +149,99 @@
 
     // Hide menu when clicking outside
     overlay.onclick = () => {
-      overlay.style.display = "none";
-      trackMenu.style.display = "none";
+      sendCommand("close");
+      toggleOverlay(false);
     };
 
     window.addEventListener('keydown', (e) => {
-    if (e.key === "Escape") {
-        window.parent.postMessage({type: "close"}, "*");
+      if (e.key === "Escape") {
+          sendCommand("close");
+          toggleOverlay(false);
+      }
+    });
+
+    // function for sending a command to the game client
+    function sendCommand(command, args) {
+      try {
+        window.parent.postMessage({type: command, ...args}, "*");
+      } catch (error) {
+        logError(error, "sending command", { command, args });
+      }
     }
-});
+
+    // persistent storage for app state
+    const appState = {
+      focused: false,
+      tabbed: false,
+      pinned: false,
+    }
+
+    // track visible state of overlay and trackMenu
+    overLayVisible = false;
+
+    // function for showing/hiding the overlay and trackMenu
+    function toggleOverlay(isVisible) {
+      if (isVisible) {
+        overlay.style.display = "block";
+        trackMenu.style.display = "block";
+        overLayVisible = true;
+      } else {
+        overlay.style.display = "none";
+        trackMenu.style.display = "none";
+        overLayVisible = false;
+      }
+    }
+
+    // Event listener for the data sent by the game client
+    window.addEventListener("message", (event) => {
+      try {
+        const data = event.data.data;
+
+        // ignore empty data
+        if (!data || data == "" || data == []) return;
+
+        for (const key in data) {
+          try {
+            switch (key) {
+              // update user data
+              case "focused":
+                appState.focused = data[key];
+                break;
+              case "tabbed":
+                appState.tabbed = data[key];
+                break;
+              case "pinned":
+                appState.pinned = data[key]
+                break;
+            }
+
+          } catch (error) {
+            console.error(error, `processing data key ${key}`, { keyData: data[key] });
+          }
+        }
+
+        // update overlay visibility based on app state
+        // If appState.focused is true, show the overlay
+        if (appState.focused) {
+          // only show if appState.tabbed is also true
+          if (appState.tabbed) {
+            toggleOverlay(true);
+          } else {
+            toggleOverlay(false);
+          }
+        } else {
+          toggleOverlay(false);
+        }
+
+      } catch (error) {
+        console.error(error, "message event handler", { eventData: typeof event.data === 'object' ? 'object structure' : event.data });
+      }
+    });
+
+    // onload load all cached data
+    window.onload = () => {
+      sendCommand("getData")
+    };
   </script>
 
 </body>
