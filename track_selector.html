@@ -153,10 +153,13 @@
       trackMenu.style.display = "none";
     };
 
-    window.addEventListener('keydown', (e) => {
-    if (e.key === "Escape") {
-        window.parent.postMessage({type: "close"}, "*");
+window.addEventListener('keydown', (e) => {
+  if (e.key === "Escape") {
+    if (trackMenu.style.display !== "none") {
+      trackMenu.style.display = "none";
+      overlay.style.display = "none";
     }
+  }
 });
   </script>
 
