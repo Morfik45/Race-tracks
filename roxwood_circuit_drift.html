@@ -1,5 +1,8 @@
-<html><head>
-    <title>Roxwood Circuit Drift Track</title>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Roxwood Circuit Drift Track<</title>
     <style>
         body {
             font-family: impact;
@@ -59,7 +62,10 @@
             overflow: auto;
             min-width: 200px;
             max-width: 400px;
+            max-height: 600px;
             cursor: move;
+            transition: min-width 0.3s ease;
+
         }
 
         #lapTimesWindow h4 {
@@ -69,6 +75,13 @@
 
         #lapTimesWindow p {
             margin: 3px 0;
+        }
+
+        #lapTimes {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-color: lightgreen transparent;
+            scrollbar-width: thin;
         }
 
         #exportBtn {
@@ -83,6 +96,33 @@
         #exportBtn:hover {
             background-color: rgba(144, 238, 144, 0.1);
         }
+
+        /* For WebKit browsers */
+#lapTimes::-webkit-scrollbar {
+  width: 8px;
+}
+
+#lapTimes::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3); /* dark track */
+  border-radius: 5px;
+}
+
+#lapTimes::-webkit-scrollbar-thumb {
+  background-color: lightgreen; /* thumb color */
+  border-radius: 5px;
+  border: 2px solid rgba(0, 0, 0, 0.6); /* border around the thumb */
+}
+
+#lapTimes::-webkit-scrollbar-thumb:hover {
+  background-color: #90ee90; /* lighter green on hover */
+}
+
+/* For Firefox */
+#lapTimes {
+  scrollbar-color: lightgreen rgba(0, 0, 0, 0.3);  /* thumb and track */
+  scrollbar-width: thin;
+}
+
     </style>
 </head>
 <body>
@@ -92,8 +132,8 @@
     <button id="restart" style="display:none;">Restart Race</button>
     <button id="settingsBtn">Settings</button>
 
-    <!-- Settings Menu -->
     <div id="settingsMenu">
+        <button style="float:right; background:none; color:lightgreen; border:none; font-size:1em; cursor:pointer;" onclick="document.getElementById('settingsMenu').style.display='none'">✕</button>
         <div>
             <input type="number" id="lapInput" value="3" min="1" style="width: 40px;">
             <button id="setLapsBtn">Set Lap Number</button>
@@ -106,13 +146,13 @@
         </div>
 
         <div id="audioSettingsMenu">
-            <label><input type="checkbox" id="sfxFinish" checked=""> Finish Audio</label>
-            <label><input type="checkbox" id="sfxNextLap" checked=""> Next Lap Audio</label>
-            <label><input type="checkbox" id="sfxCheckpoint" checked=""> Checkpoint Audio</label>
+            <label><input type="checkbox" id="sfxFinish" checked> Finish Audio</label>
+            <label><input type="checkbox" id="sfxNextLap" checked> Next Lap Audio</label>
+            <label><input type="checkbox" id="sfxCheckpoint" checked> Checkpoint Audio</label>
         </div>
     </div>
 
-    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Drift Track</p>
+    <p style="color:#f0c850; font-size: 1.15em; line-height: 22px">Roxwood Circuit Drift Track<</p>
     <p style="color:lightgreen">Author: <span style="color:white">Morfik</span></p>
     <p style="color:lightgreen">Lap: <span style="color:white" id="rlap">1/3</span></p>
     <span style="color: white" id="timer">00:00:000</span>
@@ -120,6 +160,10 @@
 
 <div id="lapTimesWindow" style="left: 1245px; top: -737px;">
     <h4 id="lapTimesHeader">Lap Times</h4>
+    <div id="fastestLap" style="margin-bottom: 6px; display: none;">
+      <span style="color: lightgreen;">Fastest Lap:</span>
+      <span id="fastestLapTime" style="color: rgb(189, 2, 189);"></span>
+    </div>
     <div id="lapTimes"></div>
     <p id="totalTime" style="color: lightgreen; font-size: 1em; display: none;">Total Time: <span style="color: white;" id="totalTimeValue"></span></p>
     <button id="exportBtn" onclick="copyLapTimes()">Export</button>
@@ -131,17 +175,16 @@
     let isPlaying = false;
     let nLaps = 3;
 
-    // On load, restore saved laps if any
     window.onload = () => {
         const saved = localStorage.getItem("savedLaps");
         if (saved) {
-            nLaps = parseInt(saved);
-            document.getElementById("lapInput").value = nLaps;
-            document.getElementById("rlap").innerText = `1/${nLaps}`;
+        nLaps = parseInt(saved);
+        document.getElementById("lapInput").value = nLaps;
+        document.getElementById("rlap").innerText = `1/${nLaps}`;
         }
-    };
+}
 
-    const checkpoints = [
+ const checkpoints = [
         {x: -2800.71875, y: 8083.9716796875, z: 43.0833854675293},
 {x: -2700.2587890625, y: 8078.7744140625, z: 42.83058929443359},
 {x: -2579.550537109375, y: 8075.25732421875, z: 45.98161697387695},
@@ -204,8 +247,29 @@
                 if (currentCheckpoint >= checkpoints.length) {
                     const lapTime = Date.now() - startTime;
                     lapTimes.push(lapTime);
+
                     document.getElementById("lapTimes").innerHTML +=
-                        `<p><span style="color: lightgreen;">Lap ${lap}:</span> <span style="color: white;">${formatTime(lapTime)}</span></p>`;
+                        `<p><span style="color: lightgreen;">Lap ${lap}:</span> <span class="lapTimeValue" style="color: white;">${formatTime(lapTime)}</span></p>`;
+                    // Auto scroll to bottom
+                    const lapTimesDiv = document.getElementById("lapTimes");
+                    lapTimesDiv.scrollTop = lapTimesDiv.scrollHeight;
+                    
+                    // Dynamically resize lapTimesWindow for wider lap numbers
+                    const lapDigits = lap.toString().length;
+                    const baseWidth = 200; // min width
+                    const charWidth = 10;  // estimated width per extra digit
+                    const newWidth = baseWidth + (lapDigits - 1) * charWidth * 2;
+                    document.getElementById("lapTimesWindow").style.minWidth = `${newWidth}px`;
+
+                    const minTime = Math.min(...lapTimes);
+                    const fastestIndex = lapTimes.indexOf(minTime);
+                    document.getElementById("fastestLap").style.display = "block";
+                    document.getElementById("fastestLapTime").textContent = `Lap ${fastestIndex + 1}  ${formatTime(minTime)}`;
+
+                    const timeSpans = document.querySelectorAll(".lapTimeValue");
+                    timeSpans.forEach((span, i) => {
+                        span.style.color = (i === fastestIndex) ? "rgb(189, 2, 189)" : "white";
+                    });
 
                     if (lap >= nLaps) {
                         safeSFX(5);
@@ -215,7 +279,7 @@
                         document.getElementById("totalTime").style.display = "block";
                         document.getElementById("totalTimeValue").innerText = formatTime(total);
                     } else {
-                        lap++; // increment only here
+                        lap++;
                         safeSFX(3);
                         currentCheckpoint = 0;
                         setCheckpoint(checkpoints[0].x, checkpoints[0].y);
@@ -243,10 +307,11 @@
 
     function copyLapTimes() {
         const lines = Array.from(document.querySelectorAll("#lapTimes p")).map(p => p.textContent);
+        const fastest = document.getElementById("fastestLapTime").textContent.trim();
         const total = document.getElementById("totalTime").style.display !== "none"
             ? `\n${document.getElementById("totalTime").textContent.trim()}`
             : "";
-        const fullText = [`LAP TIMES - ${userDetails.vehicleName || "Unknown"}`, ...lines].join("\n") + total;
+        const fullText = [`LAP TIMES - ${userDetails.vehicleName || "Unknown"}`, `Fastest Lap: ${fastest}`, ...lines].join("\n") + total;
 
         const textarea = document.createElement("textarea");
         textarea.value = fullText;
@@ -265,46 +330,33 @@
     }
 
     document.getElementById("start").onclick = startGame;
-    document.getElementById("restart").onclick = () => {
-        // Reload page, laps are remembered by localStorage
-        location.reload();
-    };
+    document.getElementById("restart").onclick = () => location.reload();
     document.getElementById("setLapsBtn").onclick = () => {
         const val = parseInt(document.getElementById("lapInput").value);
         nLaps = isNaN(val) || val < 1 ? 1 : val;
         document.getElementById("rlap").innerText = `1/${nLaps}`;
         localStorage.setItem("savedLaps", nLaps);
     };
-
     document.getElementById("settingsBtn").onclick = () => {
         const menu = document.getElementById("settingsMenu");
         menu.style.display = menu.style.display === "none" ? "block" : "none";
     };
-
-    // Track Selector
     document.getElementById("changeTrackBtn").onclick = function () {
         const url = this.getAttribute("data-url");
-        if (url) {
-            location.href = url;
-        }
+        if (url) location.href = url;
     };
-
-    // Audio settings
     document.getElementById("sfxFinish").onchange = (e) => audioPrefs.finish = e.target.checked;
     document.getElementById("sfxNextLap").onchange = (e) => audioPrefs.nextLap = e.target.checked;
     document.getElementById("sfxCheckpoint").onchange = (e) => audioPrefs.checkpoint = e.target.checked;
 
-    // Drag lapTimesWindow
     const dragWindow = document.getElementById("lapTimesWindow");
     let offsetX, offsetY, isDragging = false;
-
     dragWindow.addEventListener("mousedown", (e) => {
         if (e.target.tagName === "BUTTON") return;
         isDragging = true;
         offsetX = e.clientX - dragWindow.offsetLeft;
         offsetY = e.clientY - dragWindow.offsetTop;
     });
-
     document.addEventListener("mouseup", () => isDragging = false);
     document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
@@ -312,11 +364,9 @@
         dragWindow.style.top = `${e.clientY - offsetY}px`;
     });
 
-    // Receive vehicle name
     window.addEventListener("message", (event) => {
         const data = event.data.data;
         if (!data) return;
-
         for (const key in data) {
             if (key === "pos_x") player_x = data[key];
             if (key === "pos_y") player_y = data[key];
@@ -332,7 +382,9 @@
             window.parent.postMessage({type: "pin"}, "*");
         }
     });
+    
+
 </script>
 
-
-</body></html>
+</body>
+</html>
