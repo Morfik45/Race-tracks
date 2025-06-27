@@ -158,20 +158,18 @@
       overlay.style.display = "none";
     }
 
-    // Wait until iframe is visible and focused
-    function waitUntilVisible() {
-      let checks = 0;
-      const check = setInterval(() => {
-        if (document.hasFocus()) {
-          showTrackMenu();
-          clearInterval(check);
-        }
-        if (++checks > 10) clearInterval(check); // Stop after 10 tries
-      }, 300);
-    }
+// Listen for visibility changes from FiveM
+window.addEventListener("message", (event) => {
+  const data = event.data;
 
-    // Start checking when loaded
-    window.onload = waitUntilVisible;
+  if (typeof data.hidden !== "undefined") {
+    if (data.hidden) {
+      hideTrackMenu();
+    } else {
+      showTrackMenu();
+    }
+  }
+});
   </script>
 
 </body>
