@@ -9,11 +9,11 @@
       font-family: sans-serif;
       margin: 0;
       padding: 20px;
-      overflow: hidden;
+       overflow:hidden;
     }
 
     #trackMenu {
-      display: none;
+      display: block;
       position: fixed;
       top: 100px;
       left: 50%;
@@ -70,12 +70,16 @@
       background: rgba(144, 238, 144, 0.1);
     }
 
+    #changeTrackBtn,
     #confirmTrackBtn {
       padding: 8px 12px;
       border: 1px solid lightgreen;
       background: transparent;
       color: white;
       cursor: pointer;
+    }
+
+    #confirmTrackBtn {
       margin-top: 10px;
       width: 100%;
     }
@@ -89,21 +93,24 @@
   <!-- Track Selector Menu -->
   <div id="trackMenu">
     <h3 style="text-align: center; margin-bottom: 10px;">Select a Track</h3>
-
+    
     <div id="trackPreview">Track preview will go here</div>
-
+    
     <div id="trackList">
       <button 
         data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html"
         data-img="Images/drift_roxwood.png">
         Roxwood Circuit Drift
       </button>
+      
+      <!-- Add more track buttons here -->
     </div>
-
+    
     <button id="confirmTrackBtn">Confirm</button>
   </div>
 
   <script>
+    const changeTrackBtn = document.getElementById("changeTrackBtn");
     const trackMenu = document.getElementById("trackMenu");
     const confirmTrackBtn = document.getElementById("confirmTrackBtn");
     const preview = document.getElementById("trackPreview");
@@ -113,7 +120,7 @@
     let selectedTrackUrl = null;
     let selectedButton = null;
 
-    // Track selection logic
+    // Handle selection
     trackButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         if (selectedButton) {
@@ -125,50 +132,31 @@
         btn.style.backgroundColor = "rgba(144, 238, 144, 0.3)";
 
         const img = btn.getAttribute("data-img");
-        preview.innerHTML = img
-          ? `<img src="${img}" style="max-width: 100%; max-height: 100%; object-fit: cover;">`
-          : "<em>No preview available</em>";
+        if (img) {
+          preview.innerHTML = `<img src="${img}" style="max-width: 100%; max-height: 100%; object-fit: cover;">`;
+        } else {
+          preview.innerHTML = "<em>No preview available</em>";
+        }
       });
     });
 
-    // Load selected track
+    // Confirm and load
     confirmTrackBtn.onclick = () => {
       if (selectedTrackUrl) {
         location.href = selectedTrackUrl;
       }
     };
 
-    // Close menu if overlay clicked
-    overlay.onclick = () => hideTrackMenu();
-
-    // ESC to close
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && trackMenu.style.display !== "none") {
-        hideTrackMenu();
-      }
-    });
-
-    function showTrackMenu() {
-      trackMenu.style.display = "block";
-      overlay.style.display = "block";
-    }
-
-    function hideTrackMenu() {
-      trackMenu.style.display = "none";
+    // Hide menu when clicking outside
+    overlay.onclick = () => {
       overlay.style.display = "none";
-    }
+      trackMenu.style.display = "none";
+    };
 
-// Listen for visibility changes from FiveM
-window.addEventListener("message", (event) => {
-  const data = event.data;
-
-  if (typeof data.hidden !== "undefined") {
-    if (data.hidden) {
-      hideTrackMenu();
-    } else {
-      showTrackMenu();
+    window.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        window.parent.postMessage({type: "close"}, "*");
     }
-  }
 });
   </script>
 
