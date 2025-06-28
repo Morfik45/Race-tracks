@@ -1,0 +1,1529 @@
+<html><head>
+    <title>Transport Tycoon - Staff Panel</title>
+    <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
+</head>
+<body>
+    <div id="cef-fix">.</div>
+    <div id="staffpanel" style="display:none;">
+        <input id="inp-user_id" type="hidden" name="user_id" value="0">
+        <input id="inp-username" type="hidden" name="username" value="">
+        <input id="inp-reason" type="hidden" name="reason" value="">
+        <input id="inp-message" type="hidden" name="message" value="">
+        <input id="inp-bantype" type="hidden" name="bantype" value="0">
+        <input id="inp-category1" type="hidden" name="category1" value="">
+        <input id="inp-category2" type="hidden" name="category2" value="">
+        <input id="inp-category3" type="hidden" name="category3" value="">
+        <input id="inp-category4" type="hidden" name="category4" value="">
+        <input id="inp-category5" type="hidden" name="category5" value="">
+        <input id="inp-category6" type="hidden" name="category6" value="">
+        <input id="inp-category7" type="hidden" name="category7" value="">
+        <input id="inp-category8" type="hidden" name="category8" value="">
+        <input id="inp-category9" type="hidden" name="category9" value="">
+        <input id="inp-category10" type="hidden" name="category10" value="">
+        <input id="inp-category11" type="hidden" name="category11" value="">
+        <input id="inp-category12" type="hidden" name="category12" value="">
+        <input id="inp-category13" type="hidden" name="category13" value="">
+        <input id="inp-category14" type="hidden" name="category14" value="">
+        <div id="staffpanel_header" class="panel-header">
+            <!-- This element can move the window around! -->
+        </div>
+        <div id="staffpanel_nav" class="panel-header">
+            <button id="btn-nav-blank" onclick="setPanelE(this)" class="btn-nav" value="blank">Home</button>
+            <button id="btn-nav-userlist" onclick="setPanelE(this)" class="btn-nav" value="userlist">User List</button>
+            <button perm="staff" id="btn-nav-manual" onclick="setPanelE(this)" class="btn-nav" value="manual" disabled="disabled">Actions</button>
+            <button perm="staff" id="btn-nav-reports" onclick="setPanelE(this)" class="btn-nav" value="reports" disabled="disabled">History</button>
+            <button perm="staff" id="btn-nav-misc" onclick="setPanelE(this)" class="btn-nav" value="misc" disabled="disabled">Misc</button>
+            <button id="btn-nav-close" onclick="closeWindow(true)" class="btn-close">Close</button>
+            <button id="btn-nav-leave" onclick="closeWindow(false)" class="btn-close-smol">_</button>
+        </div>
+        <div id="panel_blank" class="panel">
+            <div class="panel-content">
+                <h2>Transport Tycoon Staff Panel</h2>
+                <h3>A high quality designer-grade interface by Glitch</h3>
+                <hr>
+                <h3>How to use</h3>
+                <p>
+                    Use the navigation menu to access different parts of the panel.
+                    Name, ID, etc. should be shared between tabs.
+                    The window can be dragged around!
+                    Use the close button to close the window.
+                </p>
+                <hr>
+                <h3>Disclaimer</h3>
+                <p>
+                    Information gathered from this panel is for staff eyes only, do not share it with anyone of the public.
+                    The features present in this panel is only to be used for staff related issues. Abuse of features will result in your privilegies being revoked.
+                </p>
+                <hr>
+                <p>
+                    Are you not a staff member? Good for you! You now have a new toy you can mess around with!
+                </p>
+                <img src="http://i.imgur.com/yoe0zsk.gif">
+                <p>None of the features would work for you anyway</p>
+            </div>
+        </div>
+        <div id="panel_userlist" style="display:none;" class="panel">
+            <input class="btn-misc" userselect="" type="text" placeholder="Search for a user (by Elfshot)" onkeyup="let userTable = document.getElementById('panel_userlist').children[1].children[0].children[0].children[0].children; let userSelect = document.getElementById('panel_userlist').children[0].value; for (let i = 1; i < userTable.length; i++) { const row = userTable[i]; const rowChild = row.children; if (!rowChild[0].innerHTML.toLowerCase().includes(userSelect.toLowerCase()) &amp;&amp; !rowChild[1].innerHTML.includes(userSelect)) { row.style.display = 'none'; } else { row.style.display = ''; } }" style="width:90%">
+            <div class="panel-content">
+                <div id="table-userlist">
+                    <!-- <tr><th>Name</th><th>ID</th></tr>
+                    <tr onclick="setUD(this)"><td class="tbl-name">Collins</td><td class="tbl-id">2</td></tr> -->
+                    <p>Seems like there is nothing here yet, did you refresh?</p>
+                    <button onclick="requestRefresh()" class="btn-refresh">Refresh</button>
+                </div>
+            </div>
+            <div class="panel-bottom">
+                <!-- <select onchange="udReason(this)" name="reason" id="sel-reason">
+                    <option></option>
+                    <option>VDM / Ramming</option>
+                    <option>Hate speech</option>
+                    <option>AFK</option>
+                    <option>Ignoring ATC</option>
+                    <option>Triggered me</option>
+                </select> -->
+                <button onclick="requestRefresh()" class="btn-refresh">Refresh</button>
+            </div>
+        </div>
+        <div id="panel_manual" style="display:none;" class="panel">
+            <div class="panel-content">
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Username:</label></td><td class="tbl-input"><input disabled="" name="username" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>ID:</label></td><td class="tbl-input"><input onchange="udUserId(this)" name="user_id" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Player Actions:</label></td><td class="tbl-input"><button perm="staff" id="btn-nav-direct-2" onclick="setPanelE(this)" class="btn-misc" value="direct" disabled="disabled">Show Player Actions</button></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Reason:</label></td><td class="tbl-input"><input onchange="udReason(this)" placeholder="Reason" name="reason" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>Time: <span id="bantypen">30 min</span></label></td><td class="tbl-label">
+                        <input type="range" value="0" min="0" max="8" step="1" class="btn-misc" oninput="udBantype(this.value)" style="width:-webkit-fill-available">
+                    </td></tr>
+                </tbody></table>
+                <hr>
+                <!-- Reason Selector -->
+                <div id="reason_selector">
+                    <table id="tbl_reasons">
+                        <!-- Among Us -->
+                        <!-- <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Ramming / Vehicle Deathmatching', 2)" class="btn-misc">VDM</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Stealing player owned vehicles', 2)" class="btn-misc">Stealing Vehicles</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Failure to follow ATC and flight rules', 2)" class="btn-misc">Misuse ATC</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Using vehicles in areas where they are not allowed', 2)" class="btn-misc">Misuse Vehicle</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Trolling and/or being unwanted in the game', 2)" class="btn-misc">Trolling</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Hate speech / Disrespecting players', 2)" class="btn-misc">Hate / Disrespect</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Flooding / Spamming', 2)" class="btn-misc">Spamming</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Using foreign languages in chat, english only', 2)" class="btn-misc">English Only</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('AFK / Idling and wasting a server slot', 2)" class="btn-misc">AFK</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Confirmed cheater', 1)" class="btn-misc">Confirmed Cheater</button></td></tr>
+                        <tr><td class="tbl-label" colspan="2"><button onclick="setReason('Not following event rules, go to another server.', 2)" class="btn-misc">Disobeying Event</button></td></tr> -->
+                    <tr><td class="tbl-label" colspan="2">Trolling</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Ramming / Vehicle Deathmatching</button></td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Stealing player owned vehicles</button></td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Trolling</button></td></tr><tr><td class="tbl-label" colspan="2">ATC</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">ATC Failure</button></td></tr><tr><td class="tbl-label" colspan="2">Idling</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">AFK / Idling and Blocking</button></td></tr><tr><td class="tbl-label" colspan="2">Chat &amp; behavior</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Hate speech / Racism</button></td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Disrespecting Players</button></td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Flooding / Spamming</button></td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Foreign Language</button></td></tr><tr><td class="tbl-label" colspan="2">Cheating</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Confirmed Cheater</button></td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Exploiting / Abuse</button></td></tr><tr><td class="tbl-label" colspan="2">User Information</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Username Violation</button></td></tr><tr><td class="tbl-label" colspan="2">Events</td></tr><tr><td class="tbl-label" colspan="2"><button class="btn-misc">Not Participating in Event</button></td></tr></table>
+                </div>
+                <div id="reason_guideline" style="display:none">
+                    <button id="reason_preset_button" class="btn-misc tbl-input">Change Preset</button>
+                    <h2 name="reason">#reason_name</h2>
+                    <p id="reason_guideline_text">#reason_guideline</p>
+                    <em><b>Note:</b> These are guidelines, check the Discord for staff rules</em>
+                </div>
+                <hr>
+                <p>
+                    Give them what they deserve
+                    <br><br>
+                    <b><u>Unlock the safety by checking the box</u></b>
+                    <!--<button onclick="" class="btn-tp smol">Teleport</button>-->
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b></b><input type="checkbox" perm="staff" onchange="enableButton('kick', this);enableButton('ban', this);enableButton('mute', this)" disabled="disabled">
+                </p>
+            </div>
+            <div class="panel-bottom">
+                <button onclick="actionTpTo()" class="btn-tp">Teleport To</button>
+                <button onclick="actionSpectate()" class="btn-spectate">Spectate</button>
+                <button onclick="actionTpToMe()" class="btn-tp">Bring To Me</button>
+                <br>
+                <br>
+                <button disabled="" id="btn-kick" onclick="actionKick()" class="btn-kick">Kick</button>
+                <button disabled="" id="btn-mute" onclick="actionMute()" class="btn-mute">30 min mute</button>
+                <button disabled="" id="btn-ban" onclick="actionBan()" class="btn-ban">Suspend for 30 min</button>
+
+                <!-- <button onclick="actionTpTo()" class="btn-tp">Teleport To</button>
+                <button onclick="actionSpectate()" class="btn-spectate">Spectate</button>
+                <button onclick="actionTpToMe()" class="btn-tp">Bring To Me</button>
+                <br/><br/>
+                <input type="checkbox" perm="staff" onchange="enableButton('kick', this);enableButton('ban', this);enableButton('mute', this)"/>
+                <br/><br/>
+                <button disabled id="btn-kick" onclick="actionKick()" class="btn-kick">Kick</button>
+                <button disabled id="btn-mute" onclick="actionMute()" class="btn-mute">Mute</button>
+                <button disabled id="btn-ban" onclick="actionBan()" class="btn-ban">Ban</button> -->
+            </div>
+        </div>
+        <div id="panel_search" style="display:none;" class="panel">
+            <div class="panel-content">
+                <hr>
+                <h3>User Search / Query</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Registration:</label></td><td class="tbl-input"><input onchange="udRegistration(this)" name="registration" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Username:</label></td><td class="tbl-input"><input disabled="" name="username" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>User ID:</label></td><td class="tbl-input"><input disabled="" name="user_id" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>Registration:</label></td><td class="tbl-input"><input disabled="" name="registration" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>Phone:</label></td><td class="tbl-input"><input disabled="" name="phone" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>Status:</label></td><td class="tbl-input"><input disabled="" name="status" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <p>
+                    New staff, who dis?
+                </p>
+            </div>
+            <div class="panel-bottom">
+                <button disabled="" class="btn-search">Search</button>
+            </div>
+        </div>
+        <div id="panel_banlist" style="display:none;" class="panel">
+            <div class="panel-content">
+                <div id="table-banlist">
+                    <!-- <tr><th>Name</th><th>ID</th></tr>
+                    <tr onclick="setUD(this)"><td class="tbl-name">Collins</td><td class="tbl-id">2</td></tr> -->
+                    <p>Seems like there is nothing here yet, did you refresh?</p>
+                    <button onclick="requestRefresh()" class="btn-refresh">Refresh</button>
+                </div>
+            </div>
+            <div class="panel-bottom">
+                <button onclick="requestRefresh()" class="btn-refresh">Refresh</button>
+                <button disabled="" onclick="" class="btn-ban">Unban</button>
+            </div>
+        </div>
+        <div id="panel_warnings" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>User Warnings</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Username:</label></td><td class="tbl-input"><input disabled="" name="username" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>User ID:</label></td><td class="tbl-input"><input onchange="udUserId(this)" name="user_id" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Warning:</label></td><td class="tbl-input"><input onchange="udReason(this)" name="reason" type="text"></td></tr>
+                    <tr><td></td><td><button disabled="" class="btn-misc" onclick="giveWarning()">Issue Warning</button></td></tr>
+                </tbody></table>
+                <hr>
+                <div id="table-warnlist">
+                    <h3>There's nothing here.</h3>
+                    <!-- <table>
+                        <tr><th>Date</th><th>Warning</th><th>Issued by</th></tr>
+                        <tr><td timestamp="23212135246">Wed Mar 28</td><td>Not using ATC</td><td>TheCaptain</td></tr>
+                        <tr><td timestamp="23233832837">Sun Apr 1</td><td>Ramming several players</td><td>BrianW</td></tr>
+                    </table> -->
+                </div>
+            </div>
+            <div class="panel-bottom">
+                <button onclick="requestWarnings()" class="btn-refresh">Fetch Warnings</button>
+            </div>
+        </div>
+        <div id="panel_reports" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>User History</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Username:</label></td><td class="tbl-input"><input disabled="" name="username" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>User ID:</label></td><td class="tbl-input"><input onchange="udUserId(this)" name="user_id" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><button onclick="addReportNote()" class="btn-add">Add Note</button></td><td class="tbl-input"><textarea rows="1" class="maxwidth" maxlength="1000" placeholder="Custom note to add to history" onchange="udReason(this)" name="reason" type="text"></textarea></td></tr>
+                </tbody></table>
+                <hr>
+                <div id="table-reportlist">
+                    <h3>There's nothing here yet</h3>
+                </div>
+            </div>
+            <div class="panel-bottom">
+                <button onclick="requestReports()" class="btn-refresh">Fetch History</button>
+                <button onclick="requestMadeReports()" class="btn-refresh">Fetch Reports</button>
+
+            </div>
+        </div>
+        <div id="panel_playerlist" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>Player List Management</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td><button class="btn-misc" onclick="requestPlayerList('hideme')">Hide Me</button></td><td>Hide yourself from the player list</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('showme')">Show Me</button></td><td>Show yourself on the player list</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('title')">Set Job Title</button></td><td class="tbl-input"><input name="plist_title" type="text"></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('namecolor')">Set Name Color</button></td><td class="tbl-input"><input name="plist_namecolor" type="text"></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('jobcolor')">Set Job Color</button></td><td class="tbl-input"><input name="plist_jobcolor" type="text"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('id')">Set ID Override</button></td><td class="tbl-input"><input name="plist_id" type="number"></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('online')">Set Online Override</button></td><td class="tbl-input"><input name="plist_online" type="text"></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPlayerList('level')">Set Level Override</button></td><td class="tbl-input"><input name="plist_level" type="number"></td></tr>
+                </tbody></table>
+                <hr>
+            </div>
+            <div class="panel-bottom">
+                You can manage your appearance on the player list here.
+            </div>
+        </div>
+        <div id="panel_recovery" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>User Recovery Tool</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Username:</label></td><td class="tbl-input"><input disabled="" name="username" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>User ID:</label></td><td class="tbl-input"><input onchange="udUserId(this)" name="user_id" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Item Name:</label></td><td class="tbl-input"><input id="recovery-item-name" name="item_name" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>Amount:</label></td><td class="tbl-input"><input id="recovery-item-amount" name="item_amount" placeholder="0" type="number"></td></tr>
+                    <tr><td></td><td><button class="btn-misc" onclick="requestRecovery('item')">Give Item</button></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Bank Amount:</label></td><td class="tbl-input"><input id="recovery-bank-amount" name="bank_amount" placeholder="0" type="number"></td></tr>
+                    <tr><td></td><td><button class="btn-misc" onclick="requestRecovery('bank')">Give Bank</button></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Stat Category:</label></td><td class="tbl-input"><input id="recovery-stat-category" name="stat_category" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>Stat Name:</label></td><td class="tbl-input"><input id="recovery-stat-name" name="stat_name" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>XP Amount:</label></td><td class="tbl-input"><input id="recovery-stat-amount" name="stat_amount" placeholder="0" type="number"></td></tr>
+                    <tr><td></td><td><button class="btn-misc" onclick="requestRecovery('stat')">Give Stats</button></td></tr>
+                </tbody></table>
+                <hr>
+            </div>
+            <div class="panel-bottom">
+                Use this tool to give stats and items to players.
+            </div>
+        </div>
+        <div id="panel_memes" style="display:none;" class="panel">
+            <div class="panel-content">
+                <img src="https://i.imgur.com/lMNLJT2.png">
+            </div>
+            <div class="panel-bottom">
+                Get back to work you lazy fuck
+            </div>
+        </div>
+        <div id="panel_psa" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>PSA Menu</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td><label class="btn-misc">PSA Line 1</label></td><td class="tbl-input"><input onchange="udCategory(1,this)" name="category1" type="text" placeholder="PSA Message"></td></tr>
+                    <tr><td><label class="btn-misc">PSA Line 2</label></td><td class="tbl-input"><input onchange="udCategory(2,this)" name="category2" type="text" placeholder="PSA Message"></td></tr>
+                    <tr><td><label class="btn-misc">PSA Line 3</label></td><td class="tbl-input"><input onchange="udCategory(3,this)" name="category3" type="text" placeholder="PSA Message"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><td><button perm="psa" disabled="disabled" class="btn-misc" onclick="requestAction('psa-img')">Image</button></td><td><input class="btn-misc" onchange="udCategory(4,this)" name="category4" type="text" placeholder="Image URL"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestAction('psa')">Chat</button></td><td class="tbl-input">1 | A chat PSA</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPSA('oneliner',1)">One-Liner</button></td><td class="tbl-input">1 | Tiny block that blocks your screen</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPSA('news',3)">News Message</button></td><td class="tbl-input">3 | News flash, kinda fancy. Everyone hates you tho</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPSA('message',2)">Message</button></td><td class="tbl-input">2 | It's like getting wasted just not saying wasted</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPSA('overlay',3)">Overlay</button></td><td class="tbl-input">3 | Literally blocks the entire screen with your shit</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPSA('popup',2)">Popup</button></td><td class="tbl-input">2 | It pops up and annoys the person</td></tr>
+                    <tr><td><button class="btn-misc" onclick="requestPSA('notify',1)">Notify</button></td><td class="tbl-input">1 | That little thing over the minimap</td></tr>
+                    <tr><td colspan="2"><hr></td></tr>
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                I will fucking strangle you with my own hands if you use this
+            </div>
+        </div>
+        <div id="panel_appearance" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>Server Appearance Tool</h3>
+                <table>
+                    <tbody><tr><td><b>Appearance</b></td><td><hr></td></tr>
+                    <tr><td><label class="btn-misc">Region</label></td><td class="tbl-input"><input onchange="udConvar('server_region',this)" name="server_region" type="text" placeholder="Region (EU)"></td></tr>
+                    <tr><td><label class="btn-misc">Number</label></td><td class="tbl-input"><input onchange="udConvar('server_number',this)" name="server_number" type="text" placeholder="Number (5)"></td></tr>
+                    <tr><td><label class="btn-misc">Name</label></td><td class="tbl-input"><input onchange="udConvar('server_name',this)" name="server_name" type="text" placeholder="Name (Beta)"></td></tr>
+                    <tr><td><label class="btn-misc">Message</label></td><td class="tbl-input"><input onchange="udConvar('server_motd',this)" name="server_motd" type="text" placeholder="MOTD (Message)"></td></tr>
+                    <tr><td><input class="btn-misc" onchange="udConvar('server_beta',this)" name="server_beta" type="checkbox"></td><td class="tbl-input"><label class="btn-misc">Patreon Only (Beta Access role)</label></td></tr>
+                    <tr><td><input class="btn-misc" onchange="udConvar('server_staff',this)" name="server_staff" type="checkbox"></td><td class="tbl-input"><label class="btn-misc">Staff Only</label></td></tr>
+                    <tr><td colspan="2"><button class="btn-misc btn-refresh" onclick="eventPreview()">Preview</button></td></tr>
+
+                    <tr><td><b>Preview</b></td><td><hr></td></tr>
+                    <tr><td><label class="btn-misc">Server Title</label></td><td style="background-color:black"><div id="event-preview"></div></td></tr>
+                    <tr><td><label class="btn-misc">Chat Logger</label></td><td class="tbl-input"><input disabled="" name="chatlog_prefix" type="text"></td></tr>
+                    <tr><td><label class="btn-misc">Master</label></td><td class="tbl-input"><input onchange="udConvar('sv_master1',this)" name="sv_master1" type="text" placeholder="Leave blank to remove from server list"></td></tr>
+
+                    <tr><td><b>Color Index</b></td><td><hr></td></tr>
+                    <tr><td></td><td><img src="https://puu.sh/DcXHN.png"></td></tr>
+
+                    <tr><td><b>Enable</b></td><td><hr></td></tr>
+                    <tr><td></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-apply', this)" disabled="disabled"></td></tr>
+
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                <button disabled="" id="btn-event-apply" class="btn-kick" onclick="eventApply()">Apply Changes</button>
+                <button class="btn-refresh" onclick="eventFetch()">Fetch Current Settings</button>
+                <br><br>
+                Appearance changes may take 2 minutes to apply
+            </div>
+        </div>
+        <div id="panel_misc" style="display:none;" class="panel">
+            <div class="panel-content">
+                <table>
+                    <tbody><tr><th>Vehicle</th><th></th></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('delete')" disabled="disabled">Delete</button></td><td>Delete your current vehicle</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('repair')" disabled="disabled">Repair</button></td><td>Repair your current vehicle</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('launch')" disabled="disabled">Launch</button></td><td>Launch your vehicle forward</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('refuel')" disabled="disabled">Refuel</button></td><td>Refuel your current vehicle</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc-half" onclick="requestAction('spawn_staff')" disabled="disabled">Staff</button><button perm="admin" class="btn-misc-half" onclick="requestAction('spawn_veh')" disabled="disabled">Car</button></td><td><input class="btn-misc" onchange="udCategory(2,this)" name="category2" type="text" placeholder="Chernobog"></td></tr>
+
+                    <!-- <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('veh_staff1')">Spawn Staff CVPI</button></td><td>Spawn the staff CVPI</td></tr> -->
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('veh_security')" disabled="disabled">Spawn Staff Patrol</button></td><td>Spawn the staff Patrol Car</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('veh_jugular')" disabled="disabled">Spawn Staff Jugular</button></td><td>Spawn the staff Jugular</td></tr>
+                    <!-- <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('security3')">Spawn Staff Ferrari</button></td><td>Spawn the staff Ferrari</td></tr> -->
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('staffdrone')" disabled="disabled">Spawn Staff Drone</button></td><td>Spawn the staff Drone</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('veh_spawnmenu')" disabled="disabled">Vehicle Selection Menu</button></td><td>Access the Vehicle Selection</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Action Menus</th><th></th></tr>
+                    <tr><td><button perm="staff" id="btn-nav-direct" onclick="setPanelE(this)" class="btn-misc" value="direct" disabled="disabled">Player Actions</button></td><td>Actions that affect the selected player</td></tr>
+                    <tr><td><button perm="staff" id="btn-nav-purge" onclick="setPanelE(this)" class="btn-misc" value="purge" disabled="disabled">Purge</button></td><td>Remove stuff around you</td></tr>
+                    <tr><td><button perm="staff" id="btn-nav-global" onclick="setPanelE(this)" class="btn-misc" value="global" disabled="disabled">Global Actions</button></td><td>Actions that affect all players on the server</td></tr>
+                    <tr><td><button perm="admin" id="btn-nav-global" onclick="setPanelE(this)" class="btn-misc" value="server" disabled="disabled">Server Actions</button></td><td>Server-wide settings and actions</td></tr>
+                    <tr><td><button perm="admin" id="btn-nav-global" onclick="setPanelE(this)" class="btn-misc" value="vehicle" disabled="disabled">Vehicle Actions</button></td><td>Make changes to the vehicle you are currently in</td></tr>
+                    <tr><td><button perm="staff" id="btn-nav-global" onclick="setPanelE(this)" class="btn-misc" value="event" disabled="disabled">Event Actions</button></td><td>Server-wide Event settings and actions</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Player</th><th></th></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('back')" disabled="disabled">Back</button></td><td>Teleport back to your previous location</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('revive')" disabled="disabled">Revive</button></td><td>Revive yourself</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('reviveplayer')" disabled="disabled">Revive Player</button></td><td>Revive someone next to you</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('stopanim')" disabled="disabled">Stop Animation</button></td><td>Exit your current animation</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('toggleesp')" disabled="disabled">Toggle ESP</button></td><td>Toggle ESP mode</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('noclip')" disabled="disabled">Noclip</button></td><td>Toggle Noclip Mode</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('marker')" disabled="disabled">Waypoint</button></td><td>Teleport to waypoint</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Chat</th><th></th></tr>
+                    <tr><td><button perm="psa" disabled="disabled" class="btn-misc" onclick="requestAction('psa')">PSA</button></td><td><input class="btn-misc" onchange="udCategory(1,this)" name="category1" type="text" placeholder="PSA Message"></td></tr>
+                    <tr><td><button perm="chat" class="btn-misc" onclick="requestAction('clear')" disabled="disabled">Clear</button></td><td>Remove all messages from the chat</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Misc Menus</th><th></th></tr>
+                    <tr><td><button perm="dev" disabled="disabled" id="btn-nav-playerlist" onclick="setPanelE(this)" class="btn-misc" value="playerlist">Player List</button></td><td>Manage player list stuff</td></tr>
+                    <tr><td><button perm="admin" id="btn-nav-banlist" onclick="setPanelE(this)" class="btn-misc" value="banlist" disabled="disabled">Ban List</button></td><td>Check the status of a ban</td></tr>
+                    <tr><td><button perm="admin" id="btn-nav-recovery" onclick="setPanelE(this)" class="btn-misc" value="recovery" disabled="disabled">Recovery Tool</button></td><td>Tool for stat and item recovery</td></tr>
+                    <tr><td><button perm="admin" id="btn-nav-appearance" onclick="setPanelE(this)" class="btn-misc" value="appearance" disabled="disabled">Server Appearance Tool</button></td><td>Change server appearance settings</td></tr>
+                    <tr><td><button perm="staff" id="btn-nav-memes" onclick="setPanelE(this)" class="btn-misc" value="memes" disabled="disabled">Memes</button></td><td>Tired of working? Look at some memes</td></tr>
+                    <tr><td><button perm="psa" disabled="disabled" id="btn-nav-psa" onclick="setPanelE(this)" class="btn-misc" value="psa">PSA Menu</button></td><td>Look at all these ways to say shit</td></tr>
+                    <tr><td><button perm="dev" disabled="disabled" id="btn-nav-vehicle_adjusting" onclick="setPanelE(this)" class="btn-misc" value="vehicle_adjusting">Vehicle Adjustments</button></td><td>Look at all the ways to fuckup your vehicles</td></tr>
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Miscellaneous actions that you can do, don't fucking abuse it
+            </div>
+        </div>
+        <div id="panel_ucp" style="display:none;" class="panel">
+        </div>
+        <div id="panel_direct" style="display:none;" class="panel">
+            <div class="panel-content">
+                <hr>
+                <table>
+                    <tbody><tr><td class="tbl-label"><label>Username:</label></td><td class="tbl-input"><input disabled="" name="username" type="text"></td></tr>
+                    <tr><td class="tbl-label"><label>ID:</label></td><td class="tbl-input"><input onchange="udUserId(this)" name="user_id" type="text"></td></tr>
+                </tbody></table>
+                <hr>
+                <table>
+                    <!-- <tr><td><button perm="staff" id="btn-intro" type="button" class="btn-misc" onclick="actionIntro()">Show Intro</button></td><td>Force a player to watch the intro cutscene</td></tr> -->
+                    <!-- <tr><td colspan="2"><hr /></td></tr> -->
+                    <tbody><tr><th>Player</th><th></th></tr>
+                    <tr><td><button class="btn-misc" onclick="requestTargetedPSA()">Send Warning PSA</button></td><td><input onchange="udCategory(1,this)" name="category1" type="text" placeholder="Warning Message"></td></tr>
+                    <tr><td><button id="btn-screencap-user" type="button" disabled="" class="btn-misc" onclick="requestAction('screencap-user')">Screencap Player</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('screencap-user', this)" disabled="disabled">Forces an infraction!</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="action('eject')" disabled="disabled">Eject from Vehicle</button></td><td>Ejects the player from their vehicle</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="action('killplayer')" disabled="disabled">Kill Player</button></td><td>Kills the selected player</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc-half" onclick="action('freeze')" disabled="disabled">Freeze</button><button perm="staff" class="btn-misc-half" onclick="action('unfreeze')" disabled="disabled">Unfreeze</button></td><td>Prevent the player from moving</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="action('inventory')" disabled="disabled">Check Inventory</button></td><td>Open the selected players inventory</td></tr>
+
+                </tbody></table>
+                <table id="license_list"><tbody><tr><td colspan="2"><hr></td></tr><tr><th>Licenses</th><th></th></tr><tr><td><button disabled="" id="btn-license-take-mec_tool_box" class="btn-misc-half" onclick="licenseAction('take', 'mec_tool_box')">Revoke</button><button disabled="" id="btn-license-give-mec_tool_box" class="btn-misc-half" onclick="licenseAction('give', 'mec_tool_box')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-mec_tool_box', this);enableButton('license-take-mec_tool_box', this)" disabled="disabled">Master Tool Box (1 Hour)</td></tr><tr><td><button disabled="" id="btn-license-take-muted_week" class="btn-misc-half" onclick="licenseAction('take', 'muted_week')">Revoke</button><button disabled="" id="btn-license-give-muted_week" class="btn-misc-half" onclick="licenseAction('give', 'muted_week')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-muted_week', this);enableButton('license-take-muted_week', this)" disabled="disabled">Chat Mute (1 week)</td></tr><tr><td><button disabled="" id="btn-license-take-farming_coffee" class="btn-misc-half" onclick="licenseAction('take', 'farming_coffee')">Revoke</button><button disabled="" id="btn-license-give-farming_coffee" class="btn-misc-half" onclick="licenseAction('give', 'farming_coffee')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-farming_coffee', this);enableButton('license-take-farming_coffee', this)" disabled="disabled">Farming Coffee Buff (1 Hour)</td></tr><tr><td><button disabled="" id="btn-license-take-supercomputer_slow" class="btn-misc-half" onclick="licenseAction('take', 'supercomputer_slow')">Revoke</button><button disabled="" id="btn-license-give-supercomputer_slow" class="btn-misc-half" onclick="licenseAction('give', 'supercomputer_slow')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-supercomputer_slow', this);enableButton('license-take-supercomputer_slow', this)" disabled="disabled">Supercomputer Scan (Slow)</td></tr><tr><td><button disabled="" id="btn-license-take-driver" class="btn-misc-half" onclick="licenseAction('take', 'driver')">Revoke</button><button disabled="" id="btn-license-give-driver" class="btn-misc-half" onclick="licenseAction('give', 'driver')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-driver', this);enableButton('license-take-driver', this)" disabled="disabled">Driver's License</td></tr><tr><td><button disabled="" id="btn-license-take-perk_cooldown" class="btn-misc-half" onclick="licenseAction('take', 'perk_cooldown')">Revoke</button><button disabled="" id="btn-license-give-perk_cooldown" class="btn-misc-half" onclick="licenseAction('give', 'perk_cooldown')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-perk_cooldown', this);enableButton('license-take-perk_cooldown', this)" disabled="disabled">Skill Perk Cooldown</td></tr><tr><td><button disabled="" id="btn-license-take-pristine" class="btn-misc-half" onclick="licenseAction('take', 'pristine')">Revoke</button><button disabled="" id="btn-license-give-pristine" class="btn-misc-half" onclick="licenseAction('give', 'pristine')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-pristine', this);enableButton('license-take-pristine', this)" disabled="disabled">Pristine Account</td></tr><tr><td><button disabled="" id="btn-license-take-supercomputer" class="btn-misc-half" onclick="licenseAction('take', 'supercomputer')">Revoke</button><button disabled="" id="btn-license-give-supercomputer" class="btn-misc-half" onclick="licenseAction('give', 'supercomputer')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-supercomputer', this);enableButton('license-take-supercomputer', this)" disabled="disabled">Supercomputer Scan</td></tr><tr><td><button disabled="" id="btn-license-take-firearm" class="btn-misc-half" onclick="licenseAction('take', 'firearm')">Revoke</button><button disabled="" id="btn-license-give-firearm" class="btn-misc-half" onclick="licenseAction('give', 'firearm')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-firearm', this);enableButton('license-take-firearm', this)" disabled="disabled">Firearms License</td></tr><tr><td><button disabled="" id="btn-license-take-exp_ee2" class="btn-misc-half" onclick="licenseAction('take', 'exp_ee2')">Revoke</button><button disabled="" id="btn-license-give-exp_ee2" class="btn-misc-half" onclick="licenseAction('give', 'exp_ee2')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-exp_ee2', this);enableButton('license-take-exp_ee2', this)" disabled="disabled">10% Exp Bonus (90 Minutes)</td></tr><tr><td><button disabled="" id="btn-license-take-farming_milk" class="btn-misc-half" onclick="licenseAction('take', 'farming_milk')">Revoke</button><button disabled="" id="btn-license-give-farming_milk" class="btn-misc-half" onclick="licenseAction('give', 'farming_milk')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-farming_milk', this);enableButton('license-take-farming_milk', this)" disabled="disabled">Farmers Milk Buff (1 Hour)</td></tr><tr><td><button disabled="" id="btn-license-take-police" class="btn-misc-half" onclick="licenseAction('take', 'police')">Revoke</button><button disabled="" id="btn-license-give-police" class="btn-misc-half" onclick="licenseAction('give', 'police')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-police', this);enableButton('license-take-police', this)" disabled="disabled">Police License</td></tr><tr><td><button disabled="" id="btn-license-take-exp_ee3" class="btn-misc-half" onclick="licenseAction('take', 'exp_ee3')">Revoke</button><button disabled="" id="btn-license-give-exp_ee3" class="btn-misc-half" onclick="licenseAction('give', 'exp_ee3')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-exp_ee3', this);enableButton('license-take-exp_ee3', this)" disabled="disabled">5% Exp Bonus (2 Hours)</td></tr><tr><td><button disabled="" id="btn-license-take-muted_time" class="btn-misc-half" onclick="licenseAction('take', 'muted_time')">Revoke</button><button disabled="" id="btn-license-give-muted_time" class="btn-misc-half" onclick="licenseAction('give', 'muted_time')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-muted_time', this);enableButton('license-take-muted_time', this)" disabled="disabled">Chat Mute</td></tr><tr><td><button disabled="" id="btn-license-take-exp_ee" class="btn-misc-half" onclick="licenseAction('take', 'exp_ee')">Revoke</button><button disabled="" id="btn-license-give-exp_ee" class="btn-misc-half" onclick="licenseAction('give', 'exp_ee')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-exp_ee', this);enableButton('license-take-exp_ee', this)" disabled="disabled">15% Exp Bonus (1 Hour)</td></tr><tr><td><button disabled="" id="btn-license-take-ruds_violation" class="btn-misc-half" onclick="licenseAction('take', 'ruds_violation')">Revoke</button><button disabled="" id="btn-license-give-ruds_violation" class="btn-misc-half" onclick="licenseAction('give', 'ruds_violation')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-ruds_violation', this);enableButton('license-take-ruds_violation', this)" disabled="disabled">RUDS Violation Penalty</td></tr><tr><td><button disabled="" id="btn-license-take-plane" class="btn-misc-half" onclick="licenseAction('take', 'plane')">Revoke</button><button disabled="" id="btn-license-give-plane" class="btn-misc-half" onclick="licenseAction('give', 'plane')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-plane', this);enableButton('license-take-plane', this)" disabled="disabled">Pilot License</td></tr><tr><td><button disabled="" id="btn-license-take-helicopter" class="btn-misc-half" onclick="licenseAction('take', 'helicopter')">Revoke</button><button disabled="" id="btn-license-give-helicopter" class="btn-misc-half" onclick="licenseAction('give', 'helicopter')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-helicopter', this);enableButton('license-take-helicopter', this)" disabled="disabled">Helicopter License</td></tr><tr><td><button disabled="" id="btn-license-take-muted_perm" class="btn-misc-half" onclick="licenseAction('take', 'muted_perm')">Revoke</button><button disabled="" id="btn-license-give-muted_perm" class="btn-misc-half" onclick="licenseAction('give', 'muted_perm')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-muted_perm', this);enableButton('license-take-muted_perm', this)" disabled="disabled">Chat Mute (Permanent)</td></tr><tr><td><button disabled="" id="btn-license-take-supercomputer_fast" class="btn-misc-half" onclick="licenseAction('take', 'supercomputer_fast')">Revoke</button><button disabled="" id="btn-license-give-supercomputer_fast" class="btn-misc-half" onclick="licenseAction('give', 'supercomputer_fast')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-supercomputer_fast', this);enableButton('license-take-supercomputer_fast', this)" disabled="disabled">Supercomputer Scan (Fast)</td></tr><tr><td><button disabled="" id="btn-license-take-muted_2d" class="btn-misc-half" onclick="licenseAction('take', 'muted_2d')">Revoke</button><button disabled="" id="btn-license-give-muted_2d" class="btn-misc-half" onclick="licenseAction('give', 'muted_2d')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-muted_2d', this);enableButton('license-take-muted_2d', this)" disabled="disabled">Chat Mute (2 days)</td></tr><tr><td><button disabled="" id="btn-license-take-muted_suggestions" class="btn-misc-half" onclick="licenseAction('take', 'muted_suggestions')">Revoke</button><button disabled="" id="btn-license-give-muted_suggestions" class="btn-misc-half" onclick="licenseAction('give', 'muted_suggestions')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-muted_suggestions', this);enableButton('license-take-muted_suggestions', this)" disabled="disabled">Suggestions Mute (Permanent)</td></tr><tr><td><button disabled="" id="btn-license-take-corp_cooldown" class="btn-misc-half" onclick="licenseAction('take', 'corp_cooldown')">Revoke</button><button disabled="" id="btn-license-give-corp_cooldown" class="btn-misc-half" onclick="licenseAction('give', 'corp_cooldown')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-corp_cooldown', this);enableButton('license-take-corp_cooldown', this)" disabled="disabled">Company Cooldown</td></tr></tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Actions that affect the selected player
+            </div>
+        </div>
+        <div id="panel_purge" style="display:none;" class="panel">
+            <div class="panel-content">
+                <table>
+                    <tbody><tr><th title="Purge will (try to) remove all of specified items in the selected radius">Purge</th><th></th></tr>
+                    <tr><td><input class="btn-misc" onchange="udCategory(5,this)" name="category5" alt="Range" type="number" min="10" max="500" value="10" placeholder="Range" perm="mod" disabled="disabled"></td><td><input perm="mod" onchange="udCategory(5,this)" name="category5" type="range" min="50" max="500" value="50" placeholder="PSA Message" disabled="disabled"></td></tr>
+                    <tr><td><button id="btn-purge" disabled="" class="btn-misc" onclick="requestAction('purge')">Purge Vehicles</button></td><td><input type="checkbox" perm="mod" onchange="enableButton('purge', this)" disabled="disabled">Remove all nearby vehicles</td></tr>
+                    <tr><td><button id="btn-purge-ped" disabled="" class="btn-misc" onclick="requestAction('purge-ped')">Purge Peds</button></td><td><input type="checkbox" perm="mod" onchange="enableButton('purge-ped', this)" disabled="disabled">Remove all nearby peds</td></tr>
+                    <tr><td><button id="btn-purge-obj" disabled="" class="btn-misc" onclick="requestAction('purge-obj')">Purge Objects</button></td><td><input type="checkbox" perm="mod" onchange="enableButton('purge-obj', this)" disabled="disabled">Remove all nearby objects</td></tr>
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><td>EXPLODE</td><td><input type="checkbox" id="chb-explosive-purge" perm="admin" disabled="disabled"></td></tr>
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Remove stuff around you
+            </div>
+        </div>
+        <div id="panel_global" style="display:none;" class="panel">
+            <div class="panel-content">
+                <table>
+                    <tbody><tr><th>Teleport</th><th></th></tr>
+                    <tr><td><button id="btn-bringall" type="button" disabled="" class="btn-misc" onclick="requestAction('bringall')">Bring All</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('bringall', this)" disabled="disabled">Bring every player to you</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Health</th><th></th></tr>
+                    <tr><td><button id="btn-killall" type="button" disabled="" class="btn-misc" onclick="requestAction('killall')">Kill All</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('killall', this)" disabled="disabled">Kill every player</td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('massrevive')" disabled="disabled">Revive All</button></td><td>Revive and heal every player</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Freeze</th><th></th></tr>
+                    <tr><td><button id="btn-freeze-all" disabled="" class="btn-misc-half" onclick="requestAction('freeze')">Freeze</button><button perm="admin" class="btn-misc-half" onclick="requestAction('unfreeze')" disabled="disabled">Unfreeze</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('freeze-all', this)" disabled="disabled">Prevent all players from moving</td></tr>
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Actions that affect all players on the server
+            </div>
+        </div>
+        <div id="panel_server" style="display:none;" class="panel">
+            <div class="panel-content">
+                <table>
+                    <tbody><tr><th>Server</th><th></th></tr>
+                    <tr><td><button id="btn-reboot" type="button" disabled="" class="btn-misc" onclick="requestAction('reboot')">Reboot (2 Minutes)</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('reboot', this)" disabled="disabled">Restart the server</td></tr>
+                    <tr><td><button id="btn-reboot-abort" type="button" disabled="" class="btn-misc" onclick="requestAction('reboot-abort')">Abort Reboot</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('reboot-abort', this)" disabled="disabled">Stop an in-progress reboot</td></tr>
+                    <tr><td><button id="btn-kill_server" type="button" disabled="" class="btn-misc" onclick="requestAction('kill_server')">Reboot (Instantly)</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('kill_server', this)" disabled="disabled">Kill the server</td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(3,this)" name="category3" type="text" placeholder="Reboot Message (Only shown for 2 minutes)"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Resources</th><th></th></tr>
+                    <tr><td><button id="btn-resource-start" type="button" disabled="" class="btn-misc" onclick="requestAction('resource-start')">Start Resource</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('resource-start', this)" disabled="disabled">Start the resource</td></tr>
+                    <tr><td><button id="btn-resource-stop" type="button" disabled="" class="btn-misc" onclick="requestAction('resource-stop')">Stop Resource</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('resource-stop', this)" disabled="disabled">Stop the resource</td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(4,this)" name="category4" type="text" placeholder="Resource Name"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Anticheat</th><th></th></tr>
+                    <tr><td><button id="btn-screencap" type="button" disabled="" class="btn-misc" onclick="requestAction('screencap')">Screencap Everyone</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('screencap', this)" disabled="disabled">Forces an infraction!</td></tr>
+                    <tr><td><button id="btn-screencap-user" type="button" disabled="" class="btn-misc" onclick="requestAction('screencap-user')">Screencap Player</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('screencap-user', this)" disabled="disabled">Forces an infraction!</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Advertisement</th><th></th></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(1,this)" name="category1" type="text" placeholder="Who do you represent? (Max 16 characters)"></td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(2,this)" name="category1" type="text" placeholder="Advertisement text (Max 90 characters)"></td></tr>
+                    <tr><td><button class="btn-misc" onclick="requstUpdateAdvertisement()">Update Advertisement</button></td><td>Replaces, advertisements over fuel stations</td></tr>
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Actions that affect the server itself
+            </div>
+        </div>
+        <div id="panel_vehicle" style="display:none;" class="panel">
+            <div class="panel-content">
+                <table>
+                    <tbody><tr><th>Decorators</th><th></th></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-decorator-staff')">Lock to Staff</button></td><td>Make it so only staff can use this vehicle</td></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-decorator-delete')">Delete Upon Exit</button></td><td>Automatically clean up the vehicle upon exit</td></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-decorator-ignore')">Ignore Locker</button></td><td>Allow the vehicle to be driven regardless of job</td></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-decorator-seatbelt')">Disable Seatbelt</button></td><td>No seatbelt means you don't get thrown out????</td></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-decorator-fuel')">Disable Fuel</button></td><td>Remove the need for fuel</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Appearance</th><th></th></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-plate')">Set Plate</button></td><td>Change the License Plate Text</td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(3,this)" name="category3" type="text" placeholder="Plate Text"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Function</th><th></th></tr>
+                    <tr><td><button type="button" class="btn-misc" onclick="requestAction('veh-boost')">Set Speed Boost</button></td><td>Set the Speed Boost multiplier</td></tr>
+                    <tr><td><input class="btn-misc" onchange="udCategory(5,this)" name="category5" alt="Range" type="number" min="10" max="500" value="10" placeholder="Range"></td><td><input perm="admin" onchange="udCategory(5,this)" name="category5" type="range" min="50" max="500" value="50" placeholder="PSA Message" disabled="disabled"></td></tr>
+
+
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Actions that affect the vehicle you are currently in<br>
+                Should only be used for events
+            </div>
+        </div>
+        <div id="panel_event" style="display:none;" class="panel">
+            <div class="panel-content">
+                <table>
+                    <tbody><tr><th>Event</th><th></th></tr>
+                    <tr><td><button id="btn-event-marker" perm="staff" class="btn-misc" onclick="requestAction('marker')" disabled="disabled">Waypoint</button></td><td>Teleport to waypoint</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc-half" onclick="requestAction('spawn_staff')" disabled="disabled">Staff</button><button perm="staff" class="btn-misc-half" onclick="requestAction('spawn_veh')" disabled="disabled">Car</button></td><td><input class="btn-misc" onchange="udCategory(2,this)" name="category2" type="text" placeholder="XA21"></td></tr>
+                    <tr><td><button perm="staff" class="btn-misc-half" onclick="requestAction('event-tp-set')" disabled="disabled">Set</button><button perm="staff" class="btn-misc-half" onclick="requestAction('event-tp-remove')" disabled="disabled">Remove</button></td><td>Event Teleport / Respawn Point</td></tr>
+                    <tr><td><button perm="staff" class="btn-misc" onclick="requestAction('event-veh-damage')" disabled="disabled">Toggle Vehicle Invincibility</button></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><td><button id="btn-event-lsc" type="button" disabled="" class="btn-misc" onclick="requestAction('event-lsc')">Force Open LSC (everyone)</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-lsc', this)" disabled="disabled">Open Los Santos Customs for everyone</td></tr>
+                    <tr><td><button id="btn-event-lsc-single" type="button" disabled="" class="btn-misc" onclick="requestAction('event-lsc-single')">Force Open LSC (personal)</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-lsc-single', this)" disabled="disabled">Open Los Santos Customs for yourself</td></tr>
+                    <tr><td><button id="btn-event-vehicle" type="button" disabled="" class="btn-misc" onclick="requestAction('event-vehicle')">Set Event Vehicle</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-vehicle', this)" disabled="disabled">Set blank to disable</td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(6,this)" name="category6" type="text" placeholder="Event Vehicle"></td></tr>
+                    <tr><td><button id="btn-event-weapon" type="button" disabled="" class="btn-misc" onclick="requestAction('event-weapon')">Give User Weapons</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-weapon', this)" disabled="disabled"></td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(7,this)" name="category7" type="text" placeholder="weapon_pistol"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Server</th><th></th></tr>
+                    <tr><td><button id="btn-event-reboot" type="button" disabled="" class="btn-misc" onclick="requestAction('reboot')">Reboot (2 Minutes)</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-reboot', this)" disabled="disabled">Restart the server</td></tr>
+                    <tr><td><button id="btn-event-reboot-abort" type="button" disabled="" class="btn-misc" onclick="requestAction('reboot-abort')">Abort Reboot</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-reboot-abort', this)" disabled="disabled">Stop an in-progress reboot</td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Resources</th><th></th></tr>
+                    <tr><td><button id="btn-event-resource-start" type="button" disabled="" class="btn-misc" onclick="requestAction('resource-start')">Start Resource</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-resource-start', this)" disabled="disabled">Start the resource</td></tr>
+                    <tr><td><button id="btn-event-resource-stop" type="button" disabled="" class="btn-misc" onclick="requestAction('resource-stop')">Stop Resource</button></td><td><input type="checkbox" perm="staff" onchange="enableButton('event-resource-stop', this)" disabled="disabled">Stop the resource</td></tr>
+                    <tr><td colspan="2" class="tbl-input"><input onchange="udCategory(4,this)" name="category4" type="text" placeholder="Resource Name"></td></tr>
+
+                    <tr><td colspan="2"><hr></td></tr>
+                    <tr><th>Menus</th><th></th></tr>
+                    <tr><td><button perm="staff" id="btn-nav-appearance" onclick="setPanelE(this)" class="btn-misc" value="appearance" disabled="disabled">Server Appearance Tool</button></td><td>Change server appearance settings</td></tr>
+                </tbody></table>
+            </div>
+            <div class="panel-bottom">
+                Actions that affect the server itself
+            </div>
+        </div>
+        <div id="panel_vehicle_adjusting" style="display:none;" class="panel">
+            <div class="panel-content">
+                <h3>Vehicle Stat Adjuster</h3>
+                <hr>
+                <table>
+                    <tbody><tr><td><button perm="staff" class="btn-misc-half" onclick="requestAction('delete')" disabled="disabled">Delete</button><button perm="staff" class="btn-misc-half" onclick="requestAction('repair')" disabled="disabled">Repair</button></td></tr>
+                    <tr><td><button perm="admin" class="btn-misc" onclick="requestAction('spawn_veh')" disabled="disabled">Car</button></td><td colspan="2"><input style="width:100%" class="btn-misc" onchange="udCategory(2,this)" name="category2" type="text" placeholder="XA21"></td></tr>
+                    <tr><td colspan="3"><button style="width:100%" class="btn-refresh" onclick="eventFetchVehicle()">Fetch Current Vehicle's Settings</button></td></tr>
+                    <tr><td>fMass</td><td><input class="btn-misc" onchange="fMass2.value=this.value;vaf('fMass',this.value)" id="fMass1" step="5" type="number" min="100" max="10000" value="0"></td><td><input onchange="fMass1.value=this.value;vaf('fMass',this.value)" id="fMass2" step="5" type="range" min="100" max="10000" value="0"></td></tr>
+                    <tr><td>fInitialDragCoeff</td><td><input class="btn-misc" onchange="fInitialDragCoeff2.value=this.value;vaf('fInitialDragCoeff',this.value)" id="fInitialDragCoeff1" step="0.01" type="number" min="0" max="100" value="0"></td><td><input onchange="fInitialDragCoeff1.value=this.value;vaf('fInitialDragCoeff',this.value)" id="fInitialDragCoeff2" step="0.01" type="range" min="0" max="100" value="0"></td></tr>
+                    <tr><td>fPercentSubmerged</td><td><input class="btn-misc" onchange="fPercentSubmerged2.value=this.value;vaf('fPercentSubmerged',this.value)" id="fPercentSubmerged1" step="1.0" type="number" min="0" max="100" value="0"></td><td><input onchange="fPercentSubmerged1.value=this.value;vaf('fPercentSubmerged',this.value)" id="fPercentSubmerged2" step="1.0" type="range" min="0" max="100" value="0"></td></tr>
+                    <tr><td>fDriveBiasFront</td><td><input class="btn-misc" onchange="fDriveBiasFront2.value=this.value;vaf('fDriveBiasFront',this.value)" id="fDriveBiasFront1" step="0.5" type="number" min="0" max="1" value="0"></td><td><input onchange="fDriveBiasFront1.value=this.value;vaf('fDriveBiasFront',this.value)" id="fDriveBiasFront2" step="0.5" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>nInitialDriveGears</td><td><input class="btn-misc" onchange="nInitialDriveGears2.value=this.value;vai('nInitialDriveGears',this.value)" id="nInitialDriveGears1" step="1" type="number" min="0" max="8" value="0"></td><td><input onchange="nInitialDriveGears1.value=this.value;vai('nInitialDriveGears',this.value)" id="nInitialDriveGears2" step="1" type="range" min="0" max="8" value="0"></td></tr>
+                    <tr><td>fInitialDriveForce</td><td><input class="btn-misc" onchange="fInitialDriveForce2.value=this.value;vaf('fInitialDriveForce',this.value)" id="fInitialDriveForce1" step="0.01" type="number" min="0" max="100" value="0"></td><td><input onchange="fInitialDriveForce1.value=this.value;vaf('fInitialDriveForce',this.value)" id="fInitialDriveForce2" step="0.01" type="range" min="0" max="100" value="0"></td></tr>
+                    <tr><td>fDriveInertia</td><td><input class="btn-misc" onchange="fDriveInertia2.value=this.value;vaf('fDriveInertia',this.value)" id="fDriveInertia1" step="0.01" type="number" min="0" max="2" value="0"></td><td><input onchange="fDriveInertia1.value=this.value;vaf('fDriveInertia',this.value)" id="fDriveInertia2" step="0.01" type="range" min="0" max="2" value="0"></td></tr>
+                    <tr><td>fClutchChangeRateScaleUpShift</td><td><input class="btn-misc" onchange="fClutchChangeRateScaleUpShift2.value=this.value;vaf('fClutchChangeRateScaleUpShift',this.value)" id="fClutchChangeRateScaleUpShift1" step="0.5" type="number" min="0" max="10" value="0"></td><td><input onchange="fClutchChangeRateScaleUpShift1.value=this.value;vaf('fClutchChangeRateScaleUpShift',this.value)" id="fClutchChangeRateScaleUpShift2" step="0.5" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fClutchChangeRateScaleDownShift</td><td><input class="btn-misc" onchange="fClutchChangeRateScaleDownShift2.value=this.value;vaf('fClutchChangeRateScaleDownShift',this.value)" id="fClutchChangeRateScaleDownShift1" step="0.5" type="number" min="0" max="10" value="0"></td><td><input onchange="fClutchChangeRateScaleDownShift1.value=this.value;vaf('fClutchChangeRateScaleDownShift',this.value)" id="fClutchChangeRateScaleDownShift2" step="0.5" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fInitialDriveMaxFlatVel</td><td><input class="btn-misc" onchange="fInitialDriveMaxFlatVel2.value=this.value;vaf('fInitialDriveMaxFlatVel',this.value)" id="fInitialDriveMaxFlatVel1" step="1.0" type="number" min="0" max="500" value="0"></td><td><input onchange="fInitialDriveMaxFlatVel1.value=this.value;vaf('fInitialDriveMaxFlatVel',this.value)" id="fInitialDriveMaxFlatVel2" step="1.0" type="range" min="0" max="500" value="0"></td></tr>
+                    <tr><td>fBrakeForce</td><td><input class="btn-misc" onchange="fBrakeForce2.value=this.value;vaf('fBrakeForce',this.value)" id="fBrakeForce1" step="0.01" type="number" min="0" max="2" value="0"></td><td><input onchange="fBrakeForce1.value=this.value;vaf('fBrakeForce',this.value)" id="fBrakeForce2" step="0.01" type="range" min="0" max="2" value="0"></td></tr>
+                    <tr><td>fBrakeBiasFront</td><td><input class="btn-misc" onchange="fBrakeBiasFront2.value=this.value;vaf('fBrakeBiasFront',this.value)" id="fBrakeBiasFront1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fBrakeBiasFront1.value=this.value;vaf('fBrakeBiasFront',this.value)" id="fBrakeBiasFront2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fHandBrakeForce</td><td><input class="btn-misc" onchange="fHandBrakeForce2.value=this.value;vaf('fHandBrakeForce',this.value)" id="fHandBrakeForce1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fHandBrakeForce1.value=this.value;vaf('fHandBrakeForce',this.value)" id="fHandBrakeForce2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fSteeringLock</td><td><input class="btn-misc" onchange="fSteeringLock2.value=this.value;vaf('fSteeringLock',this.value)" id="fSteeringLock1" step="0.01" type="number" min="0" max="100" value="0"></td><td><input onchange="fSteeringLock1.value=this.value;vaf('fSteeringLock',this.value)" id="fSteeringLock2" step="0.01" type="range" min="0" max="100" value="0"></td></tr>
+                    <tr><td>fTractionCurveMax</td><td><input class="btn-misc" onchange="fTractionCurveMax2.value=this.value;vaf('fTractionCurveMax',this.value)" id="fTractionCurveMax1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fTractionCurveMax1.value=this.value;vaf('fTractionCurveMax',this.value)" id="fTractionCurveMax2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fTractionCurveMin</td><td><input class="btn-misc" onchange="fTractionCurveMin2.value=this.value;vaf('fTractionCurveMin',this.value)" id="fTractionCurveMin1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fTractionCurveMin1.value=this.value;vaf('fTractionCurveMin',this.value)" id="fTractionCurveMin2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fTractionCurveLateral</td><td><input class="btn-misc" onchange="fTractionCurveLateral2.value=this.value;vaf('fTractionCurveLateral',this.value)" id="fTractionCurveLateral1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fTractionCurveLateral1.value=this.value;vaf('fTractionCurveLateral',this.value)" id="fTractionCurveLateral2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fTractionSpringDeltaMax</td><td><input class="btn-misc" onchange="fTractionSpringDeltaMax2.value=this.value;vaf('fTractionSpringDeltaMax',this.value)" id="fTractionSpringDeltaMax1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fTractionSpringDeltaMax1.value=this.value;vaf('fTractionSpringDeltaMax',this.value)" id="fTractionSpringDeltaMax2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fLowSpeedTractionLossMult</td><td><input class="btn-misc" onchange="fLowSpeedTractionLossMult2.value=this.value;vaf('fLowSpeedTractionLossMult',this.value)" id="fLowSpeedTractionLossMult1" step="0.01" type="number" min="-10" max="10" value="0"></td><td><input onchange="fLowSpeedTractionLossMult1.value=this.value;vaf('fLowSpeedTractionLossMult',this.value)" id="fLowSpeedTractionLossMult2" step="0.01" type="range" min="-10" max="10" value="0"></td></tr>
+                    <tr><td>fCamberStiffnesss</td><td><input class="btn-misc" onchange="fCamberStiffnesss2.value=this.value;vaf('fCamberStiffnesss',this.value)" id="fCamberStiffnesss1" step="0.01" type="number" min="-10" max="10" value="0"></td><td><input onchange="fCamberStiffnesss1.value=this.value;vaf('fCamberStiffnesss',this.value)" id="fCamberStiffnesss2" step="0.01" type="range" min="-10" max="10" value="0"></td></tr>
+                    <tr><td>fTractionBiasFront</td><td><input class="btn-misc" onchange="fTractionBiasFront2.value=this.value;vaf('fTractionBiasFront',this.value)" id="fTractionBiasFront1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fTractionBiasFront1.value=this.value;vaf('fTractionBiasFront',this.value)" id="fTractionBiasFront2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fTractionLossMult</td><td><input class="btn-misc" onchange="fTractionLossMult2.value=this.value;vaf('fTractionLossMult',this.value)" id="fTractionLossMult1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fTractionLossMult1.value=this.value;vaf('fTractionLossMult',this.value)" id="fTractionLossMult2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fSuspensionForce</td><td><input class="btn-misc" onchange="fSuspensionForce2.value=this.value;vaf('fSuspensionForce',this.value)" id="fSuspensionForce1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fSuspensionForce1.value=this.value;vaf('fSuspensionForce',this.value)" id="fSuspensionForce2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fSuspensionCompDamp</td><td><input class="btn-misc" onchange="fSuspensionCompDamp2.value=this.value;vaf('fSuspensionCompDamp',this.value)" id="fSuspensionCompDamp1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fSuspensionCompDamp1.value=this.value;vaf('fSuspensionCompDamp',this.value)" id="fSuspensionCompDamp2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fSuspensionReboundDamp</td><td><input class="btn-misc" onchange="fSuspensionReboundDamp2.value=this.value;vaf('fSuspensionReboundDamp',this.value)" id="fSuspensionReboundDamp1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fSuspensionReboundDamp1.value=this.value;vaf('fSuspensionReboundDamp',this.value)" id="fSuspensionReboundDamp2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fSuspensionUpperLimit</td><td><input class="btn-misc" onchange="fSuspensionUpperLimit2.value=this.value;vaf('fSuspensionUpperLimit',this.value)" id="fSuspensionUpperLimit1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fSuspensionUpperLimit1.value=this.value;vaf('fSuspensionUpperLimit',this.value)" id="fSuspensionUpperLimit2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fSuspensionLowerLimit</td><td><input class="btn-misc" onchange="fSuspensionLowerLimit2.value=this.value;vaf('fSuspensionLowerLimit',this.value)" id="fSuspensionLowerLimit1" step="0.01" type="number" min="-10" max="0" value="0"></td><td><input onchange="fSuspensionLowerLimit1.value=this.value;vaf('fSuspensionLowerLimit',this.value)" id="fSuspensionLowerLimit2" step="0.01" type="range" min="-10" max="0" value="0"></td></tr>
+                    <tr><td>fSuspensionRaise</td><td><input class="btn-misc" onchange="fSuspensionRaise2.value=this.value;vaf('fSuspensionRaise',this.value)" id="fSuspensionRaise1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fSuspensionRaise1.value=this.value;vaf('fSuspensionRaise',this.value)" id="fSuspensionRaise2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fSuspensionBiasFront</td><td><input class="btn-misc" onchange="fSuspensionBiasFront2.value=this.value;vaf('fSuspensionBiasFront',this.value)" id="fSuspensionBiasFront1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fSuspensionBiasFront1.value=this.value;vaf('fSuspensionBiasFront',this.value)" id="fSuspensionBiasFront2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fAntiRollBarForce</td><td><input class="btn-misc" onchange="fAntiRollBarForce2.value=this.value;vaf('fAntiRollBarForce',this.value)" id="fAntiRollBarForce1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fAntiRollBarForce1.value=this.value;vaf('fAntiRollBarForce',this.value)" id="fAntiRollBarForce2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fAntiRollBarBiasFront</td><td><input class="btn-misc" onchange="fAntiRollBarBiasFront2.value=this.value;vaf('fAntiRollBarBiasFront',this.value)" id="fAntiRollBarBiasFront1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fAntiRollBarBiasFront1.value=this.value;vaf('fAntiRollBarBiasFront',this.value)" id="fAntiRollBarBiasFront2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fRollCentreHeightFront</td><td><input class="btn-misc" onchange="fRollCentreHeightFront2.value=this.value;vaf('fRollCentreHeightFront',this.value)" id="fRollCentreHeightFront1" step="0.01" type="number" min="-10" max="10" value="0"></td><td><input onchange="fRollCentreHeightFront1.value=this.value;vaf('fRollCentreHeightFront',this.value)" id="fRollCentreHeightFront2" step="0.01" type="range" min="-10" max="10" value="0"></td></tr>
+                    <tr><td>fRollCentreHeightRear</td><td><input class="btn-misc" onchange="fRollCentreHeightRear2.value=this.value;vaf('fRollCentreHeightRear',this.value)" id="fRollCentreHeightRear1" step="0.01" type="number" min="-10" max="10" value="0"></td><td><input onchange="fRollCentreHeightRear1.value=this.value;vaf('fRollCentreHeightRear',this.value)" id="fRollCentreHeightRear2" step="0.01" type="range" min="-10" max="10" value="0"></td></tr>
+                    <tr><td>fCollisionDamageMult</td><td><input class="btn-misc" onchange="fCollisionDamageMult2.value=this.value;vaf('fCollisionDamageMult',this.value)" id="fCollisionDamageMult1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fCollisionDamageMult1.value=this.value;vaf('fCollisionDamageMult',this.value)" id="fCollisionDamageMult2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fWeaponDamageMult</td><td><input class="btn-misc" onchange="fWeaponDamageMult2.value=this.value;vaf('fWeaponDamageMult',this.value)" id="fWeaponDamageMult1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fWeaponDamageMult1.value=this.value;vaf('fWeaponDamageMult',this.value)" id="fWeaponDamageMult2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fDeformationDamageMult</td><td><input class="btn-misc" onchange="fDeformationDamageMult2.value=this.value;vaf('fDeformationDamageMult',this.value)" id="fDeformationDamageMult1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fDeformationDamageMult1.value=this.value;vaf('fDeformationDamageMult',this.value)" id="fDeformationDamageMult2" step="0.01" type="range" min="0" max="10" value="0"></td></tr>
+                    <tr><td>fEngineDamageMult</td><td><input class="btn-misc" onchange="fEngineDamageMult2.value=this.value;vaf('fEngineDamageMult',this.value)" id="fEngineDamageMult1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fEngineDamageMult1.value=this.value;vaf('fEngineDamageMult',this.value)" id="fEngineDamageMult2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fPetrolTankVolume</td><td><input class="btn-misc" onchange="fPetrolTankVolume2.value=this.value;vaf('fPetrolTankVolume',this.value)" id="fPetrolTankVolume1" step="0.01" type="number" min="0" max="10" value="0"></td><td><input onchange="fPetrolTankVolume1.value=this.value;vaf('fPetrolTankVolume',this.value)" id="fPetrolTankVolume2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fOilVolume</td><td><input class="btn-misc" onchange="fOilVolume2.value=this.value;vaf('fOilVolume',this.value)" id="fOilVolume1" step="0.01" type="number" min="0" max="100" value="0"></td><td><input onchange="fOilVolume1.value=this.value;vaf('fOilVolume',this.value)" id="fOilVolume2" step="0.01" type="range" min="0" max="100" value="0"></td></tr>
+                    <tr><td>fSeatOffsetDistX</td><td><input class="btn-misc" onchange="fSeatOffsetDistX2.value=this.value;vaf('fSeatOffsetDistX',this.value)" id="fSeatOffsetDistX1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fSeatOffsetDistX1.value=this.value;vaf('fSeatOffsetDistX',this.value)" id="fSeatOffsetDistX2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fSeatOffsetDistY</td><td><input class="btn-misc" onchange="fSeatOffsetDistY2.value=this.value;vaf('fSeatOffsetDistY',this.value)" id="fSeatOffsetDistY1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fSeatOffsetDistY1.value=this.value;vaf('fSeatOffsetDistY',this.value)" id="fSeatOffsetDistY2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+                    <tr><td>fSeatOffsetDistZ</td><td><input class="btn-misc" onchange="fSeatOffsetDistZ2.value=this.value;vaf('fSeatOffsetDistZ',this.value)" id="fSeatOffsetDistZ1" step="0.01" type="number" min="0" max="1" value="0"></td><td><input onchange="fSeatOffsetDistZ1.value=this.value;vaf('fSeatOffsetDistZ',this.value)" id="fSeatOffsetDistZ2" step="0.01" type="range" min="0" max="1" value="0"></td></tr>
+
+                </tbody></table>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        // First, checks if it isn't implemented yet.
+        if (!String.prototype.format) { String.prototype.format = function() { var args = arguments; return this.replace(/{(\d+)}/g, function(match, number) { return typeof args[number] != 'undefined' ? args[number] : match ; }); }; }
+
+        const DEBUG = false;
+        var panel = document.getElementById('staffpanel');
+        var movebar = document.getElementById('staffpanel_header');
+        var o = {x:0,y:0};
+        var PANEL = {x:0,y:0,name:"blank",btn:null,elem:null,sel_elem:null};
+        var ELEMENTS = [
+            ["input", "disabled"],
+            ["button", "disabled"],
+            ["tr", "hidden"],
+            ["td", "hidden"],
+            ["div", "hidden"],
+        ];
+        const BAN_LENGTH = ["Permanent", "Six Months", "One Month", "Two Weeks", "One Week", "Four Days", "Two Days", "One Day", "4 hours", "30 minutes", "Kick"];
+        var USER_LIST = [];
+        var USER_LIST_USERNAME_SORTDIR = "";
+        var USER_LIST_ID_SORTDIR = "";
+        var PERMISSIONS = {
+            kick:false,
+            ban:false,
+            unban:false,
+            nav:false,
+            staff:false,
+            mod:false,
+            admin:false,
+            dev:false,
+            psa:false,
+            chat:false,
+            warnings:false,
+        };
+        if (DEBUG) {
+            document.getElementById("btn-nav-blank").innerHTML = "!!!DEBUG!!!";
+            for (var perm in PERMISSIONS) {
+                PERMISSIONS[perm] = true;
+            }
+            PERMISSIONS["admin"] = true;
+        }
+        var IS_ACTIVE = false;
+        movebar.addEventListener('mousedown', mouseDown, false);
+        window.addEventListener('mouseup', mouseUp, false);
+        function defaultFor(arg, val) { return typeof arg !== 'undefined' ? arg : val; }
+        window.addEventListener('message', function(event) {
+            if (event.data.type == "open") {
+                openWindow();
+            }
+            if (event.data.type == "close") {
+                closeWindow(true);
+            }
+            if (event.data.type == "event_data") {
+                updateEventData(event.data.list);
+            }
+            if (event.data.type == "user_list") {
+                updateUserlist(event.data.list);
+            }
+            if (event.data.type == "ban_list") {
+                updateBanlist(event.data.list);
+            }
+            if (event.data.type == "warn_list") {
+                updateWarnlist(event.data.list);
+            }
+            if (event.data.type == "reports") {
+                updateReportlist(event.data.list);
+            }
+            if (event.data.type == "made_reports") {
+                updateReportedlist(event.data.list);
+            }
+            if (event.data.type == "search_result") {
+
+            }
+            if (event.data.type == "license_list") {
+                updateLicenseList(event.data.list);
+            }
+            if (event.data.type == "selected_user") {
+                document.getElementsByName("username").forEach(function(_elem) {
+                    _elem.value = event.data.user[1];
+                });
+                document.getElementsByName("user_id").forEach(function(_elem) {
+                    _elem.value = event.data.user[0];
+                });
+            }
+            if (event.data.type == "perms") {
+                PERMISSIONS.kick = defaultFor(event.data.perms.kick, PERMISSIONS.kick)
+                PERMISSIONS.ban = defaultFor(event.data.perms.ban, PERMISSIONS.ban)
+                PERMISSIONS.unban = defaultFor(event.data.perms.unban, PERMISSIONS.unban)
+                PERMISSIONS.nav = defaultFor(event.data.perms.nav, PERMISSIONS.nav)
+                PERMISSIONS.staff = defaultFor(event.data.perms.staff, PERMISSIONS.staff)
+                PERMISSIONS.mod = defaultFor(event.data.perms.mod, PERMISSIONS.mod)
+                PERMISSIONS.admin = defaultFor(event.data.perms.admin, PERMISSIONS.admin)
+                PERMISSIONS.dev = defaultFor(event.data.perms.dev, PERMISSIONS.dev)
+                PERMISSIONS.psa = defaultFor(event.data.perms.psa, PERMISSIONS.psa)
+                PERMISSIONS.chat = defaultFor(event.data.perms.chat, PERMISSIONS.chat)
+                PERMISSIONS.warnings = defaultFor(event.data.perms.warnings, PERMISSIONS.warnings)
+                refreshPermissions();
+            }
+            if (event.data.type == "vehicle_stats") {
+                updateVehicleStats(event.data.list);
+            }
+        });
+        function updateVehicleStats(list) {
+            for (var key in list) {
+                var data = list[key];
+                var element1 = document.getElementById(key+"1")
+                var element2 = document.getElementById(key+"2")
+                element1.value = data
+                element2.value = data
+            }
+        }
+
+        function eventFetchVehicle() {
+            $.post('http://omni_staffpanel/vehicle_fetch');
+        }
+        function vaf(fieldName, fieldValue) {
+            $.post('http://omni_staffpanel/vehicle_adjustment_f', JSON.stringify({
+                fieldName: fieldName,
+                fieldValue: fieldValue,
+            }));
+        }
+        function vai(fieldName, fieldValue) {
+            $.post('http://omni_staffpanel/vehicle_adjustment_i', JSON.stringify({
+                fieldName: fieldName,
+                fieldValue: fieldValue,
+            }));
+        }
+        function requestRecovery(action) {
+            var username = document.getElementById("inp-username").value;
+            var user_id = document.getElementById("inp-user_id").value;
+            var recovery_item_name = document.getElementById("recovery-item-name").value;
+            var recovery_item_amount = document.getElementById("recovery-item-amount").value;
+            var recovery_bank_amount = document.getElementById("recovery-bank-amount").value;
+            var recovery_stat_category = document.getElementById("recovery-stat-category").value;
+            var recovery_stat_name = document.getElementById("recovery-stat-name").value;
+            var recovery_stat_amount = document.getElementById("recovery-stat-amount").value;
+            $.post('http://omni_staffpanel/recovery', JSON.stringify({
+                action: action,
+                username: username,
+                user_id: user_id,
+                recovery_item_name: recovery_item_name,
+                recovery_item_amount: recovery_item_amount,
+                recovery_bank_amount: recovery_bank_amount,
+                recovery_stat_category: recovery_stat_category,
+                recovery_stat_name: recovery_stat_name,
+                recovery_stat_amount: recovery_stat_amount,
+            }));
+        }
+        function requestAction(action) {
+            var psa = document.getElementById("inp-category1").value;
+            var veh = document.getElementById("inp-category2").value;
+            var msg = document.getElementById("inp-category3").value;
+            var url = document.getElementById("inp-category4").value;
+            var resource = document.getElementById("inp-category4").value;
+            var range = document.getElementById("inp-category5").value;
+            var model = document.getElementById("inp-category6").value;
+            var hash = document.getElementById("inp-category7").value;
+            var explode = document.getElementById("chb-explosive-purge").checked;
+            var user_id = document.getElementById("inp-user_id").value;
+            $.post('http://omni_staffpanel/misc', JSON.stringify({
+                action: action,
+                range: range,
+                url: url,
+                psa: psa,
+                veh: veh,
+                msg: msg,
+                resource: resource,
+                model: model,
+                hash: hash,
+                explode: explode,
+                user_id: user_id,
+            }));
+        }
+        function requestPSA(psa, lines) {
+            var line1 = document.getElementById("inp-category1").value;
+            var line2 = document.getElementById("inp-category2").value;
+            var line3 = document.getElementById("inp-category3").value;
+            $.post('http://omni_staffpanel/psa', JSON.stringify({
+                psa: psa,
+                lines: lines,
+                line1: line1,
+                line2: line2,
+                line3: line3,
+            }));
+        }
+        function requestTargetedPSA() {
+            var line1 = document.getElementById("inp-category1").value;
+            var user_id = document.getElementById("inp-user_id").value;
+            $.post('http://omni_staffpanel/targetedpsa', JSON.stringify({
+                line1: line1,
+                user_id: user_id,
+            }));
+        }
+        function requstUpdateAdvertisement() {
+            var line1 = document.getElementById("inp-category1").value;
+            var line2 = document.getElementById("inp-category2").value;
+            var user_id = document.getElementById("inp-user_id").value;
+            console.log("hello world")
+            $.post('http://omni_staffpanel/updateadvertisement', JSON.stringify({
+                line1: line1,
+                line2: line2,
+                user_id: user_id,
+            }));
+        }
+        function _updateUserlist(list) {
+            var tableElement = document.getElementById("table-userlist");
+            var str = "<table><tr><th onclick='sortUserlistName()'>Username" + USER_LIST_USERNAME_SORTDIR + "</th><th onclick='sortUserlistId()'>User ID" + USER_LIST_ID_SORTDIR + "</th></tr>";
+            for (var key in list) {
+                var data = list[key];
+                str += "<tr onclick=\"setUD(this)\"><td class=\"tbl-name\">{0}</td><td class=\"tbl-id\">{1}</td></tr>".format(data.username, data.user_id);
+            };
+            str += "</table>";
+            tableElement.innerHTML = str;
+        }
+        function updateUserlist(list) {
+            USER_LIST = list;
+            USER_LIST_USERNAME_SORTDIR = "  ";
+            USER_LIST_ID_SORTDIR = "  ";
+            _updateUserlist(USER_LIST);
+        }
+        function sortUserlistName() {
+            USER_LIST.sort((a,b) => (a.username > b.username) ? 1 : ((b.username > a.username) ? -1 : 0));
+            USER_LIST_USERNAME_SORTDIR = " ↓";
+            USER_LIST_ID_SORTDIR = "  ";
+            _updateUserlist(USER_LIST);
+        }
+        function sortUserlistId() {
+            USER_LIST.sort((a,b) => (a.user_id - b.user_id));
+            USER_LIST_USERNAME_SORTDIR = "  ";
+            USER_LIST_ID_SORTDIR = " ↓";
+            _updateUserlist(USER_LIST);
+        }
+        function updateBanlist(list) {
+            var tableElement = document.getElementById("table-banlist");
+            var str = "<table><tr><th>Reason</th><th>User ID</th></tr>";
+            for (var key in list) {
+                var data = list[key];
+                str += "<tr onclick=\"setUD(this)\"><td class=\"tbl-name\">{0}</td><td class=\"tbl-id\">{1}</td></tr>".format(data.username, data.user_id);
+            };
+            str += "</table>";
+            tableElement.innerHTML = str;
+        }
+        function updateWarnlist(list) {
+            var tableElement = document.getElementById("table-warnlist");
+            var str = "<table><tr><th>Date</th><th>Warnings</th></tr>";
+            for (var key in list) {
+                var data = list[key];
+                str += "<tr><td class=\"tbl-id\">{0}</td><td>{1}</td></tr>".format(data.date, data.warning);
+            };
+            str += "</table>";
+            tableElement.innerHTML = str;
+        }
+        function updateReportlist(list) {
+            var tableElement = document.getElementById("table-reportlist");
+            var str = "<h3>History for " + document.getElementById("inp-user_id").value + " (" + list.length + ")</h3></br><table><tr><th>Date</th><th>Entry</th></tr>";
+            for (var key in list) {
+                var data = list[key];
+                if (data.flag) {
+                    str += "<tr><td class=\"tbl-id\">{0}</td><td class=\"tbl-id\">{1}</td></tr>".format(data.date, data.reason);
+                } else {
+                    str += "<tr><td class=\"tbl-id\">{0}</td><td>Reported: {1}</td></tr>".format(data.date, data.reason);
+                }
+            };
+            str += "</table>";
+            tableElement.innerHTML = str;
+        }
+        function updateReportedlist(list) {
+            var tableElement = document.getElementById("table-reportlist");
+            var str = "<h3>Reports by " + document.getElementById("inp-user_id").value + " (" + list.length + ")</h3></br><table><tr><th>Date</th><th>User ID</th><th>Reason</th></tr>";
+            for (var key in list) {
+                var data = list[key];
+                if (data.flag) {
+                    str += "<tr><td class=\"tbl-id\">{0}</td><td>{1}</td><td class=\"tbl-id\">{2}</td></tr>".format(data.date, data.user_id, data.reason);
+                } else {
+                    str += "<tr><td class=\"tbl-id\">{0}</td><td>{1}</td><td>{2}</td></tr>".format(data.date, data.user_id, data.reason);
+                }
+            };
+            str += "</table>";
+            tableElement.innerHTML = str;
+        }
+        function updateLicenseList(list) {
+            var tableElement = document.getElementById("license_list");
+            // <tr><td><button disabled id="btn-license-take-corp_cooldown" class="btn-misc-half" onclick="licenseAction('take', 'corp_cooldown')">Revoke</button><button disabled id="btn-license-give-corp_cooldown" class="btn-misc-half" onclick="licenseAction('give', 'corp_cooldown')">Give</button></td><td><input type="checkbox" perm="admin" onchange="enableButton('license-give-corp_cooldown', this);enableButton('license-take-corp_cooldown', this)"/>Company Cooldown</td></tr>
+            var str = "<tr><td colspan=\"2\"><hr /></td></tr><tr><th>Licenses</th><th></th></tr>";
+            for (var key in list) {
+                var data = list[key];
+                str += "<tr><td><button disabled id=\"btn-license-take-{0}\" class=\"btn-misc-half\" onclick=\"licenseAction('take', '{0}')\">Revoke</button><button disabled id=\"btn-license-give-{0}\" class=\"btn-misc-half\" onclick=\"licenseAction('give', '{0}')\">Give</button></td><td><input type=\"checkbox\" perm=\"admin\" onchange=\"enableButton('license-give-{0}', this);enableButton('license-take-{0}', this)\"/>{1}</td></tr>".format(data.licenseId, data.licenseName);
+            };
+            tableElement.innerHTML = str;
+        }
+        if (DEBUG) {
+            updateReportlist([
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3,flag:true},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+                {date:"TEST DATE",reason:"TEST REASON",reporter:3},
+            ])
+            updateLicenseList([
+                {licenseId:"test_license_1",licenseName:"My Name"},
+                {licenseId:"test_license_2",licenseName:"Jeff"},
+                {licenseId:"test_license_3",licenseName:"Police Life V"},
+                {licenseId:"test_license_4",licenseName:"Mek"},
+            ])
+            updateUserlist([
+                {user_id:"1243",username:"My Name"},
+                {user_id:"134213",username:"Jeff"},
+                {user_id:"6",username:"GFDGKFDS1##"},
+                {user_id:"24461",username:"Mek"},
+                {user_id:"7235",username:"Janmedijuf"},
+                {user_id:"53466",username:"sdfdsdrEE!1"},
+            ])
+        }
+        function openWindow() {
+            console.log("Panel Opened");
+            IS_ACTIVE = true;
+            document.getElementById("staffpanel").style.display = "block";
+        };
+        if (DEBUG) {
+            openWindow();
+        }
+        function closeWindow(hide = false) {
+            console.log("Panel Closed");
+            IS_ACTIVE = false;
+            if (hide) {
+                document.getElementById("staffpanel").style.display = "none";
+                console.log("Panel Hidden");
+            }
+            $.post('http://omni_staffpanel/close');
+        };
+        function requestRefresh() {
+            $.post('http://omni_staffpanel/refresh');
+        }
+        function requestWarnings() {
+            var user_id = document.getElementById("inp-user_id").value;
+            $.post('http://omni_staffpanel/get_warnings', JSON.stringify({
+                user_id: user_id,
+            }));
+        }
+        function requestReports() {
+            var user_id = document.getElementById("inp-user_id").value;
+            $.post('http://omni_staffpanel/get_reports', JSON.stringify({
+                user_id: user_id,
+            }));
+        }
+        function addReportNote() {
+            var user_id = document.getElementById("inp-user_id").value;
+            var note = document.getElementById("inp-reason").value;
+            $.post('http://omni_staffpanel/add_report_note', JSON.stringify({
+                user_id: user_id,
+                note: note,
+            }));
+        }
+        function requestMadeReports() {
+            var user_id = document.getElementById("inp-user_id").value;
+            $.post('http://omni_staffpanel/get_made_reports', JSON.stringify({
+                user_id: user_id,
+            }));
+        }
+
+        window.onload = function() {
+            refreshPermissions();
+            let _cef = false;
+            setInterval(function(){
+                _cef = !_cef;
+                if (_cef) {
+                    document.getElementById("cef-fix").innerHTML = ",";
+                } else {
+                    document.getElementById("cef-fix").innerHTML = ".";
+                }
+            }, 100);
+            setInterval(function(){
+                refreshPermissions();
+            }, 10000);
+        };
+
+        function refreshPermissions() {
+            var list;
+            ELEMENTS.forEach(function(element_data){
+                var element = element_data[0];
+                var attribute = element_data[1];
+                list = document.querySelectorAll(element + "[perm]");
+                list.forEach(function(data){
+                    data.setAttribute(attribute, attribute);
+                });
+                for (var permission in PERMISSIONS) {
+                    var bool = PERMISSIONS[permission];
+                    list = document.querySelectorAll(element + "[perm=" + permission + "]");
+                    list.forEach(function(data){
+                        if (bool) {
+                            // data.style.display = "";
+                            data.removeAttribute(attribute);
+                        } else {
+                            // data.style.display = "none";
+                            data.setAttribute(attribute, attribute);
+                        }
+                    });
+                };
+            });
+            // document.getElementsByClassName("btn-nav").forEach(function(_elem) {
+            //     console.log("Locked")
+            //     _elem.setAttribute("disabled","disabled");
+            // });
+            // document.getElementsByClassName("btn-ban").forEach(function(_elem) {
+            //     _elem.setAttribute("disabled","disabled");
+            // });
+            // document.getElementsByClassName("btn-kick").forEach(function(_elem) {
+            //     _elem.setAttribute("disabled","disabled");
+            // });
+        }
+
+        function enableButton(label, element) {
+            var button = document.getElementById("btn-" + label);
+            if (element.checked) {
+                button.removeAttribute("disabled");
+            } else {
+                button.setAttribute("disabled", "disabled");
+            }
+        }
+
+        function mouseUp() {
+            window.removeEventListener('mousemove', move, true);
+        }
+
+        function mouseDown(e) {
+            o.x = e.clientX - PANEL.x;
+            o.y = e.clientY - PANEL.y;
+            // console.log("Client: " + e.clientX + "x " + e.clientY + "y")
+            // console.log("Panel: " + PANEL.x + "x " + PANEL.y + "y")
+            // console.log("Offset: " + o.x + "x " + o.y + "y")
+            window.addEventListener('mousemove', move, true);
+        };
+
+        function move(e) {
+            PANEL.x = e.clientX - o.x;
+            PANEL.y = e.clientY - o.y;
+            panel.style.left = PANEL.x + "px";
+            panel.style.top = PANEL.y + "px";
+        };
+
+        function setUD(elem = false) {
+            if (elem) {
+                if (PANEL.sel_elem) {
+                    PANEL.sel_elem.className = "unselected";
+                }
+                PANEL.sel_elem = elem;
+                PANEL.sel_elem.className = "selected";
+                document.getElementsByName("username").forEach(function(_elem) {
+                    _elem.value = elem.getElementsByClassName("tbl-name")[0].innerHTML;
+                });
+                document.getElementsByName("user_id").forEach(function(_elem) {
+                    _elem.value = elem.getElementsByClassName("tbl-id")[0].innerHTML;
+                });
+            }
+        };
+        function udUserId(elem) { setUserId(elem.value) };
+        function setUserId(reason) {
+            document.getElementsByName("user_id").forEach(function(_elem) {
+                _elem.value = reason;
+            });
+        };
+        function udReason(elem) { setReason(elem.value) };
+        function setReason(reason) {
+            document.getElementsByName("reason").forEach(function(_elem) {
+                _elem.value = reason;
+                _elem.innerText = reason;
+            });
+        };
+        function udCategory(cat, elem) { setCategory(cat, elem.value) };
+        function setCategory(cat, val) {
+            document.getElementsByName("category" + cat).forEach(function(_elem) {
+                _elem.value = val;
+            });
+        };
+        function udBantype(bantype) { setBantype(bantype) };
+        let banTypeNames = ["30 min", "1 hour", "6 hours", "1 day", "2 days", "1 week", "2 weeks", "1 month", "Permanent"];
+        let muteTypeNames = ["30m", "1h", "6h", "1d", "2d", "1w", "2w", "1M", "Permanent"];
+        function setBantype(bantype) {
+            document.getElementsByName("bantype").forEach(function(_elem) {
+                _elem.value = bantype;
+            });
+            document.getElementById("bantypen").innerHTML = banTypeNames[bantype];
+            if (bantype == 8) {
+                document.getElementById("bantypen").style.color = 'red'
+                document.getElementById("btn-kick").innerHTML = 'Permakick'
+                document.getElementById("btn-ban").innerHTML = 'Ban'
+                document.getElementById("btn-mute").innerHTML = 'Forever mute'
+            } else {
+                document.getElementById("bantypen").style.color = ''
+                document.getElementById("btn-kick").innerHTML = 'Kick'
+                document.getElementById("btn-ban").innerHTML = 'Suspend for ' + banTypeNames[bantype];
+                document.getElementById("btn-mute").innerHTML = banTypeNames[bantype] + ' mute';
+            };
+        };
+        setBantype(0);
+        function udConvar(convar, elem) { setConvar(convar, elem.value) };
+        function setConvar(convar, value) {
+            document.getElementsByName(convar).forEach(function(_elem) {
+                _elem.value = value;
+            });
+        };
+        function getConvar(convar) {
+            return document.getElementsByName(convar)[0].value || "";
+        }
+        function setPanelE(elem) {
+            if (PANEL.btn) {
+                if (PANEL.btn.className == "btn-misc selected") {
+                    PANEL.btn.className = "btn-misc";
+                } else {
+                    PANEL.btn.className = "btn-nav";
+                }
+            }
+            PANEL.btn = elem;
+            if (PANEL.btn.className == "btn-misc") {
+                PANEL.btn.className = "btn-misc selected";
+            } else {
+                PANEL.btn.className = "btn-nav selected";
+            }
+            setPanel(elem.value);
+        };
+        function setPanel(name) {
+            var newPanel = name
+            if (PANEL.name == newPanel) {
+
+            } else {
+                if (PANEL.elem) {
+                    PANEL.elem.style.display = "none";
+                }
+                PANEL.elem = document.getElementById("panel_" + newPanel);
+                PANEL.elem.style.display = "block";
+                PANEL.name = newPanel;
+            }
+        };
+        if (DEBUG) {
+            panel_blank.style.overflow = 'scroll'
+            panel_blank.innerHTML = `
+<h1>Transport Tycoon Staff Panel</h1>
+<p>Oh no! The developers accidentally left debug mode on</p>
+<p>Debug mode forces the staff panel to stay open for easy development.</p>
+<p>You cannot access anything here, and there is no way to remove the panel.</p>
+<p>Please let the developers know so that can fix it</p>
+<hr>
+<p>We're very sorry, the server needs to be updated to resolve this.</p>
+<br>
+<br>
+<h2>What are you waiting for? Let them know!</h2>
+            `
+//             fetch('https://meme-api.herokuapp.com/gimme').then((r) => r.json()).then((r) => {
+//                 panel_blank.innerHTML = `
+// <h1>Transport Tycoon Staff Panel</h1>
+// <p>Hello, it looks like the developers forgot to turn off the debug mode on the staff panel</p>
+// <p>You cannot access it, and there is no way to remove it.</p>
+// <p>Please let the developers know that they did this</p>
+// <img width="400" src='` + r.url + `'>`
+//             }).catch((e) => console.error(e))
+            // setPanel("manual");
+        }
+        function kickReason(reason) {
+            setReason(reason);
+            actionKick();
+        }
+        function actionMute() {
+            action("mute");
+        }
+        function actionKick() {
+            action("kick");
+        }
+        function actionBan() {
+            action("ban");
+        }
+        function actionTpTo() {
+            action("tpto");
+        }
+        function actionTpToMe() {
+            action("tptome");
+        }
+        function actionSpectate() {
+            action("spectate");
+        }
+        function actionIntro() {
+            action("intro");
+        }
+        function action(type) {
+            if (IS_ACTIVE) {
+                var method = type;
+                var username = document.getElementById("inp-username").value;
+                var user_id = document.getElementById("inp-user_id").value;
+                var reason = document.getElementById("inp-reason").value;
+                var bantype = document.getElementById("inp-bantype").value;
+
+                console.log("Player " + username + " (id " + user_id + ") has been (" + method + ") for (" + reason + "), bt " + bantype + "");
+                $.post('http://omni_staffpanel/action', JSON.stringify({
+                    method: method,
+                    username: username,
+                    user_id: user_id,
+                    reason: reason,
+                    bantype: bantype,
+                }));
+            };
+        }
+        function licenseAction(action, licenseId) {
+            if (IS_ACTIVE) {
+                var user_id = document.getElementById("inp-user_id").value;
+                $.post('http://omni_staffpanel/license', JSON.stringify({
+                    action: action,
+                    licenseId: licenseId,
+                    user_id: user_id,
+                }));
+            }
+        }
+        function escapeRegExp(string){
+            return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }
+        function replaceAll(str, term, replacement) {
+            return str.replace(new RegExp(escapeRegExp(term), 'g'), replacement);
+        }
+        function eventPreview() {
+            let server_region = getConvar("server_region");
+            let server_number = getConvar("server_number");
+            let server_motd = getConvar("server_motd");
+            let server_name = getConvar("server_name");
+
+            if (server_motd == "") {
+                server_motd = "Planes | Trains | Automobiles | Boats";
+            }
+
+            if (server_number != "1") {
+                server_motd = server_motd + " ^7| ^1Server #" + server_number;
+                if (server_name != "") {
+                    server_motd = server_motd + " ^3(" + server_name + ")";
+                }
+            }
+
+            let serverFormatted = `^7[PVE | Simulator][${server_region}] ^1Transport Tycoon ^7| ${server_motd}`
+            document.getElementById("event-preview").innerHTML = getColoredText(serverFormatted);
+            setConvar("chatlog_prefix", `${server_region}-${server_number}`)
+        }
+        function getColoredText(text) {
+            const Colors = [
+                "FFFFFF",
+                "F44336",
+                "4CAF50",
+                "FFEB3B",
+                "42A5F5",
+                "03A9F4",
+                "9C27B0",
+                "FFFFFF",
+                "FF5722",
+                "9E9E9E",
+            ]
+            var open = 0;
+            var newText = text
+            for (colorId in Colors) {
+                let color = Colors[colorId];
+                console.log("colorId: " + colorId);
+                newText = replaceAll(newText, "^" + colorId, function(x) {
+                    open = open + 1;
+                    return "<span style='color:" + color + "'>";
+                });
+            }
+            for (i = 0; i < open; i++) {
+                newText = newText + "</span>";
+            }
+            return newText;
+        }
+        function eventApply() {
+            const Convars = [
+                "server_region",
+                "server_number",
+                "server_name",
+                "server_motd",
+            ];
+            let convars = {};
+            for (convarId in Convars) {
+                let convar = Convars[convarId];
+                convars[convar] = getConvar(convar);
+            }
+            convars["server_beta"] = "";
+            if (document.getElementsByName("server_beta")[0].checked) {
+                convars["server_beta"] = "true";
+            }
+            convars["server_staff"] = "";
+            if (document.getElementsByName("server_staff")[0].checked) {
+                convars["server_staff"] = "true";
+            }
+            $.post('http://omni_staffpanel/convars', JSON.stringify({
+                convars: convars,
+            }));
+        }
+        function eventFetch() {
+            $.post('http://omni_staffpanel/event_fetch');
+        }
+
+        function updateEventData(data) {
+            for (convar in data) {
+                setConvar(convar, data[convar]);
+            };
+            if (data["server_beta"] != "") {
+                document.getElementsByName("server_beta")[0].setAttribute("checked", "checked");
+            } else {
+                document.getElementsByName("server_beta")[0].removeAttribute("checked");
+            }
+            if (data["server_staff"] != "") {
+                document.getElementsByName("server_staff")[0].setAttribute("checked", "checked");
+            } else {
+                document.getElementsByName("server_staff")[0].removeAttribute("checked");
+            }
+            eventPreview();
+        }
+
+        const url = DEBUG ? "https://cfx-nui-omni_staffpanel/html/guidelines.json" : 'https://cdn.tycoon.community/ingame/guidelines_v2.json';
+        fetch(url)
+            .then( res => { return res.json(); } )
+            .then( data => { data.forEach((e) => {
+            let tr = document.createElement('tr')
+            let td = document.createElement('td')
+            td.className = 'tbl-label'
+            td.setAttribute('colspan', '2')
+            if (e.category) {
+                td.innerText = e.title
+                tr.appendChild(td)
+                tbl_reasons.appendChild(tr)
+                return;
+            }
+            let button = document.createElement('button')
+            button.className = 'btn-misc'
+            button.innerText = e.title
+            button.onclick = () => {
+                setReason(e.reason, 2)
+                let n = 0, s = 0;
+                reason_guideline_text.innerHTML = e.guidelines.map((entry) => {
+                    if (entry.startsWith('--')) {
+                        s++;
+                        return `<div class='guideline'><strong>${n}.${s}.</strong> ${entry.slice(2)}</div>`
+                    } else if (entry.startsWith('-')) {
+                        n++;
+                        s = 0;
+                        return `<div class='guideline'><strong>${n}.</strong> ${entry.slice(1)}</div>`
+                    } else {
+                        s = 0;
+                        return `<div>${entry}</div>`;
+                    }
+                }).join('\n');
+                reason_selector.style.display = 'none';
+                reason_guideline.style.display = 'block';
+            }
+            tr.appendChild(td)
+            td.appendChild(button)
+            tbl_reasons.appendChild(tr)
+            reason_preset_button.onclick = () => {
+                reason_selector.style.display = 'block';
+                reason_guideline.style.display = 'none';
+            }
+        }) } )
+            .catch( err => { console.errror(err) } )
+
+    </script>
+    <style type="text/css">
+        #staffpanel {
+            width: 500px;
+            height: 490px;
+            border: 1px solid black;
+            background-color: darkgray;
+            position: fixed;
+            padding: 5px;
+            text-align: center;
+            border-radius: 5px;
+            user-select: none;
+        }
+        button {
+            border: 1px solid black;
+        }
+        .panel-header {
+            height: 30px;
+            background-color: darkgray;
+        }
+        .panel {
+            width: 500px;
+            height: 430px;
+            background-color: white;
+            align-content: center;
+            position: absolute;
+            border: black solid 1px;
+            border-radius: 5px;
+        }
+        .panel-content {
+            width: 100%;
+            height: 370px;
+            top: 0px;
+            position: relative;
+            overflow: auto;
+        }
+        .panel-bottom {
+            width: 100%;
+            height: 60px;
+            text-align: center;
+            bottom: 0px;
+            position: relative;
+        }
+        .panel-bottom * {
+            bottom: 20px;
+            max-width: 30%;
+            width: 30%;
+        }
+        .panel-content table {
+            width: 100%;
+        }
+        .tbl-id, .tbl-label {
+            font-weight: bold;
+        }
+        .tbl-name, .tbl-input {
+            overflow: hidden;
+            width: 350px;
+            max-width: 350px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .tbl-input input {
+            width: 100%;
+        }
+        #staffpanel_header {
+            border: 1px solid gray;
+        }
+        #staffpanel_nav button {
+            margin: 1px;
+        }
+        .btn-misc {
+            width: 100%;
+        }
+        .btn-misc-half {
+            width: 50%;
+        }
+        .btn-nav {
+            width: 74px;
+        }
+        .btn-nav.selected {
+            background-color: gray;
+        }
+        .btn-close-smol {
+            width: 25px;
+            background-color: red;
+        }
+        .btn-close {
+            background-color: red;
+        }
+        .btn-refresh {
+            background-color: limegreen;
+        }
+        .maxwidth {
+            width: 100%;
+            resize: vertical;
+        }
+        .btn-add {
+            background-color: yellow;
+            width: 100%;
+        }
+        .btn-kick:enabled {
+            background-color: rgb(184, 58, 0);
+            color: white;
+        }
+        .btn-ban:enabled {
+            background-color: darkred;
+            color: white;
+        }
+        tr.selected {
+            background-color: tomato;
+            color: white;
+        }
+        #panel_userlist > input{
+            margin: 5px;
+        }
+        .guideline {
+            position: relative;
+            left: 10px;
+            text-align: left;
+        }
+    </style>
+
+</body></html>
