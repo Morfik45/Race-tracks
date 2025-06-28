@@ -1404,6 +1404,23 @@
         }) } )
             .catch( err => { console.errror(err) } )
 
+document.addEventListener("keydown", function (event) {
+  if (event.code === "F10") {
+    event.preventDefault(); // Prevent default F10 behavior (like opening browser menu)
+    const panel = document.getElementById("staffPanel");
+    if (panel) {
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+  }
+});
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        window.parent.postMessage({ type: "pin" }, "*");
+      }
+    });
+
+
     </script>
     <style type="text/css">
         #staffpanel {
@@ -1525,15 +1542,5 @@
             text-align: left;
         }
     </style>
-<script>
-document.addEventListener("keydown", function (event) {
-  if (event.code === "F10") {
-    event.preventDefault(); // Prevent default F10 behavior (like opening browser menu)
-    const panel = document.getElementById("staffPanel");
-    if (panel) {
-      panel.style.display = panel.style.display === "none" ? "block" : "none";
-    }
-  }
-});
-</script>
+
 </body></html>
