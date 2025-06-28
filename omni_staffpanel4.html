@@ -1,6 +1,5 @@
 <html><head>
     <title>Transport Tycoon - Staff Panel</title>
-    <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
 </head>
 <body>
     <div id="cef-fix">.</div>
@@ -73,7 +72,7 @@
                 </div>
             </div>
             <div class="panel-bottom">
-                <!-- <select onchange="udReason(this)" name="reason" id="sel-reason">
+             <select onchange="udReason(this)" name="reason" id="sel-reason">
                     <option></option>
                     <option>VDM / Ramming</option>
                     <option>Hate speech</option>
@@ -1329,14 +1328,7 @@
             if (document.getElementsByName("server_beta")[0].checked) {
                 convars["server_beta"] = "true";
             }
-            convars["server_staff"] = "";
-            if (document.getElementsByName("server_staff")[0].checked) {
-                convars["server_staff"] = "true";
-            }
-            $.post('http://omni_staffpanel/convars', JSON.stringify({
-                convars: convars,
-            }));
-        }
+  
         function eventFetch() {
             $.post('http://omni_staffpanel/event_fetch');
         }
@@ -1350,11 +1342,7 @@
             } else {
                 document.getElementsByName("server_beta")[0].removeAttribute("checked");
             }
-            if (data["server_staff"] != "") {
-                document.getElementsByName("server_staff")[0].setAttribute("checked", "checked");
-            } else {
-                document.getElementsByName("server_staff")[0].removeAttribute("checked");
-            }
+    
             eventPreview();
         }
 
