@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Streak Tracker</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .job-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .job-name {
+      font-size: 16px;
+    }
+    .circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: green;
+      border: 2px solid #444;
+      position: relative;
+    }
+    .circle.yellow {
+      background: yellow;
+    }
+    .circle.red {
+      background: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Job Streak Tracker</h1>
+  <div id="jobList"></div>
+
+  <script>
+    const jobList = document.getElementById("jobList");
+    const jobs = {};
+
+    // Assume Central European Summer Time day resets at 2am local time
+    function getLastResetDate() {
+      const now = new Date();
+      const reset = new Date(now);
+      reset.setHours(2, 0, 0, 0);
+      if (now < reset) {
+        reset.setDate(reset.getDate() - 1);
+      }
+      return reset.getTime();
+    }
+
+    function updateTimers() {
+      const now = Date.now();
+      const resetTime = getLastResetDate();
+
+      for (const id in jobs) {
+        const job = jobs[id];
+        const elapsed = now - job.timestamp;
+        const total = 48 * 60 * 60 * 1000; // 48h
+
+        const circle = document.querySelector(`#circle-${id}`);
+        if (!circle) continue;
+
+        if (elapsed < total * 0.5) {
+          circle.className = "circle green";
+        } else if (elapsed < total * 0.9) {
+          circle.className = "circle yellow";
+        } else {
+          circle.className = "circle red";
+        }
+      }
+    }
+
+    function addJob(name) {
+      const id = name.replace(/\W+/g, "_");
+      if (jobs[id]) return;
+      const timestamp = Date.now();
+      jobs[id] = { name, timestamp };
+
+      const div = document.createElement("div");
+      div.className = "job-entry";
+      div.innerHTML = `
+        <div class="job-name">${name}</div>
+        <div class="circle green" id="circle-${id}"></div>
+      `;
+      jobList.appendChild(div);
+    }
+
+    // Listen for data updates from game
+    window.addEventListener("message", (event) => {
+      const data = event.data.data;
+      if (!data) return;
+
+      const job = data.job_name || "";
+      const vehicle = (data.vehicleClassName || "").toLowerCase();
+      const notification = data.notification || "";
+
+      const validGround = !["plane", "helicopter", "boat"].includes(vehicle) || vehicle === "jetpacks";
+      const isRTS = job === "R.T.S. Transporter";
+      const scoreNotice = notification.includes("R.T.S. Score");
+
+      if (isRTS && validGround && scoreNotice) {
+        addJob("RTS Ground");
+      }
+    });
+
+    // Regular timer check
+    setInterval(updateTimers, 60000); // every minute
+  </script>
+</body>
+</html>
