@@ -222,23 +222,30 @@ window.addEventListener("load", async () => {
 
     sendCommand("getData");
 
-    const speedometerContainer = document.getElementById('speedometerContainer');
-    // Center it on first load (if no saved position)
 const speedometerContainer = document.getElementById('speedometerContainer');
 
-if (!localStorage.getItem('speedo_pos_left') || !localStorage.getItem('speedo_pos_top')) {
+// Wait for layout to be ready before positioning
+requestAnimationFrame(() => {
+  const savedLeft = localStorage.getItem('speedo_pos_left');
+  const savedTop = localStorage.getItem('speedo_pos_top');
+
+  if (!savedLeft || !savedTop) {
+    // Center the speedometer if no saved position
     const rect = speedometerContainer.getBoundingClientRect();
     const centerX = (window.innerWidth / 2) - (rect.width / 2);
     const centerY = (window.innerHeight / 2) - (rect.height / 2);
     speedometerContainer.style.left = `${centerX}px`;
     speedometerContainer.style.top = `${centerY}px`;
-} else {
+  } else {
     restoreSpeedoPosition(speedometerContainer);
-}
+  }
 
-makeSpeedometerDraggable(speedometerContainer);
-    generateSpeedTicks(localStorage.getItem('speedUnit') || 'kmh');
-    generateRpmTicks();
+  // Make draggable after positioning
+  makeSpeedometerDraggable(speedometerContainer);
+});
+
+generateSpeedTicks(localStorage.getItem('speedUnit') || 'kmh');
+generateRpmTicks();
 
 const speedUnit = localStorage.getItem('speedUnit') || 'kmh';
 document.getElementById('speedDisplayUnit').innerText = speedUnit === 'mph' ? 'mph' : 'km/h';
