@@ -170,22 +170,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-  <div class="input-group mb-3">
-    <label class="input-group-text" for="speedUnit">Speed Unit</label>
-    <select class="form-select bg-dark" id="speedUnit" style="color:white;">
-      <option value="kmh">Kilometers per Hour (km/h)</option>
-      <option value="mph">Miles per Hour (mph)</option>
-    </select>
-  </div>
-
-  <!-- 🔹 New Scale Slider -->
-  <div class="mb-3">
-    <label for="scaleSlider" class="form-label text-light">
-      Speedometer Size <span id="scaleValue" class="text-info ms-2"></span>
-    </label>
-    <input type="range" class="form-range" id="scaleSlider" min="0.5" max="1.5" step="0.01">
-  </div>
-</div>
+            <div class="input-group mb-3">
+              <label class="input-group-text" for="speedUnit">Speed Unit</label>
+              <select class="form-select bg-dark" id="speedUnit" style="color:white;">
+                <option value="kmh">Kilometers per Hour (km/h)</option>
+                <option value="mph">Miles per Hour (mph)</option>
+              </select>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -232,52 +223,27 @@ window.addEventListener("load", async () => {
     sendCommand("getData");
 
     const speedometerContainer = document.getElementById('speedometerContainer');
+    // Center it on first load (if no saved position)
+const speedometerContainer = document.getElementById('speedometerContainer');
+
+if (!localStorage.getItem('speedo_pos_left') || !localStorage.getItem('speedo_pos_top')) {
+    const rect = speedometerContainer.getBoundingClientRect();
+    const centerX = (window.innerWidth / 2) - (rect.width / 2);
+    const centerY = (window.innerHeight / 2) - (rect.height / 2);
+    speedometerContainer.style.left = `${centerX}px`;
+    speedometerContainer.style.top = `${centerY}px`;
+} else {
     restoreSpeedoPosition(speedometerContainer);
-    makeSpeedometerDraggable(speedometerContainer);
+}
+
+makeSpeedometerDraggable(speedometerContainer);
     generateSpeedTicks(localStorage.getItem('speedUnit') || 'kmh');
     generateRpmTicks();
 
-    const speedUnit = localStorage.getItem('speedUnit') || 'kmh';
-    document.getElementById('speedDisplayUnit').innerText = speedUnit === 'mph' ? 'mph' : 'km/h';
-    document.getElementById('speedUnit').value = speedUnit;
-
-    // 🔹 Restore saved scale
-    const savedScale = parseFloat(localStorage.getItem('speedo_scale')) || 1;
-    applySpeedometerScale(savedScale);
-    const slider = document.getElementById('scaleSlider');
-    const scaleValueLabel = document.getElementById('scaleValue');
-    slider.value = savedScale.toFixed(2);
-    scaleValueLabel.textContent = `${Math.round(savedScale * 100)}%`;
-
-    // 🔹 Live scaling while moving the slider
-    slider.addEventListener('input', (e) => {
-        const scale = parseFloat(e.target.value);
-        applySpeedometerScale(scale);
-        scaleValueLabel.textContent = `${Math.round(scale * 100)}%`;
-    });
-
-    // 🔹 Save scale when settings are saved
-    document.getElementById('saveSettings').addEventListener('click', () => {
-        const selectedUnit = document.getElementById('speedUnit').value;
-        localStorage.setItem('speedUnit', selectedUnit);
-        localStorage.setItem('speedo_scale', slider.value);
-
-        generateSpeedTicks(selectedUnit);
-        document.getElementById('speedDisplayUnit').innerText = selectedUnit === 'mph' ? 'mph' : 'km/h';
-
-        sendNotification(`Speed unit set to ${selectedUnit.toUpperCase()} | Scale: ${Math.round(slider.value * 100)}%`);
-        const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
-        modal.hide();
-    });
+const speedUnit = localStorage.getItem('speedUnit') || 'kmh';
+document.getElementById('speedDisplayUnit').innerText = speedUnit === 'mph' ? 'mph' : 'km/h';
+document.getElementById('speedUnit').value = speedUnit;
 });
-
-// 🔹 Function to apply scale to entire speedometer
-function applySpeedometerScale(scale) {
-    const container = document.getElementById('speedometerContainer');
-    container.style.transformOrigin = "bottom right"; // keeps position steady
-    container.style.transform = `scale(${scale})`;
-}
-
 
 const userDetailsInterval = setInterval(() => {
     if (userDetails.username) {
