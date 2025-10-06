@@ -181,6 +181,7 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" id="saveSettings">Save changes</button>
+            <button type="button" class="btn btn-warning" id="recenterButton">Re-center Speedometer</button>
             <button type="button" class="btn btn-danger" id="clearStorageButton">Clear Cache + Reload</button>
           </div>
         </div>
@@ -584,6 +585,29 @@ document.getElementById('saveSettings').addEventListener('click', () => {
     const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
     modal.hide();
 });
+
+      document.getElementById('recenterButton').addEventListener('click', () => {
+  const speedometerContainer = document.getElementById('speedometerContainer');
+
+  // Calculate center
+  const rect = speedometerContainer.getBoundingClientRect();
+  const centerX = (window.innerWidth / 2) - (rect.width / 2);
+  const centerY = (window.innerHeight / 2) - (rect.height / 2);
+
+  // Apply and save new position
+  speedometerContainer.style.left = `${centerX}px`;
+  speedometerContainer.style.top = `${centerY}px`;
+  localStorage.setItem('speedo_pos_left', `${centerX}px`);
+  localStorage.setItem('speedo_pos_top', `${centerY}px`);
+
+  // Optional: show toast / notification
+  sendNotification("Speedometer re-centered");
+
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+  modal.hide();
+});
+      
     </script>
   </main>
 
