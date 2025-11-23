@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Racetrack Selector</title>
+  <style>
+    body {
+      background: transparent;
+      color: white;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+       overflow:hidden;
+    }
+
+    #trackMenu {
+      display: block;
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid lightgreen;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1001;
+      width: 300px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+    }
+
+    #trackPreview {
+      background: #111;
+      border: 1px solid lightgreen;
+      height: 140px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: gray;
+    }
+
+    #trackList {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      scrollbar-color: lightgreen transparent;
+      scrollbar-width: thin;  
+    }
+
+    #trackList button {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      background: transparent;
+      border: 1px solid lightgreen;
+      color: white;
+      cursor: pointer;
+    }
+
+    #trackList button:hover {
+      background: rgba(144, 238, 144, 0.1);
+    }
+
+    #changeTrackBtn,
+    #confirmTrackBtn {
+      padding: 8px 12px;
+      border: 1px solid lightgreen;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+    }
+
+    #confirmTrackBtn {
+      margin-top: 10px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Overlay -->
+  <div id="overlay"></div>
+
+  <!-- Track Selector Menu -->
+  <div id="trackMenu">
+    <h3 style="text-align: center; margin-bottom: 10px;">Select a Track</h3>
+    
+    <div id="trackPreview">Select track from list below</div>
+    
+    <div id="trackList">
+      <button 
+        data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_short.html"
+        data-img="Images/short_roxwood.png.png">
+        Roxwood Circuit Short Track
+      </button>
+      
+      <button 
+        data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_drift.html"
+        data-img="Images/drift_roxwood.png">
+        Roxwood Circuit Drift Track
+      </button>      
+      
+      <button 
+        data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_speed.html"
+        data-img="Images/speed_roxwood.png">
+        Roxwood Circuit Speed Track
+      </button>
+
+         <button 
+        data-url="https://morfik45.github.io/Race-tracks/roxwood_circuit_grand.html"
+        data-img="Images/grand_roxwood.png">
+        Roxwood Circuit Grand Track
+      </button>
+
+        <button 
+        data-url="https://morfik45.github.io/Race-tracks/race_docks_dash.html"
+        data-img="Images/docks_dash.png">
+        Docks Dash
+      </button>
+
+          <button 
+        data-url="https://morfik45.github.io/Race-tracks/race_5_laps_supercars.html"
+        data-img="Images/5lapssupercars.png">
+        5 Laps Supercars
+      </button>
+
+      <!-- Add more track buttons here -->
+    </div>
+    
+    <button id="confirmTrackBtn">Confirm</button>
+  </div>
+
+  <script>
+    const changeTrackBtn = document.getElementById("changeTrackBtn");
+    const trackMenu = document.getElementById("trackMenu");
+    const confirmTrackBtn = document.getElementById("confirmTrackBtn");
+    const preview = document.getElementById("trackPreview");
+    const trackButtons = document.querySelectorAll("#trackList button");
+    const overlay = document.getElementById("overlay");
+
+    let selectedTrackUrl = null;
+    let selectedButton = null;
+
+    // Handle selection
+    trackButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (selectedButton) {
+          selectedButton.style.backgroundColor = "transparent";
+        }
+
+        selectedTrackUrl = btn.getAttribute("data-url");
+        selectedButton = btn;
+        btn.style.backgroundColor = "rgba(144, 238, 144, 0.3)";
+
+        const img = btn.getAttribute("data-img");
+        if (img) {
+          preview.innerHTML = `<img src="${img}" style="max-width: 100%; max-height: 100%; object-fit: cover;">`;
+        } else {
+          preview.innerHTML = "<em>No preview available</em>";
+        }
+      });
+    });
+
+    // Confirm and load
+    confirmTrackBtn.onclick = () => {
+      if (selectedTrackUrl) {
+        location.href = selectedTrackUrl;
+      }
+    };
+
+    // Hide menu when clicking outside
+    overlay.onclick = () => {
+      sendCommand("close");
+      toggleOverlay(false);
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === "Escape") {
+          sendCommand("close");
+          toggleOverlay(false);
+      }
+    });
+
+    // function for sending a command to the game client
+    function sendCommand(command, args) {
+      try {
+        window.parent.postMessage({type: command, ...args}, "*");
+      } catch (error) {
+        logError(error, "sending command", { command, args });
+      }
+    }
+
+    // persistent storage for app state
+    const appState = {
+      focused: false,
+      tabbed: false,
+      pinned: false,
+    }
+
+    // track visible state of overlay and trackMenu
+    overLayVisible = false;
+
+    // function for showing/hiding the overlay and trackMenu
+    function toggleOverlay(isVisible) {
+      if (isVisible) {
+        overlay.style.display = "block";
+        trackMenu.style.display = "block";
+        overLayVisible = true;
+      } else {
+        overlay.style.display = "none";
+        trackMenu.style.display = "none";
+        overLayVisible = false;
+      }
+    }
+
+    // Event listener for the data sent by the game client
+    window.addEventListener("message", (event) => {
+      try {
+        const data = event.data.data;
+
+        // ignore empty data
+        if (!data || data == "" || data == []) return;
+
+        for (const key in data) {
+          try {
+            switch (key) {
+              // update user data
+              case "focused":
+                appState.focused = data[key];
+                break;
+              case "tabbed":
+                appState.tabbed = data[key];
+                break;
+              case "pinned":
+                appState.pinned = data[key]
+                break;
+            }
+
+          } catch (error) {
+            console.error(error, `processing data key ${key}`, { keyData: data[key] });
+          }
+        }
+
+        // update overlay visibility based on app state
+        // If appState.focused is true, show the overlay
+if (data.close === true) {
+  toggleOverlay(false);
+}
+
+      } catch (error) {
+        console.error(error, "message event handler", { eventData: typeof event.data === 'object' ? 'object structure' : event.data });
+      }
+    });
+
+    // onload load all cached data
+    window.onload = () => {
+      sendCommand("getData")
+    };
+  </script>
+
+</body>
+</html>
