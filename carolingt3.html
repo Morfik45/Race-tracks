@@ -294,21 +294,28 @@
       };
 
       if(state.countdown){
-        runCountdown(3, start);
+        runCountdown(2, start);
       } else start();
     }
 
-    // Countdown visual + beep
-    function runCountdown(secs, onDone){
-      countdownOverlay.style.display = 'block';
-      let n=secs;
-      countdownOverlay.textContent = n;
-      const tick = ()=>{
-        if(n<=0){ countdownOverlay.style.display='none'; if(onDone) onDone(); return; }
-        countdownOverlay.textContent = n; makeClickAtTime(audioCtx.currentTime + 0.02, 'accent'); n--; setTimeout(tick, 433);
-      };
-      tick();
+// Countdown visual (no beep)
+function runCountdown(secs, onDone){
+  countdownOverlay.style.display = 'block';
+  let n=secs;
+  countdownOverlay.textContent = n;
+  const tick = ()=>{
+    if(n<=0){
+      countdownOverlay.style.display='none';
+      if(onDone) onDone();
+      return;
     }
+    countdownOverlay.textContent = n;
+    // makeClickAtTime(audioCtx.currentTime + 0.02, 'accent'); // ← removed beep
+    n--;
+    setTimeout(tick, 650);
+  };
+  tick();
+}
 
     // Listen for keydowns
     window.addEventListener('keydown', (e)=>{
