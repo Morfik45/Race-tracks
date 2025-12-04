@@ -51,9 +51,8 @@
     <div style="margin-top:6px"><strong>Last action:</strong> <span id="lastAction">—</span></div>
     <div style="margin-top:6px;color:#cfe"><strong>Hints:</strong>
       <ul>
-        <li>If nothing appears when pressing E ingame, the parent might not be posting messages to the UI.</li>
-        <li>To test locally: open DevTools and run: window.postMessage({trigger_qte: Date.now()}, '*');</li>
-        <li>FiveM bind example you used: bind keyboard e "userapp_trigger QTE" should send a trigger_qte property.</li>
+        <li>The game may wrap triggers inside a data object (you showed that example).</li>
+        <li>Simulate trigger posts a message locally so you can verify the handler without the game.</li>
       </ul>
     </div>
   </div>
@@ -101,7 +100,7 @@
   <div id="countdownOverlay"></div>
 
   <script>
-    // Register QTE trigger (lowercase 'qte' -> FiveM sends trigger_qte)
+    // Register QTE trigger (lowercase 'qte' -> FiveM will send trigger_qte)
     window.parent.postMessage({
       type: 'registerTrigger',
       trigger: 'qte',
@@ -257,9 +256,9 @@
       console.debug('[carolingt] action:', msg);
     }
     simulateTrigger.onclick = ()=>{
-      const fake = { trigger_qte: Date.now() };
+      const fake = { type: 'data', data: { trigger_qte: Date.now() } };
       window.postMessage(fake, '*'); // dispatch to this window
-      logAction('Simulated trigger posted');
+      logAction('Simulated nested trigger posted');
     };
     clearDebug.onclick = ()=>{
       lastOrigin.textContent = '—';
@@ -267,7 +266,36 @@
       lastAction.textContent = '—';
     };
 
-    // Robust postMessage handler: accepts JSON strings, {trigger:'QTE'}, and trigger_* props case-insensitive
+    // Utility: recursively search any object/array for a key starting with 'trigger_' (case-insensitive).
+    // Returns the matched key if found (original key string), otherwise null.
+    function findTriggerKeyInTree(obj) {
+      if (obj == null) return null;
+      if (typeof obj !== 'object') return null;
+      // if it's an array, check each element
+      if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+          const res = findTriggerKeyInTree(obj[i]);
+          if (res) return res;
+        }
+        return null;
+      }
+      for (const k of Object.keys(obj)) {
+        try {
+          const keyLower = String(k).toLowerCase();
+          if (keyLower.startsWith('trigger_')) return k; // return original key
+          const val = obj[k];
+          if (val && typeof val === 'object') {
+            const nested = findTriggerKeyInTree(val);
+            if (nested) return nested;
+          }
+        } catch (err) {
+          // ignore and continue
+        }
+      }
+      return null;
+    }
+
+    // Robust postMessage handler: accepts JSON strings, and finds trigger_* keys anywhere in the message tree
     window.addEventListener('message', e => {
       let d = e.data;
       try {
@@ -281,31 +309,28 @@
       console.debug('[carolingt] postMessage from', e.origin, 'data=', d);
       logPayload(e.origin, d);
 
-      // 1) explicit trigger property
+      // quick check: explicit d.trigger property
       if (d && (d.trigger === 'QTE' || d.trigger === 'qte')) {
         logAction('Detected d.trigger === QTE/qte');
         tryStartFromE();
         return;
       }
 
-      // 2) any trigger_* key (case-insensitive), e.g. trigger_qte or trigger_QTE
-      if (d && typeof d === 'object') {
-        for (const key in d) {
-          if (!Object.prototype.hasOwnProperty.call(d, key)) continue;
-          const keyLower = String(key).toLowerCase();
-          if (keyLower.startsWith('trigger_')) {
-            const suffix = keyLower.slice('trigger_'.length);
-            console.debug('[carolingt] found trigger key:', key, '=>', suffix);
-            if (suffix === 'qte') {
-              logAction('Detected trigger_qte key');
-              tryStartFromE();
-              return;
-            } else {
-              logAction('Detected other trigger: ' + suffix);
-            }
-          }
+      // search the whole message tree for trigger_* key (case-insensitive)
+      const foundKey = findTriggerKeyInTree(d);
+      if (foundKey) {
+        const suffix = foundKey.slice('trigger_'.length).toLowerCase();
+        console.debug('[carolingt] matched trigger key in tree:', foundKey, 'suffix=', suffix);
+        if (suffix === 'qte') {
+          logAction('Detected trigger_qte (nested) -> starting mini-game');
+          tryStartFromE();
+          return;
+        } else {
+          logAction('Detected other trigger: ' + suffix);
+          return;
         }
       }
+      // nothing relevant found
     });
 
     // Mini-game
