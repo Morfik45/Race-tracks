@@ -81,11 +81,11 @@
 
   <script>
     // Register QTE trigger
-    window.parent.postMessage({
-      type: 'registerTrigger',
-      trigger: 'trigger_QTE',
-      name: 'Start Caroling QTE'
-    }, '*');
+window.parent.postMessage({
+  type: 'registerTrigger',
+  trigger: 'QTE',
+  name: 'Start Caroling QTE'
+}, '*');
 
     // --- UI elements ---
     const openSettings = document.getElementById('openSettings');
@@ -245,12 +245,10 @@
 
 // --- Listen for QTE trigger ---
 window.addEventListener('message', e => {
-    console.log("Received message from parent:", e.data);
-
     const d = e.data;
-if (d.trigger === 'trigger_QTE') {
-    tryStartFromE();  // call your start function
-}
+    if(d.trigger === 'QTE'){
+        tryStartFromE();
+    }
 });
 
     window.addEventListener('keydown',(e)=>{
