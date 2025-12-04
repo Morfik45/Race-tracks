@@ -328,14 +328,15 @@ window.addEventListener('message', (event) => {
   }
 });
 
-  // Handle mini-game keys
-  if(miniGameActive){
+// Handle mini-game keys
+window.addEventListener('keydown', (e) => {
+    if(!miniGameActive) return;
     const k = e.key.toLowerCase();
     if(['d','f','j','k'].includes(k)){
-      if(audioCtx.state === 'suspended') audioCtx.resume();
-      playKeySound(k);
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        playKeySound(k);
     }
-  }
+});
 
     // Also provide on-screen start/stop for testing
     document.body.addEventListener('dblclick', ()=>{
