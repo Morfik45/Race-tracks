@@ -283,25 +283,32 @@
     function stopAllAudio(){ stopScheduler(); stopMusicLoop(); state.running=false; updateUI(); }
 
     // Handle pressing E to start
-    function tryStartFromE(){
-      if(!state.enabled) return;
-      if(!state.autoStart) return;
-      if(state.running) return; // already running
+function tryStartFromE(){
+  if(!state.enabled) return;
+  if(!state.autoStart) return;
+  if(state.running) return; // already running
 
-      // resume AudioContext on user gesture
-      if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
 
-      const start = ()=>{
-        state.running = true; updateUI();
-        // start scheduling
-        currentNoteTime = audioCtx.currentTime + 0.05;
-        startScheduler();
-      };
+  const start = ()=>{
+    state.running = true;
+    miniGameActive = true;
+    updateUI();
 
-      if(state.countdown){
-        runCountdown(2, start);
-      } else start();
-    }
+    // Start scheduler
+    currentNoteTime = audioCtx.currentTime + 0.05;
+    startScheduler();
+
+    // Auto-stop after 10 notes
+    const noteDuration = 60 / state.bpm;   // seconds per beat
+    const totalDuration = noteDuration * 10 * 1000; // ms
+    miniGameStopTimeout = setTimeout(() => stopMiniGame(), totalDuration);
+  };
+
+  if(state.countdown){
+    runCountdown(2, start); // countdown from 2
+  } else start();
+}
 
 // Countdown visual (no beep)
 function runCountdown(secs, onDone){
@@ -329,34 +336,47 @@ function showGo(){
 }
     
     // Listen for keydowns
-    window.addEventListener('keydown', (e)=>{
-      // If focus is inside an input, ignore
-      const tag = document.activeElement && document.activeElement.tagName.toLowerCase();
-      if(tag === 'input' || tag === 'textarea' || tag === 'select') return;
+let miniGameActive = false;
+let miniGameStopTimeout = null;
 
-      if(e.key.toLowerCase() === 'e'){
-        // Start/stop toggle when pressing E if enabled
-        if(!state.enabled) return;
-        if(state.running){ stopAllAudio(); }
-        else { tryStartFromE(); }
-      }
+window.addEventListener('keydown', (e)=>{
+  // Start/stop toggle with E
+  if(e.key.toLowerCase() === 'e'){
+    if(!state.enabled) return;
 
-      if(state.running){
-        const k = e.key.toLowerCase();
-        if(['d','f','j','k'].includes(k)){
-          // play assigned key sound
-          if(audioCtx.state === 'suspended') audioCtx.resume();
-          playKeySound(k);
-        }
-      }
-    });
+    if(state.running){
+      stopMiniGame();
+    } else {
+      tryStartFromE();
+    }
+  }
+
+  // Handle mini-game keys
+  if(miniGameActive){
+    const k = e.key.toLowerCase();
+    if(['d','f','j','k'].includes(k)){
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      playKeySound(k);
+    }
+  }
+}, { capture: true });  // <- ensures listener works even when unfocused
 
     // Also provide on-screen start/stop for testing
     document.body.addEventListener('dblclick', ()=>{
       if(!state.enabled) return;
       if(state.running) stopAllAudio(); else tryStartFromE();
     });
+function stopMiniGame(){
+  miniGameActive = false;
+  state.running = false;
+  updateUI();
+  stopScheduler();
 
+  if(miniGameStopTimeout){
+    clearTimeout(miniGameStopTimeout);
+    miniGameStopTimeout = null;
+  }
+}
     // make sure UI reflects masterGain changes
     function persistStateToUI(){ masterGain.gain.value = state.vol; }
 
