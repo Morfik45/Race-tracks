@@ -220,7 +220,13 @@ window.parent.postMessage({
     }
 
     function showGo(){ countdownOverlay.textContent="GO!"; countdownOverlay.style.display='block'; setTimeout(()=>countdownOverlay.style.display='none',500); }
-
+// --- Listen for QTE trigger ---
+window.addEventListener('message', e => {
+    const d = e.data;
+    if(d.trigger === 'QTE'){
+        tryStartFromE();
+    }
+});
     // --- Mini-game ---
     let miniGameActive = false;
     let miniGameStopTimeout = null;
@@ -242,14 +248,6 @@ window.parent.postMessage({
       miniGameActive=false; state.running=false; updateUI(); stopScheduler();
       if(miniGameStopTimeout){ clearTimeout(miniGameStopTimeout); miniGameStopTimeout=null; }
     }
-
-// --- Listen for QTE trigger ---
-window.addEventListener('message', e => {
-    const d = e.data;
-    if(d.trigger === 'QTE'){
-        tryStartFromE();
-    }
-});
 
     window.addEventListener('keydown',(e)=>{
       if(!miniGameActive) return;
