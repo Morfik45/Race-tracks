@@ -197,11 +197,16 @@
       }
     }
 
-    function startScheduler(){
-      if(timerID) return;
-      currentNoteTime = audioCtx.currentTime + 0.05;
-      timerID = setInterval(scheduler, lookahead);
-    }
+   function startScheduler(){
+  if(timerID) return;
+
+  currentNoteTime = audioCtx.currentTime + 0.05;
+
+  // 🚀 Show GO! exactly when the first tick is scheduled
+  showGo();
+
+  timerID = setInterval(scheduler, lookahead);
+}
     function stopScheduler(){ if(timerID){ clearInterval(timerID); timerID = null; } }
 
     // Produce click sound based on preset and type
@@ -317,6 +322,12 @@ function runCountdown(secs, onDone){
   tick();
 }
 
+function showGo(){
+  countdownOverlay.textContent = "GO!";
+  countdownOverlay.style.display = "block";
+  setTimeout(()=> countdownOverlay.style.display='none', 500); // hide after 0.5s
+}
+    
     // Listen for keydowns
     window.addEventListener('keydown', (e)=>{
       // If focus is inside an input, ignore
