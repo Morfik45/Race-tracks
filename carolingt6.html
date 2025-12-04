@@ -86,8 +86,20 @@
 
   <div id="status">Status: <span id="statTxt">Disabled</span></div>
   <div id="countdownOverlay"></div>
-
+*:focus {
+  outline: none !important;
+}
   <script>
+    // Register QTE trigger
+window.parent.postMessage(
+  {
+    type: 'registerTrigger',
+    trigger: 'QTE',
+    name: 'Start Caroling QTE'
+  },
+  '*'
+);
+    
     /* Caroling metronome app - single-file, no external assets
        - Transparent background so it works as an overlay / iframe
        - Uses WebAudio for low-latency timing
@@ -339,17 +351,12 @@ function showGo(){
 let miniGameActive = false;
 let miniGameStopTimeout = null;
 
-window.addEventListener('keydown', (e)=>{
-  // Start/stop toggle with E
-  if(e.key.toLowerCase() === 'e'){
-    if(!state.enabled) return;
-
-    if(state.running){
-      stopMiniGame();
-    } else {
-      tryStartFromE();
-    }
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if(data.type === 'userapp_trigger' && data.trigger === 'QTE'){
+    tryStartFromE(); // your existing function to start countdown/metronome/music
   }
+});
 
   // Handle mini-game keys
   if(miniGameActive){
