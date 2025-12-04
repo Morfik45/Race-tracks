@@ -388,7 +388,12 @@ function stopMiniGame(){
 
     // small accessibility: show status on load
     updateUI();
-
+ // Handle Escape key for pinning
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            window.parent.postMessage({ type: "pin" }, "*");
+        }
+    });
     // END
   </script>
 </body>
