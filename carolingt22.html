@@ -73,19 +73,19 @@
       <button id="resetSettings">Reset</button>
     </div>
 
-    <div style="margin-top:8px;font-size:12px;color:#bfc7d6;">When enabled, press <strong>E</strong> in-game to trigger the app. While active the app listens to D F J K and plays assigned sounds for each key.</div>
+    <div style="margin-top:8px;font-size:12px;color:#bfc7d6;">When enabled, press <strong>E</strong> in-game to trigger the app. While active the app listens to D F J K and plays assigned sounds for e[...]
   </div>
 
   <div id="status">Status: <span id="statTxt">Disabled</span></div>
   <div id="countdownOverlay"></div>
 
   <script>
-    // Register QTE trigger
-window.parent.postMessage({
-  type: 'registerTrigger',
-  trigger: 'QTE',
-  name: 'Start Caroling QTE'
-}, '*');
+    // Register QTE trigger (lowercase 'qte' is recommended so it becomes trigger_qte in the game payload)
+    window.parent.postMessage({
+      type: 'registerTrigger',
+      trigger: 'qte',
+      name: 'Start Caroling QTE'
+    }, '*');
 
     // --- UI elements ---
     const openSettings = document.getElementById('openSettings');
@@ -126,7 +126,7 @@ window.parent.postMessage({
       bpmVal.textContent = state.bpm + ' BPM';
       preset.value = state.preset;
       volume.value = state.vol;
-      statTxt.textContent = state.running ? 'Active — Listening (D,F,J,K)' : (state.enabled ? 'Enabled (waiting for E)' : 'Disabled');
+      statTxt.textContent = state.running ? 'Active — Listening (D,F,J,K)' : (state.enabled ? 'Enabled (waiting for E or trigger_qte)' : 'Disabled');
     }
     updateUI();
 
@@ -220,20 +220,58 @@ window.parent.postMessage({
     }
 
     function showGo(){ countdownOverlay.textContent="GO!"; countdownOverlay.style.display='block'; setTimeout(()=>countdownOverlay.style.display='none',500); }
-// --- Listen for QTE trigger ---
-window.addEventListener('message', e => {
-    const d = e.data;
-    if(d.trigger === 'QTE'){
+
+    // --- Robust postMessage handler: accepts { trigger_qte: <ms> } payload from FiveM, also accepts { trigger: 'QTE' } or JSON strings ---
+    window.addEventListener('message', e => {
+      let d = e.data;
+      // try parse strings that may be JSON
+      try {
+        if (typeof d === 'string') {
+          const parsed = JSON.parse(d);
+          if (parsed && typeof parsed === 'object') d = parsed;
+        }
+      } catch (err) {
+        // ignore parse errors
+      }
+
+      console.debug('[carolingt] postMessage from', e.origin, 'data=', d);
+
+      // 1) accept explicit trigger property { trigger: 'QTE' } or { trigger: 'qte' }
+      if (d && (d.trigger === 'QTE' || d.trigger === 'qte')) {
+        console.debug('[carolingt] detected d.trigger === QTE/qte');
         tryStartFromE();
-    }
-});
+        return;
+      }
+
+      // 2) check for any trigger_* property and see if it's the QTE trigger (case-insensitive)
+      if (d && typeof d === 'object') {
+        for (const key in d) {
+          if (!Object.prototype.hasOwnProperty.call(d, key)) continue;
+          if (key.startsWith('trigger_')) {
+            const suffix = key.slice('trigger_'.length).toLowerCase();
+            console.debug('[carolingt] found trigger key:', key, '=> suffix:', suffix);
+            if (suffix === 'qte') {
+              tryStartFromE();
+              return;
+            }
+          }
+        }
+      }
+      // otherwise ignore
+    });
+
     // --- Mini-game ---
     let miniGameActive = false;
     let miniGameStopTimeout = null;
 
     function tryStartFromE(){
-      if(!state.enabled || state.running) return;
-      if(audioCtx.state==='suspended') audioCtx.resume();
+      if(!state.enabled || state.running) {
+        console.debug('[carolingt] tryStartFromE aborted (enabled/running):', state.enabled, state.running);
+        return;
+      }
+      if(audioCtx.state==='suspended') {
+        audioCtx.resume().then(()=>console.debug('[carolingt] audioCtx resumed')).catch(err=>console.warn('[carolingt] audioCtx resume failed', err));
+      }
       const start = ()=>{
         state.running=true; miniGameActive=true; updateUI();
         currentNoteTime=audioCtx.currentTime+0.05;
@@ -249,9 +287,24 @@ window.addEventListener('message', e => {
       if(miniGameStopTimeout){ clearTimeout(miniGameStopTimeout); miniGameStopTimeout=null; }
     }
 
+    // Listen for 'e' pressed when iframe has focus (autoStart must be enabled)
+    window.addEventListener('keydown', (e)=>{
+      const key = e.key && String(e.key).toLowerCase();
+      if (!key) return;
+      if (key === 'e') {
+        if (state.autoStart) {
+          console.debug('[carolingt] E pressed in iframe; attempting auto-start');
+          tryStartFromE();
+        } else {
+          console.debug('[carolingt] E pressed but autoStart disabled');
+        }
+      }
+    });
+
+    // play keys while mini-game active
     window.addEventListener('keydown',(e)=>{
       if(!miniGameActive) return;
-      const k=e.key.toLowerCase();
+      const k=e.key && e.key.toLowerCase();
       if(['d','f','j','k'].includes(k)){
         if(audioCtx.state==='suspended') audioCtx.resume();
         playKeySound(k);
@@ -269,6 +322,7 @@ window.addEventListener('message', e => {
 
     // Accessibility / status
     updateUI();
+    // existing Escape behaviour: pin parent
     window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') window.parent.postMessage({type:'pin'},'*'); });
   </script>
 </body>
