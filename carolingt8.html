@@ -51,7 +51,6 @@
     <div class="row"><label>Enabled (master)</label><button id="enabledBtn" class="toggle">Off</button></div>
     <div class="row"><label>Auto-start on E press</label><button id="autoStartBtn" class="toggle">On</button></div>
     <div class="row"><label>Metronome</label><button id="metronomeBtn" class="toggle">On</button></div>
-    <div class="row"><label>Music</label><button id="musicBtn" class="toggle">Off</button></div>
     <div class="row"><label>Countdown before start</label><button id="countdownBtn" class="toggle">On</button></div>
 
     <div style="margin-top:10px">
@@ -113,7 +112,6 @@ window.parent.postMessage(
     const enabledBtn = document.getElementById('enabledBtn');
     const autoStartBtn = document.getElementById('autoStartBtn');
     const metronomeBtn = document.getElementById('metronomeBtn');
-    const musicBtn = document.getElementById('musicBtn');
     const countdownBtn = document.getElementById('countdownBtn');
     const bpmRange = document.getElementById('bpmRange');
     const bpmVal = document.getElementById('bpmVal');
@@ -128,10 +126,9 @@ window.parent.postMessage(
 
     // state
     let state = {
-      enabled: false,
+      enabled: true,
       autoStart: true,
       metronome: true,
-      music: false,
       countdown: true,
       bpm: 85,
       preset: 'classic',
@@ -143,7 +140,6 @@ window.parent.postMessage(
       enabledBtn.textContent = state.enabled ? 'On' : 'Off';
       autoStartBtn.textContent = state.autoStart ? 'On' : 'Off';
       metronomeBtn.textContent = state.metronome ? 'On' : 'Off';
-      musicBtn.textContent = state.music ? 'On' : 'Off';
       countdownBtn.textContent = state.countdown ? 'On' : 'Off';
       bpmRange.value = state.bpm;
       bpmVal.textContent = state.bpm + ' BPM';
@@ -157,7 +153,6 @@ window.parent.postMessage(
     enabledBtn.onclick = ()=>{ state.enabled = !state.enabled; updateUI(); }
     autoStartBtn.onclick = ()=>{ state.autoStart = !state.autoStart; updateUI(); }
     metronomeBtn.onclick = ()=>{ state.metronome = !state.metronome; updateUI(); }
-    musicBtn.onclick = ()=>{ state.music = !state.music; if(state.music) startMusicLoop(); else stopMusicLoop(); updateUI(); }
     countdownBtn.onclick = ()=>{ state.countdown = !state.countdown; updateUI(); }
     bpmRange.oninput = (e)=>{ state.bpm = Number(e.target.value); updateUI(); }
     preset.onchange = (e)=>{ state.preset = e.target.value; }
@@ -169,15 +164,6 @@ window.parent.postMessage(
 
     testSound.onclick = ()=>{ makeClickAtTime(audioCtx.currentTime + 0.02, 'accent'); }
     stopAll.onclick = ()=>{ stopAllAudio(); }
-
-    // Make settings draggable
-    (function makeDraggable(node, handle){
-      handle = handle || node;
-      let dragging=false, startX=0, startY=0, origX=0, origY=0;
-      handle.addEventListener('pointerdown', e=>{dragging=true; startX=e.clientX; startY=e.clientY; origX=parseFloat(node.style.right||'12'); origY=parseFloat(node.style.top||'56'); handle.setPointerCapture(e.pointerId)});
-      window.addEventListener('pointermove', e=>{ if(!dragging) return; const dx = e.clientX - startX; const dy = e.clientY - startY; node.style.right = (origX - dx) + 'px'; node.style.top = (origY + dy) + 'px'; });
-      window.addEventListener('pointerup', ()=>{dragging=false});
-    })(settings, openSettings);
 
     // Audio setup
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -274,23 +260,7 @@ window.parent.postMessage(
       osc.stop(now + 0.4);
     }
 
-    // Very simple music loop (when user toggles Music). It's a gentle arpeggio made with oscillators.
-    let musicInterval = null;
-    function startMusicLoop(){
-      if(musicInterval) return;
-      const chord = [440, 554.37, 659.25];
-      let i = 0;
-      musicInterval = setInterval(()=>{
-        const now = audioCtx.currentTime;
-        const o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.value = chord[i%chord.length];
-        const g = audioCtx.createGain(); g.gain.value = 0.0001; g.connect(masterGain);
-        g.gain.exponentialRampToValueAtTime(state.vol * 0.2, now + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-        o.connect(g); o.start(now); o.stop(now + 0.65);
-        i++;
-      }, 450);
-    }
-    function stopMusicLoop(){ if(musicInterval){ clearInterval(musicInterval); musicInterval = null; } }
+
 
     function stopAllAudio(){ stopScheduler(); stopMusicLoop(); state.running=false; updateUI(); }
 
