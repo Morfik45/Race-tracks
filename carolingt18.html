@@ -83,7 +83,7 @@
     // Register QTE trigger
     window.parent.postMessage({
       type: 'registerTrigger',
-      trigger: 'QTE',
+      trigger: 'trigger_QTE',
       name: 'Start Caroling QTE'
     }, '*');
 
@@ -243,14 +243,14 @@
       if(miniGameStopTimeout){ clearTimeout(miniGameStopTimeout); miniGameStopTimeout=null; }
     }
 
-    // --- Listeners ---
-   window.addEventListener('message', e => {
+// --- Listen for QTE trigger ---
+window.addEventListener('message', e => {
     console.log("Received message from parent:", e.data);
 
     const d = e.data;
     if(d.type === 'userapp_trigger' && d.trigger === 'trigger_QTE'){
         console.log("QTE trigger detected! Starting mini-game...");
-        startMiniGame();
+        tryStartFromE();  // call your start function
     }
 });
 
