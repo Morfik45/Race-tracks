@@ -305,7 +305,7 @@
       countdownOverlay.textContent = n;
       const tick = ()=>{
         if(n<=0){ countdownOverlay.style.display='none'; if(onDone) onDone(); return; }
-        countdownOverlay.textContent = n; makeClickAtTime(audioCtx.currentTime + 0.02, 'accent'); n--; setTimeout(tick, 1000);
+        countdownOverlay.textContent = n; makeClickAtTime(audioCtx.currentTime + 0.02, 'accent'); n--; setTimeout(tick, 706);
       };
       tick();
     }
