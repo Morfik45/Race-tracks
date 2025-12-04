@@ -7,12 +7,15 @@
   <style>
     html,body{height:100%;margin:0;background:transparent}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;color:#eaeaea}
-
+    #debug {
+      position:fixed;left:12px;top:12px;z-index:10001;background:rgba(0,0,0,0.65);
+      padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);width:360px;color:#dff;
+      font-size:12px;max-height:60vh;overflow:auto;
+    }
     #openSettings{
       position:fixed;right:12px;top:12px;z-index:9999;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);
       border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer
     }
-
     #settings{
       position:fixed;right:12px;top:56px;width:320px;z-index:9999;background:rgba(10,10,10,0.72);
       border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.06);box-shadow:0 8px 30px rgba(0,0,0,0.6);
@@ -24,19 +27,37 @@
     .toggle{cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)}
     .small{font-size:12px;opacity:0.8}
     select,input[type=range]{width:100%}
-
     #status {
       position:fixed;left:12px;bottom:12px;background:rgba(0,0,0,0.45);padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);
       color:#dfe6ff;font-size:13px;z-index:9999
     }
-
     #countdownOverlay{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:72px;color:white;text-shadow:0 2px 12px rgba(0,0,0,0.8);display:none;z-index:10000}
-
     .controls{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
     button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:inherit;cursor:pointer}
+    pre {white-space:pre-wrap;word-break:break-word;margin:4px 0;font-size:11px;}
   </style>
 </head>
 <body>
+  <div id="debug">
+    <strong>Debug panel</strong>
+    <div style="margin-top:6px">
+      <button id="simulateTrigger">Simulate trigger_qte</button>
+      <button id="clearDebug">Clear</button>
+    </div>
+    <div style="margin-top:8px"><strong>Last message origin:</strong> <span id="lastOrigin">—</span></div>
+    <div style="margin-top:6px"><strong>Last payload:</strong>
+      <pre id="lastPayload">—</pre>
+    </div>
+    <div style="margin-top:6px"><strong>Last action:</strong> <span id="lastAction">—</span></div>
+    <div style="margin-top:6px;color:#cfe"><strong>Hints:</strong>
+      <ul>
+        <li>If nothing appears when pressing E ingame, the parent might not be posting messages to the UI.</li>
+        <li>To test locally: open DevTools and run: window.postMessage({trigger_qte: Date.now()}, '*');</li>
+        <li>FiveM bind example you used: bind keyboard e "userapp_trigger QTE" should send a trigger_qte property.</li>
+      </ul>
+    </div>
+  </div>
+
   <button id="openSettings">⚙️ Caroling audio settings</button>
 
   <div id="settings" role="dialog" aria-label="Caroling settings">
@@ -73,21 +94,21 @@
       <button id="resetSettings">Reset</button>
     </div>
 
-    <div style="margin-top:8px;font-size:12px;color:#bfc7d6;">When enabled, press <strong>E</strong> in-game to trigger the app. While active the app listens to D F J K and plays assigned sounds for e[...]
+    <div style="margin-top:8px;font-size:12px;color:#bfc7d6;">When enabled, press <strong>E</strong> in-game to trigger the app. While active the app listens to D F J K and plays assigned sounds.</div>
   </div>
 
   <div id="status">Status: <span id="statTxt">Disabled</span></div>
   <div id="countdownOverlay"></div>
 
   <script>
-    // Register QTE trigger (lowercase 'qte' is recommended so it becomes trigger_qte in the game payload)
+    // Register QTE trigger (lowercase 'qte' -> FiveM sends trigger_qte)
     window.parent.postMessage({
       type: 'registerTrigger',
       trigger: 'qte',
       name: 'Start Caroling QTE'
     }, '*');
 
-    // --- UI elements ---
+    // UI / state elements
     const openSettings = document.getElementById('openSettings');
     const settings = document.getElementById('settings');
     const enabledBtn = document.getElementById('enabledBtn');
@@ -105,7 +126,13 @@
     const resetSettings = document.getElementById('resetSettings');
     const countdownOverlay = document.getElementById('countdownOverlay');
 
-    // --- state ---
+    // debug elements
+    const lastOrigin = document.getElementById('lastOrigin');
+    const lastPayload = document.getElementById('lastPayload');
+    const lastAction = document.getElementById('lastAction');
+    const simulateTrigger = document.getElementById('simulateTrigger');
+    const clearDebug = document.getElementById('clearDebug');
+
     let state = {
       enabled: true,
       autoStart: true,
@@ -130,7 +157,6 @@
     }
     updateUI();
 
-    // --- toggle helpers ---
     enabledBtn.onclick = ()=>{ state.enabled = !state.enabled; updateUI(); }
     autoStartBtn.onclick = ()=>{ state.autoStart = !state.autoStart; updateUI(); }
     metronomeBtn.onclick = ()=>{ state.metronome = !state.metronome; updateUI(); }
@@ -144,15 +170,15 @@
       state = { enabled:true, autoStart:true, metronome:true, countdown:true, bpm:85, preset:'classic', vol:0.6, running:false };
       updateUI();
       stopAllAudio();
+      logAction('Settings reset');
     }
     testSound.onclick = ()=>{ makeClickAtTime(audioCtx.currentTime + 0.02,'accent'); }
-    stopAll.onclick = ()=>{ stopAllAudio(); }
+    stopAll.onclick = ()=>{ stopAllAudio(); logAction('Stopped audio'); }
 
-    // --- Audio setup ---
+    // Audio
     const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     let masterGain = audioCtx.createGain(); masterGain.gain.value = state.vol; masterGain.connect(audioCtx.destination);
 
-    // --- Metronome scheduler ---
     let lookahead = 25.0;
     let scheduleAheadTime = 0.1;
     let currentNoteTime = 0.0;
@@ -221,52 +247,74 @@
 
     function showGo(){ countdownOverlay.textContent="GO!"; countdownOverlay.style.display='block'; setTimeout(()=>countdownOverlay.style.display='none',500); }
 
-    // --- Robust postMessage handler: accepts { trigger_qte: <ms> } payload from FiveM, also accepts { trigger: 'QTE' } or JSON strings ---
+    // Debug helpers
+    function logPayload(origin, payload){
+      lastOrigin.textContent = origin || '—';
+      try { lastPayload.textContent = JSON.stringify(payload, null, 2); } catch(e){ lastPayload.textContent = String(payload); }
+    }
+    function logAction(msg){
+      lastAction.textContent = msg;
+      console.debug('[carolingt] action:', msg);
+    }
+    simulateTrigger.onclick = ()=>{
+      const fake = { trigger_qte: Date.now() };
+      window.postMessage(fake, '*'); // dispatch to this window
+      logAction('Simulated trigger posted');
+    };
+    clearDebug.onclick = ()=>{
+      lastOrigin.textContent = '—';
+      lastPayload.textContent = '—';
+      lastAction.textContent = '—';
+    };
+
+    // Robust postMessage handler: accepts JSON strings, {trigger:'QTE'}, and trigger_* props case-insensitive
     window.addEventListener('message', e => {
       let d = e.data;
-      // try parse strings that may be JSON
       try {
         if (typeof d === 'string') {
           const parsed = JSON.parse(d);
           if (parsed && typeof parsed === 'object') d = parsed;
         }
       } catch (err) {
-        // ignore parse errors
+        // ignore parse error
       }
-
       console.debug('[carolingt] postMessage from', e.origin, 'data=', d);
+      logPayload(e.origin, d);
 
-      // 1) accept explicit trigger property { trigger: 'QTE' } or { trigger: 'qte' }
+      // 1) explicit trigger property
       if (d && (d.trigger === 'QTE' || d.trigger === 'qte')) {
-        console.debug('[carolingt] detected d.trigger === QTE/qte');
+        logAction('Detected d.trigger === QTE/qte');
         tryStartFromE();
         return;
       }
 
-      // 2) check for any trigger_* property and see if it's the QTE trigger (case-insensitive)
+      // 2) any trigger_* key (case-insensitive), e.g. trigger_qte or trigger_QTE
       if (d && typeof d === 'object') {
         for (const key in d) {
           if (!Object.prototype.hasOwnProperty.call(d, key)) continue;
-          if (key.startsWith('trigger_')) {
-            const suffix = key.slice('trigger_'.length).toLowerCase();
-            console.debug('[carolingt] found trigger key:', key, '=> suffix:', suffix);
+          const keyLower = String(key).toLowerCase();
+          if (keyLower.startsWith('trigger_')) {
+            const suffix = keyLower.slice('trigger_'.length);
+            console.debug('[carolingt] found trigger key:', key, '=>', suffix);
             if (suffix === 'qte') {
+              logAction('Detected trigger_qte key');
               tryStartFromE();
               return;
+            } else {
+              logAction('Detected other trigger: ' + suffix);
             }
           }
         }
       }
-      // otherwise ignore
     });
 
-    // --- Mini-game ---
+    // Mini-game
     let miniGameActive = false;
     let miniGameStopTimeout = null;
 
     function tryStartFromE(){
       if(!state.enabled || state.running) {
-        console.debug('[carolingt] tryStartFromE aborted (enabled/running):', state.enabled, state.running);
+        logAction('tryStartFromE aborted (enabled/running): ' + state.enabled + ' / ' + state.running);
         return;
       }
       if(audioCtx.state==='suspended') {
@@ -278,6 +326,7 @@
         startScheduler();
         const noteDuration=60/state.bpm;
         miniGameStopTimeout=setTimeout(stopMiniGame,noteDuration*10*1000);
+        logAction('Mini-game started');
       };
       if(state.countdown) runCountdown(2,start); else start();
     }
@@ -285,23 +334,24 @@
     function stopMiniGame(){
       miniGameActive=false; state.running=false; updateUI(); stopScheduler();
       if(miniGameStopTimeout){ clearTimeout(miniGameStopTimeout); miniGameStopTimeout=null; }
+      logAction('Mini-game stopped');
     }
 
-    // Listen for 'e' pressed when iframe has focus (autoStart must be enabled)
+    // iframe-focused E key fallback
     window.addEventListener('keydown', (e)=>{
       const key = e.key && String(e.key).toLowerCase();
       if (!key) return;
       if (key === 'e') {
         if (state.autoStart) {
-          console.debug('[carolingt] E pressed in iframe; attempting auto-start');
+          logAction('E pressed in iframe; attempting auto-start');
           tryStartFromE();
         } else {
-          console.debug('[carolingt] E pressed but autoStart disabled');
+          logAction('E pressed but autoStart disabled');
         }
       }
     });
 
-    // play keys while mini-game active
+    // play key sounds while mini-game active
     window.addEventListener('keydown',(e)=>{
       if(!miniGameActive) return;
       const k=e.key && e.key.toLowerCase();
@@ -316,12 +366,9 @@
       if(state.running) stopAllAudio(); else tryStartFromE();
     });
 
-
     // Resume AudioContext on first gesture
     ['pointerdown','keydown'].forEach(evt=>{ window.addEventListener(evt, ()=>{ if(audioCtx.state==='suspended') audioCtx.resume(); }, {once:true}); });
 
-    // Accessibility / status
-    updateUI();
     // existing Escape behaviour: pin parent
     window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') window.parent.postMessage({type:'pin'},'*'); });
   </script>
