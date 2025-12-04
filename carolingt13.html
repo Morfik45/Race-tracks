@@ -32,7 +32,7 @@ button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06
 </style>
 </head>
 <body>
-<button id="openSettings">⚙️ Caroling audio settings</button>
+<button id="openSettings">⚙️ Caroling settings</button>
 
 <div id="settings" role="dialog" aria-label="Caroling settings">
   <h2>Caroling audio app</h2>
@@ -76,6 +76,11 @@ button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06
 
 <script>
 // Register QTE trigger
+  window.addEventListener('message', (event)=>{
+    if(event.data.type === 'userapp_trigger' && event.data.trigger === 'QTE'){
+        // Start your minigame here
+    }
+});
 window.parent.postMessage({type:'registerTrigger', trigger:'QTE', name:'Start Caroling QTE'}, '*');
 
 // --- State & UI ---
@@ -107,7 +112,7 @@ function updateUI(){
   preset.value=state.preset;
   volume.value=state.vol;
   statTxt.textContent=state.running?'Active — Listening (D,F,J,K)':
-    (state.enabled?'Enabled (waiting for QTE)':'Disabled');
+    (state.enabled?'Enabled (waiting for E key)':'Disabled');
 }
 updateUI();
 
