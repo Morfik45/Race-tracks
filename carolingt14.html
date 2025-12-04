@@ -75,12 +75,7 @@ button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06
 <div id="countdownOverlay"></div>
 
 <script>
-// Register QTE trigger
-  window.addEventListener('message', (event)=>{
-    if(event.data.type === 'userapp_trigger' && event.data.trigger === 'QTE'){
-        // Start your minigame here
-    }
-});
+  
 window.parent.postMessage({type:'registerTrigger', trigger:'QTE', name:'Start Caroling QTE'}, '*');
 
 // --- State & UI ---
