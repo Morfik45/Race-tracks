@@ -248,10 +248,9 @@ window.addEventListener('message', e => {
     console.log("Received message from parent:", e.data);
 
     const d = e.data;
-    if(d.type === 'userapp_trigger' && d.trigger === 'trigger_QTE'){
-        console.log("QTE trigger detected! Starting mini-game...");
-        tryStartFromE();  // call your start function
-    }
+if (d.trigger === 'trigger_QTE') {
+    tryStartFromE();  // call your start function
+}
 });
 
     window.addEventListener('keydown',(e)=>{
@@ -268,22 +267,6 @@ window.addEventListener('message', e => {
       if(state.running) stopAllAudio(); else tryStartFromE();
     });
 
-    // --- Draggable settings ---
-    (function makeDraggable(node, handle){
-      handle=handle||node;
-      let dragging=false,startX=0,startY=0,origX=0,origY=0;
-      handle.addEventListener('pointerdown', e=>{
-        dragging=true; startX=e.clientX; startY=e.clientY;
-        origX=parseFloat(node.style.right||'12'); origY=parseFloat(node.style.top||'56');
-        handle.setPointerCapture(e.pointerId);
-      });
-      window.addEventListener('pointermove', e=>{
-        if(!dragging) return;
-        const dx=e.clientX-startX, dy=e.clientY-startY;
-        node.style.right=(origX-dx)+'px'; node.style.top=(origY+dy)+'px';
-      });
-      window.addEventListener('pointerup', ()=>{ dragging=false; });
-    })(settings, openSettings);
 
     // Resume AudioContext on first gesture
     ['pointerdown','keydown'].forEach(evt=>{ window.addEventListener(evt, ()=>{ if(audioCtx.state==='suspended') audioCtx.resume(); }, {once:true}); });
