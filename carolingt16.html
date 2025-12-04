@@ -32,7 +32,7 @@ button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06
 </style>
 </head>
 <body>
-<button id="openSettings">⚙️ Caroling settings</button>
+<button id="openSettings">⚙️ Caroling audio settings</button>
 
 <div id="settings" role="dialog" aria-label="Caroling settings">
   <h2>Caroling audio app</h2>
@@ -112,14 +112,46 @@ let state = {
   running: false
 };
 
+function updateUI(){
+  enabledBtn.textContent = state.enabled ? 'On' : 'Off';
+  autoStartBtn.textContent = state.autoStart ? 'On' : 'Off';
+  metronomeBtn.textContent = state.metronome ? 'On' : 'Off';
+  countdownBtn.textContent = state.countdown ? 'On' : 'Off';
+  bpmRange.value = state.bpm;
+  bpmVal.textContent = state.bpm + ' BPM';
+  preset.value = state.preset;
+  volume.value = state.vol;
+  statTxt.textContent = state.running ? 'Active — Listening (D,F,J,K)' : (state.enabled ? 'Enabled (waiting for QTE)' : 'Disabled');
+}
+updateUI();
+
+// --- UI Toggles ---
+enabledBtn.onclick = ()=>{ state.enabled = !state.enabled; updateUI(); }
+autoStartBtn.onclick = ()=>{ state.autoStart = !state.autoStart; updateUI(); }
+metronomeBtn.onclick = ()=>{ state.metronome = !state.metronome; updateUI(); }
+countdownBtn.onclick = ()=>{ state.countdown = !state.countdown; updateUI(); }
+bpmRange.oninput = (e)=>{ state.bpm = Number(e.target.value); updateUI(); }
+preset.onchange = (e)=>{ state.preset = e.target.value; }
+volume.oninput = (e)=>{ state.vol = Number(e.target.value); masterGain.gain.value = state.vol; }
+
+openSettings.onclick = ()=>{ settings.style.display = (settings.style.display==='none'?'block':'none'); }
+closeSettings.onclick = ()=>{ settings.style.display = 'none'; }
+resetSettings.onclick = ()=>{
+  state={enabled:true,autoStart:true,metronome:true,countdown:true,bpm:85,preset:'classic',vol:0.6,running:false};
+  updateUI(); stopAllAudio();
+}
+
 // --- Audio ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let masterGain = audioCtx.createGain();
 masterGain.gain.value = state.vol;
 masterGain.connect(audioCtx.destination);
 
-// --- Metronome Scheduler ---
-let lookahead = 25.0, scheduleAheadTime = 0.1, currentNoteTime = 0.0, timerID = null;
+// --- Scheduler ---
+let lookahead = 25.0;
+let scheduleAheadTime = 0.1;
+let currentNoteTime = 0.0;
+let timerID = null;
 
 function nextNote(){
   const secondsPerBeat = 60.0/state.bpm;
@@ -149,7 +181,6 @@ function makeClickAtTime(time,type){
   if(state.preset==='classic') freq = (type==='accent')?1400:1000;
   else if(state.preset==='soft') freq=(type==='accent')?900:600;
   else if(state.preset==='synth') freq=(type==='accent')?1800:1200;
-  osc.frequency.value=freq;
   g.gain.setValueAtTime(0.0001,time);
   g.gain.exponentialRampToValueAtTime(state.vol,time+0.001);
   g.gain.exponentialRampToValueAtTime(0.0001,time+0.12);
@@ -165,7 +196,7 @@ function playKeySound(k){
   const now=audioCtx.currentTime;
   const g=audioCtx.createGain(); g.gain.value=0.0001; g.connect(masterGain);
   const osc=audioCtx.createOscillator();
-  osc.type=(state.preset==='synth')?'sawtooth':'sine';
+  osc.type = (state.preset==='synth')?'sawtooth':'sine';
   let freq=keyMap[k];
   if(state.preset==='soft') freq*=0.95;
   if(state.preset==='synth') freq*=1.02;
@@ -190,15 +221,7 @@ function stopMiniGame(){
   if(miniGameStopTimeout){ clearTimeout(miniGameStopTimeout); miniGameStopTimeout=null; }
 }
 
-function startMiniGame(){
-  if(!state.enabled || !state.autoStart || state.running) return;
-  if(audioCtx.state==='suspended') audioCtx.resume();
-  state.running=true; miniGameActive=true; updateUI();
-  currentNoteTime = audioCtx.currentTime + 0.05;
-  startScheduler();
-  const noteDuration = 60/state.bpm;
-  miniGameStopTimeout = setTimeout(stopMiniGame, noteDuration*1000*10);
-}
+function stopAllAudio(){ stopScheduler(); state.running=false; updateUI(); }
 
 // --- Countdown ---
 function runCountdown(secs,onDone){
@@ -212,13 +235,29 @@ function runCountdown(secs,onDone){
 }
 function showGo(){ countdownOverlay.textContent="GO!"; countdownOverlay.style.display="block"; setTimeout(()=>countdownOverlay.style.display='none',500); }
 
-// --- QTE trigger listener ---
+// --- Start minigame ---
+function startMiniGame(){
+  if(!state.enabled||!state.autoStart||state.running) return;
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  console.log("Mini-game starting!");
+  state.running=true; miniGameActive=true; updateUI();
+  currentNoteTime=audioCtx.currentTime+0.05;
+  startScheduler();
+  const noteDuration=60/state.bpm;
+  miniGameStopTimeout=setTimeout(stopMiniGame,noteDuration*1000*10);
+}
+
+// --- Listen for QTE trigger ---
 window.addEventListener('message', e=>{
+  console.log("Received message:", e.data);
   const d = e.data;
-  if(d.type==='userapp_trigger' && d.trigger==='QTE') startMiniGame();
+  if(d.type==='userapp_trigger' && d.trigger==='trigger_QTE'){
+      console.log("QTE trigger detected!");
+      startMiniGame();
+  }
 });
 
-// --- Mini-game keys ---
+// --- Listen for mini-game keys ---
 document.addEventListener('keydown', e=>{
   if(!miniGameActive) return;
   if(['d','f','j','k'].includes(e.key.toLowerCase())){
@@ -227,45 +266,18 @@ document.addEventListener('keydown', e=>{
   }
 });
 
-// --- UI functions ---
-function updateUI(){
-  enabledBtn.textContent = state.enabled?'On':'Off';
-  autoStartBtn.textContent = state.autoStart?'On':'Off';
-  metronomeBtn.textContent = state.metronome?'On':'Off';
-  countdownBtn.textContent = state.countdown?'On':'Off';
-  bpmRange.value = state.bpm;
-  bpmVal.textContent = state.bpm+' BPM';
-  preset.value = state.preset;
-  volume.value = state.vol;
-  statTxt.textContent = state.running?'Active — Listening (D,F,J,K)':(state.enabled?'Enabled (waiting for QTE)':'Disabled');
-}
+// --- Testing / double-click ---
+document.body.addEventListener('dblclick', ()=>{
+  if(!state.enabled) return;
+  if(state.running) stopAllAudio(); else startMiniGame();
+});
 
-// --- UI event handlers ---
-enabledBtn.onclick = ()=>{ state.enabled=!state.enabled; updateUI(); }
-autoStartBtn.onclick = ()=>{ state.autoStart=!state.autoStart; updateUI(); }
-metronomeBtn.onclick = ()=>{ state.metronome=!state.metronome; updateUI(); }
-countdownBtn.onclick = ()=>{ state.countdown=!state.countdown; updateUI(); }
-bpmRange.oninput = e=>{ state.bpm=Number(e.target.value); updateUI(); }
-preset.onchange = e=>{ state.preset=e.target.value; }
-volume.oninput = e=>{ state.vol=Number(e.target.value); masterGain.gain.value=state.vol; }
-
-openSettings.onclick = ()=>{ settings.style.display=(settings.style.display==='none'?'block':'none'); }
-closeSettings.onclick = ()=>{ settings.style.display='none'; }
-resetSettings.onclick = ()=>{
-  state={enabled:true,autoStart:true,metronome:true,countdown:true,bpm:85,preset:'classic',vol:0.6,running:false};
-  updateUI(); stopAllAudio();
-}
-testSound.onclick = ()=>{ makeClickAtTime(audioCtx.currentTime+0.02,'accent'); }
-stopAll.onclick = ()=>{ stopAllAudio(); }
-
-function stopAllAudio(){ stopScheduler(); state.running=false; updateUI(); }
+// --- Initial UI update ---
+updateUI();
+masterGain.gain.value=state.vol;
 
 // --- Escape key to pin ---
-window.addEventListener('keydown', e=>{ if(e.key==='Escape') window.parent.postMessage({type:"pin"},'*'); });
-
-// --- Initialize ---
-updateUI();
-masterGain.gain.value = state.vol;
+window.addEventListener('keydown',(e)=>{if(e.key==='Escape') window.parent.postMessage({type:"pin"},'*');});
 </script>
 </body>
 </html>
