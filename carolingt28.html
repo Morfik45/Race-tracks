@@ -218,7 +218,12 @@
       osc.connect(g); osc.start(now); osc.stop(now+0.13);
     }
 
-    const keyMap = { d:{freq:440}, f:{freq:523.25}, j:{freq:659.25}, k:{freq:783.99} };
+    const keyMap = {
+    d: { freq: 466.16 },   // A#4
+    f: { freq: 554.37 },   // C#5
+    j: { freq: 698.46 },   // F5
+    k: { freq: 830.61 }    // G#5
+};
     function playKeySound(key){
       const k = String(key).toLowerCase(); if(!keyMap[k]) return;
       const now = audioCtx.currentTime;
