@@ -14,7 +14,8 @@
     }
     #openSettings{
       position:fixed;right:12px;top:12px;z-index:9999;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);
-      border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer
+      border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer;
+      user-select:none;
     }
     #settings{
       position:fixed;right:12px;top:56px;width:320px;z-index:9999;background:rgba(10,10,10,0.72);
@@ -38,10 +39,11 @@
   </style>
 </head>
 <body>
-  <div id="debug">
+  <div id="debug" aria-hidden="false">
     <strong>Debug panel</strong>
     <div style="margin-top:6px">
       <button id="simulateTrigger">Simulate trigger_qte</button>
+      <button id="simulateD">Simulate trigger_QTED</button>
       <button id="clearDebug">Clear</button>
     </div>
     <div style="margin-top:8px"><strong>Last message origin:</strong> <span id="lastOrigin">—</span></div>
@@ -51,8 +53,8 @@
     <div style="margin-top:6px"><strong>Last action:</strong> <span id="lastAction">—</span></div>
     <div style="margin-top:6px;color:#cfe"><strong>Hints:</strong>
       <ul>
-        <li>The game may wrap triggers inside a data object (we handle nested shapes).</li>
-        <li>Simulate trigger posts a message locally so you can verify the handler without the game.</li>
+        <li>FiveM sends triggers wrapped in an object (we search the full message tree).</li>
+        <li>Bind examples: bind keyboard e "userapp_trigger QTE", bind keyboard d "userapp_trigger QTED" etc.</li>
       </ul>
     </div>
   </div>
@@ -97,7 +99,7 @@
   </div>
 
   <div id="status">Status: <span id="statTxt">Disabled</span></div>
-  <div id="countdownOverlay"></div>
+  <div id="countdownOverlay" aria-hidden="true"></div>
 
   <script>
     // Register QTE trigger (lowercase 'qte' -> FiveM will send trigger_qte)
@@ -130,6 +132,7 @@
     const lastPayload = document.getElementById('lastPayload');
     const lastAction = document.getElementById('lastAction');
     const simulateTrigger = document.getElementById('simulateTrigger');
+    const simulateD = document.getElementById('simulateD');
     const clearDebug = document.getElementById('clearDebug');
 
     let state = {
@@ -195,6 +198,8 @@
     function startScheduler(){ 
       if(timerID) return; 
       currentNoteTime = audioCtx.currentTime + 0.05; 
+      // show GO at the exact moment scheduler starts
+      showGo();
       timerID = setInterval(scheduler, lookahead);
     }
     function stopScheduler(){ if(timerID){ clearInterval(timerID); timerID=null; } }
@@ -223,4 +228,216 @@
       let freq = keyMap[k].freq;
       if(state.preset==='soft') freq*=0.95; else if(state.preset==='synth') freq*=1.02;
       osc.frequency.value=freq;
-      g.gain.setValueAtTime
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(state.vol*1.2, now+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now+0.35);
+      osc.connect(g); osc.start(now); osc.stop(now+0.4);
+    }
+
+    function stopAllAudio(){ stopScheduler(); stopMiniGame(); }
+
+    function runCountdown(secs,onDone){
+      countdownOverlay.style.display='block';
+      countdownOverlay.setAttribute('aria-hidden','false');
+      let n=secs;
+      countdownOverlay.textContent=n;
+      const tick = ()=>{
+        if(n<=0){ 
+          countdownOverlay.style.display='none'; 
+          countdownOverlay.setAttribute('aria-hidden','true');
+          if(onDone) onDone(); 
+          return; 
+        }
+        countdownOverlay.textContent=n;
+        n--; setTimeout(tick,650);
+      };
+      tick();
+    }
+
+    function showGo(){ countdownOverlay.textContent="GO!"; countdownOverlay.style.display='block'; countdownOverlay.setAttribute('aria-hidden','false'); setTimeout(()=>{ countdownOverlay.style.display='none'; countdownOverlay.setAttribute('aria-hidden','true'); },500); }
+
+    // Debug helpers
+    function logPayload(origin, payload){
+      lastOrigin.textContent = origin || '—';
+      try { lastPayload.textContent = JSON.stringify(payload, null, 2); } catch(e){ lastPayload.textContent = String(payload); }
+    }
+    function logAction(msg){
+      lastAction.textContent = msg;
+      console.debug('[carolingt] action:', msg);
+    }
+    simulateTrigger.onclick = ()=>{
+      const fake = { type: 'data', data: { trigger_qte: Date.now() } };
+      window.postMessage(fake, '*'); // dispatch to this window
+      logAction('Simulated nested trigger posted');
+    };
+    simulateD.onclick = ()=>{
+      const fake = { type: 'data', data: { trigger_QTED: Date.now() } };
+      window.postMessage(fake, '*');
+      logAction('Simulated nested trigger_QTED posted');
+    };
+    clearDebug.onclick = ()=>{
+      lastOrigin.textContent = '—';
+      lastPayload.textContent = '—';
+      lastAction.textContent = '—';
+    };
+
+    // Utility: recursively search any object/array for a key starting with 'trigger_' (case-insensitive).
+    // Returns the matched key (original) if found, otherwise null.
+    function findTriggerKeyInTree(obj) {
+      if (obj == null) return null;
+      if (typeof obj !== 'object') return null;
+      if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+          const res = findTriggerKeyInTree(obj[i]);
+          if (res) return res;
+        }
+        return null;
+      }
+      for (const k of Object.keys(obj)) {
+        try {
+          const keyLower = String(k).toLowerCase();
+          if (keyLower.startsWith('trigger_')) return k; // return original key
+          const val = obj[k];
+          if (val && typeof val === 'object') {
+            const nested = findTriggerKeyInTree(val);
+            if (nested) return nested;
+          }
+        } catch (err) {
+          // ignore
+        }
+      }
+      return null;
+    }
+
+    // Parse trigger key suffix into action: returns {type: 'start'} or {type:'key', key:'d'} or null
+    function parseTriggerKeyAction(foundKey){
+      if(!foundKey) return null;
+      const normal = String(foundKey).toLowerCase().replace(/[^a-z0-9_]/g,'_'); // normalize
+      // remove prefix up to 'trigger_'
+      const idx = normal.indexOf('trigger_');
+      let suffix = idx>=0 ? normal.slice(idx + 'trigger_'.length) : normal;
+      // common variants: 'qte', 'qted', 'qte_d', 'qte-d', 'qte_d_key' etc
+      if (suffix === 'qte') return {type:'start'};
+      // if suffix contains a key letter d/f/j/k, prefer that
+      const keyMatch = suffix.match(/[dfjk]/);
+      if (keyMatch) {
+        return {type:'key', key:keyMatch[0]};
+      }
+      // also support keys provided directly like trigger_d
+      if (['d','f','j','k'].includes(suffix)) return {type:'key', key:suffix};
+      return null;
+    }
+
+    // Robust postMessage handler: accepts JSON strings, and finds trigger_* keys anywhere in the message tree
+    window.addEventListener('message', e => {
+      let d = e.data;
+      try {
+        if (typeof d === 'string') {
+          const parsed = JSON.parse(d);
+          if (parsed && typeof parsed === 'object') d = parsed;
+        }
+      } catch (err) {
+        // ignore parse error
+      }
+      console.debug('[carolingt] postMessage from', e.origin, 'data=', d);
+      logPayload(e.origin, d);
+
+      // quick check: explicit d.trigger property
+      if (d && (d.trigger === 'QTE' || d.trigger === 'qte')) {
+        logAction('Detected d.trigger === QTE/qte');
+        tryStartFromE();
+        return;
+      }
+
+      // search the whole message tree for trigger_* key (case-insensitive)
+      const foundKey = findTriggerKeyInTree(d);
+      if (foundKey) {
+        const action = parseTriggerKeyAction(foundKey);
+        if (action) {
+          if (action.type === 'start') {
+            logAction('Detected trigger_qte (nested) -> starting mini-game');
+            tryStartFromE();
+            return;
+          } else if (action.type === 'key') {
+            logAction('Detected key trigger -> ' + action.key.toUpperCase());
+            // play the corresponding sound even if iframe not focused
+            if(audioCtx.state==='suspended') {
+              audioCtx.resume().catch(()=>{});
+            }
+            playKeySound(action.key);
+            return;
+          }
+        } else {
+          logAction('Detected trigger key but unknown action: ' + foundKey);
+          return;
+        }
+      }
+      // nothing relevant found
+    });
+
+    // Mini-game
+    let miniGameActive = false;
+    let miniGameStopTimeout = null;
+
+    function tryStartFromE(){
+      if(!state.enabled || state.running) {
+        logAction('tryStartFromE aborted (enabled/running): ' + state.enabled + ' / ' + state.running);
+        return;
+      }
+      if(audioCtx.state==='suspended') {
+        audioCtx.resume().then(()=>console.debug('[carolingt] audioCtx resumed')).catch(err=>console.warn('[carolingt] audioCtx resume failed', err));
+      }
+      const start = ()=>{
+        state.running=true; miniGameActive=true; updateUI();
+        currentNoteTime=audioCtx.currentTime+0.05;
+        startScheduler();
+        const noteDuration=60/state.bpm;
+        miniGameStopTimeout=setTimeout(stopMiniGame,noteDuration*10*1000);
+        logAction('Mini-game started');
+      };
+      if(state.countdown) runCountdown(2,start); else start();
+    }
+
+    function stopMiniGame(){
+      miniGameActive=false; state.running=false; updateUI(); stopScheduler();
+      if(miniGameStopTimeout){ clearTimeout(miniGameStopTimeout); miniGameStopTimeout=null; }
+      logAction('Mini-game stopped');
+    }
+
+    // iframe-focused E key fallback
+    window.addEventListener('keydown', (e)=>{
+      const key = e.key && String(e.key).toLowerCase();
+      if (!key) return;
+      if (key === 'e') {
+        if (state.autoStart) {
+          logAction('E pressed in iframe; attempting auto-start');
+          tryStartFromE();
+        } else {
+          logAction('E pressed but autoStart disabled');
+        }
+      }
+    });
+
+    // play key sounds while mini-game active (local keyboard)
+    window.addEventListener('keydown',(e)=>{
+      if(!miniGameActive) return;
+      const k=e.key && e.key.toLowerCase();
+      if(['d','f','j','k'].includes(k)){
+        if(audioCtx.state==='suspended') audioCtx.resume();
+        playKeySound(k);
+      }
+    });
+
+    document.body.addEventListener('dblclick',()=>{
+      if(!state.enabled) return;
+      if(state.running) stopAllAudio(); else tryStartFromE();
+    });
+
+    // Resume AudioContext on first gesture
+    ['pointerdown','keydown'].forEach(evt=>{ window.addEventListener(evt, ()=>{ if(audioCtx.state==='suspended') audioCtx.resume(); }, {once:true}); });
+
+    // existing Escape behaviour: pin parent
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') window.parent.postMessage({type:'pin'},'*'); });
+  </script>
+</body>
+</html>
