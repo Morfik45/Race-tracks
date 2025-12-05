@@ -198,8 +198,7 @@
     function startScheduler(){ 
       if(timerID) return; 
       currentNoteTime = audioCtx.currentTime + 0.05; 
-      // show GO at the exact moment scheduler starts
-      showGo();
+      // don't call showGo here (we show GO in runCountdown or when starting immediately)
       timerID = setInterval(scheduler, lookahead);
     }
     function stopScheduler(){ if(timerID){ clearInterval(timerID); timerID=null; } }
@@ -242,14 +241,24 @@
       let n=secs;
       countdownOverlay.textContent=n;
       const tick = ()=>{
-        if(n<=0){ 
-          countdownOverlay.style.display='none'; 
-          countdownOverlay.setAttribute('aria-hidden','true');
-          if(onDone) onDone(); 
-          return; 
+        if(n<=0){
+          // show GO at the exact moment we start the metronome
+          countdownOverlay.textContent = 'GO!';
+          countdownOverlay.style.display = 'block';
+          countdownOverlay.setAttribute('aria-hidden','false');
+          // start immediately, let overlay remain visible briefly
+          if(onDone) {
+            try { onDone(); } catch(err){ console.warn('onDone error',err); }
+          }
+          setTimeout(()=>{
+            countdownOverlay.style.display='none';
+            countdownOverlay.setAttribute('aria-hidden','true');
+          },500);
+          return;
         }
         countdownOverlay.textContent=n;
-        n--; setTimeout(tick,650);
+        n--;
+        setTimeout(tick,650);
       };
       tick();
     }
@@ -313,17 +322,13 @@
     function parseTriggerKeyAction(foundKey){
       if(!foundKey) return null;
       const normal = String(foundKey).toLowerCase().replace(/[^a-z0-9_]/g,'_'); // normalize
-      // remove prefix up to 'trigger_'
       const idx = normal.indexOf('trigger_');
       let suffix = idx>=0 ? normal.slice(idx + 'trigger_'.length) : normal;
-      // common variants: 'qte', 'qted', 'qte_d', 'qte-d', 'qte_d_key' etc
       if (suffix === 'qte') return {type:'start'};
-      // if suffix contains a key letter d/f/j/k, prefer that
       const keyMatch = suffix.match(/[dfjk]/);
       if (keyMatch) {
         return {type:'key', key:keyMatch[0]};
       }
-      // also support keys provided directly like trigger_d
       if (['d','f','j','k'].includes(suffix)) return {type:'key', key:suffix};
       return null;
     }
@@ -360,7 +365,11 @@
             return;
           } else if (action.type === 'key') {
             logAction('Detected key trigger -> ' + action.key.toUpperCase());
-            // play the corresponding sound even if iframe not focused
+            // Only play DFJK from remote triggers while the mini-game is active/running
+            if (!miniGameActive || !state.running) {
+              logAction('Ignored key trigger (mini-game not active)');
+              return;
+            }
             if(audioCtx.state==='suspended') {
               audioCtx.resume().catch(()=>{});
             }
@@ -390,6 +399,8 @@
       const start = ()=>{
         state.running=true; miniGameActive=true; updateUI();
         currentNoteTime=audioCtx.currentTime+0.05;
+        // startScheduler does not show GO; show GO here so GO and first metronome tick align
+        showGo();
         startScheduler();
         const noteDuration=60/state.bpm;
         miniGameStopTimeout=setTimeout(stopMiniGame,noteDuration*10*1000);
