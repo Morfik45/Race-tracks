@@ -39,14 +39,13 @@
   </style>
 </head>
 <body>
-  <!--<div id="debug" aria-hidden="false">
+<!--  <div id="debug" aria-hidden="false">
     <strong>Debug panel</strong>
     <div style="margin-top:6px">
       <button id="simulateTrigger">Simulate trigger_qte</button>
       <button id="simulateD">Simulate trigger_QTED</button>
       <button id="clearDebug">Clear</button>
     </div>
-
     <div style="margin-top:8px"><strong>Last message origin:</strong> <span id="lastOrigin">—</span></div>
     <div style="margin-top:6px"><strong>Last payload:</strong>
       <pre id="lastPayload">—</pre>
@@ -60,7 +59,7 @@
     </div>
   </div>-->
 
-  <button id="openSettings">⚙️ Caroling settings</button>
+  <button id="openSettings">⚙️ Caroling audio settings</button>
 
   <div id="settings" role="dialog" aria-label="Caroling settings">
     <h2>Caroling audio app</h2>
@@ -103,10 +102,6 @@
   <div id="countdownOverlay" aria-hidden="true"></div>
 
   <script>
-    
-    // existing Escape behaviour: pin parent
-    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') window.parent.postMessage({type:'pin'},'*'); });
-    
     // Register QTE trigger (lowercase 'qte' -> FiveM will send trigger_qte)
     window.parent.postMessage({
       type: 'registerTrigger',
@@ -457,6 +452,8 @@
     // Resume AudioContext on first gesture
     ['pointerdown','keydown'].forEach(evt=>{ window.addEventListener(evt, ()=>{ if(audioCtx.state==='suspended') audioCtx.resume(); }, {once:true}); });
 
+    // existing Escape behaviour: pin parent
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') window.parent.postMessage({type:'pin'},'*'); });
   </script>
 </body>
 </html>
