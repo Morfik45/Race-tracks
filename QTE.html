@@ -1,0 +1,648 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Circle QTE</title>
+    <style>
+        body {
+            background: transparent;
+            margin: 0;
+            overflow: hidden;
+        }
+        #circle-qte-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            display: none;
+        }
+        .ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            margin-left: -150px;
+            margin-top: -150px;
+            border-radius: 50%;
+            border: 10px solid #444;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        .gap {
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background: rgba(255,0,0,0.7);
+            border-radius: 10px;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+        }
+        .ring2 { width: 240px; height: 240px; margin-left: -120px; margin-top: -120px; border-width: 10px; }
+        .ring3 { width: 180px; height: 180px; margin-left: -90px; margin-top: -90px; border-width: 10px; }
+        #circle-qte-marker {
+            display: none !important;
+        }
+        #qte-bar-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 40px;
+            background: #222;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            display: none;
+            z-index: 10;
+        }
+        #qte-bar {
+            width: 100%;
+            height: 100%;
+            background: #444;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        #qte-bar-target {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: rgba(255,0,0,0.7);
+            border-radius: 15px;
+            transition: width 0.1s linear;
+        }
+        #qte-circle-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 90px;
+            background: #00ffea;
+            transform: translate(-50%, -100%) rotate(0deg);
+            z-index: 12;
+            border-radius: 2px;
+            box-shadow: 0 0 8px #00ffea;
+            pointer-events: none;
+            display: none;
+        }
+        #qte-circle-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 24px solid #00ffea; /* Arrow points outward (up) */
+            border-bottom: none;
+            transform: translate(-50%, 0%) rotate(0deg);
+            z-index: 20;
+            pointer-events: none;
+            filter: drop-shadow(0 0 6px #00ffea);
+            display: none;
+        }
+        /* Remove any border, background, or box-shadow from all QTE circle elements */
+        #qte-circle-container,
+        #qte-circle,
+        .qte-circle-ring,
+        #qte-circle-indicator {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+#rhythm-qte-container {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 420px;
+    height: 120px;
+    z-index: 30;
+}
+#rhythm-qte-track {
+    position: relative;
+    width: 420px;
+    height: 100px;
+    background: #222;
+    border-radius: 16px;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    overflow: hidden;
+}
+.rhythm-qte-hitbox {
+    position: absolute;
+    bottom: 0;
+    width: 60px;
+    height: 100px;
+    border-radius: 12px;
+    border: 2px solid #00ffea;
+    left: 0;
+    opacity: 0.2;
+}
+.rhythm-qte-hitbox[data-key="d"],
+.rhythm-qte-hitbox[data-key="f"],
+.rhythm-qte-hitbox[data-key="j"],
+.rhythm-qte-hitbox[data-key="k"] {
+    left: 15px;
+}
+
+.rhythm-qte-note {
+    position: absolute;
+    bottom: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #00ffea;
+    box-shadow: 0 0 8px #00ffea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    color: #222;
+    font-weight: bold;
+    left: 0;
+    transition: background 0.1s;
+}
+.rhythm-qte-hit-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 15px; /* Move to far left of the track */
+    width: 60px;
+    height: 100px;
+    border-radius: 12px;
+    z-index: 1;
+    background: rgba(0,255,234,0.18);
+    box-shadow: 0 0 18px 6px #00ffea, 0 0 0 2px #00ffea inset;
+    pointer-events: none;
+}
+.rhythm-qte-hit-indicator[data-key="d"] { left: 15px; }
+.rhythm-qte-hit-indicator[data-key="f"] { left: 120px; }
+.rhythm-qte-hit-indicator[data-key="j"] { left: 225px; }
+.rhythm-qte-hit-indicator[data-key="k"] { left: 330px; }
+    </style>
+</head>
+<body>
+    <div id="qte-bar-container" style="display: none;">
+        <div id="qte-bar">
+            <div id="qte-bar-target"></div>
+        </div>
+    </div>
+    <div id="circle-qte-container" style="display: none;">
+        <div id="qte-circle-arrow" style="display: none;"></div>
+        <div class="ring ring1"><div class="gap gap1"></div></div>
+        <div class="ring ring2"><div class="gap gap2"></div></div>
+        <div class="ring ring3"><div class="gap gap3"></div></div>
+        <div id="circle-qte-marker"></div>
+        <div id="qte-circle-indicator"></div>
+    </div>
+    <div id="rhythm-qte-container" style="display: block;">
+        <div id="rhythm-qte-track">
+            <div class="rhythm-qte-hit-indicator"></div>
+            <div class="rhythm-qte-hitbox" data-key="d"></div>
+            <div class="rhythm-qte-hitbox" data-key="f"></div>
+            <div class="rhythm-qte-hitbox" data-key="j"></div>
+            <div class="rhythm-qte-hitbox" data-key="k"></div>
+        </div>
+    </div>
+    <script>
+        // --- Circle QTE Variables ---
+        let circleContainer = document.getElementById('circle-qte-container');
+        let rings = [
+            {el: document.querySelector('.ring1'), gap: document.querySelector('.gap1'), angle: 0, speed: 0, dir: 1},
+            {el: document.querySelector('.ring2'), gap: document.querySelector('.gap2'), angle: 0, speed: 0, dir: 1},
+            {el: document.querySelector('.ring3'), gap: document.querySelector('.gap3'), angle: 0, speed: 0, dir: 1}
+        ];
+        let circleRunning = false;
+        let alignTolerance = 12; // degrees
+        let circleAnimFrame;
+        let currentRing = 0;
+        let alignAngle = 0;
+        const arrow = document.getElementById('qte-circle-arrow');
+        let circleActive = false;
+        let circleInterval;
+
+        function randomizeRing(ring) {
+            ring.angle = Math.random() * 360;
+            ring.speed = (Math.random() * 1.2 + 0.8) * (Math.random() > 0.5 ? 1 : -1); // 0.8-2.0
+        }
+
+        function updateArrowPosition() {
+            const ring = rings[currentRing];
+            const ringRadius = ring.el.offsetWidth / 2;
+            const arrowLength = 24;
+            const offset = ringRadius - arrowLength / 2 - 6;
+            arrow.style.transform = `translate(-50%, -50%) rotate(${alignAngle}deg) translateY(-${offset}px)`;
+        }
+
+        function updateRings() {
+            rings.forEach((ring, idx) => {
+                if (idx === currentRing) {
+                    ring.angle = (ring.angle + ring.speed) % 360;
+                    ring.el.style.opacity = "1";
+                    // Color the gap green if aligned, else red
+                    let a = ((ring.angle % 360) + 360) % 360;
+                    let diff = Math.abs(((a - alignAngle + 540) % 360) - 180); // shortest angle diff
+                    if (diff < alignTolerance) {
+                        ring.gap.style.background = 'rgba(0,255,0,0.7)'; // green
+                    } else {
+                        ring.gap.style.background = 'rgba(255,0,0,0.7)'; // red
+                    }
+                } else {
+                    ring.el.style.opacity = "0.3";
+                    ring.gap.style.background = 'rgba(255,0,0,0.7)';
+                }
+                ring.el.style.transform = `rotate(${ring.angle}deg)`;
+            });
+            // Move the arrow to the edge of the current ring
+            updateArrowPosition();
+        }
+
+        function animateRings() {
+            if (!circleRunning) return;
+            updateRings();
+            circleAnimFrame = requestAnimationFrame(animateRings);
+        }
+
+        // When starting the QTE
+        function startCircleQTE() {
+            barContainer.style.display = 'none';
+            circleContainer.style.display = 'block';
+
+            // Remove old rings from DOM and JS
+            rings.forEach(ring => {
+                if (ring.el.parentNode) ring.el.parentNode.removeChild(ring.el);
+            });
+            rings = [];
+
+            // Randomize number of rings between 1 and 5
+            const numRings = Math.floor(Math.random() * 5) + 1;
+
+            // Ring sizes (outer to inner)
+            const ringSizes = [300, 240, 180, 120, 60];
+            for (let i = 0; i < numRings; i++) {
+    const ringDiv = document.createElement('div');
+    ringDiv.className = `ring ring${i+1}`;
+    ringDiv.style.width = ringSizes[i] + 'px';
+    ringDiv.style.height = ringSizes[i] + 'px';
+    ringDiv.style.marginLeft = (-ringSizes[i]/2) + 'px';
+    ringDiv.style.marginTop = (-ringSizes[i]/2) + 'px';
+    ringDiv.style.borderWidth = '10px';
+
+    const gapDiv = document.createElement('div');
+    gapDiv.className = `gap gap${i+1}`;
+    ringDiv.appendChild(gapDiv);
+
+    circleContainer.appendChild(ringDiv);
+
+    rings.push({
+        el: ringDiv,
+        gap: gapDiv,
+        angle: 0,
+        speed: 0,
+        dir: 1
+    });
+}
+
+            currentRing = 0;
+            alignAngle = Math.floor(Math.random() * 360); // Randomize the correct spot
+            arrow.style.display = 'block';
+            rings.forEach((ring, idx) => {
+                randomizeRing(ring);
+                ring.el.style.opacity = idx === 0 ? "1" : "0.3";
+            });
+            circleRunning = true;
+            circleActive = true;
+            animateRings();
+}
+
+function hideCircleQTE() {
+    circleRunning = false;
+    circleActive = false;
+    // REMOVE this line:
+    // clearInterval(circleInterval);
+    cancelAnimationFrame(circleAnimFrame);
+    circleContainer.style.display = 'none';
+    arrow.style.display = 'none';
+}
+
+function checkAlignment(ring) {
+    let a = ((ring.angle % 360) + 360) % 360;
+    let diff = Math.abs(((a - alignAngle + 540) % 360) - 180); // shortest angle diff
+    return diff < alignTolerance;
+}
+
+// --- Key Handling ---
+window.addEventListener('keydown', function(e) {
+    // Bar QTE
+    if (barFilling && (e.key === 'e' || e.key === 'E')) {
+        barFilling = false;
+        if (barInterval) clearInterval(barInterval);
+        if (barFill >= barTargetStart && barFill <= barTargetEnd) {
+            fetch(`https://${GetParentResourceName()}/qteSuccess`, {method: 'POST'});
+        } else {
+            fetch(`https://${GetParentResourceName()}/qteFail`, {method: 'POST'});
+        }
+        hideBarQTE();
+    }
+    // Circle QTE (one ring at a time)
+    if (circleRunning && (e.key === 'e' || e.key === 'E')) {
+        if (checkAlignment(rings[currentRing])) {
+            currentRing++;
+            if (currentRing >= rings.length) {
+                circleRunning = false;
+                cancelAnimationFrame(circleAnimFrame);
+                // On success:
+fetch(`https://${GetParentResourceName()}/circleQteSuccess`, {method: 'POST'});
+hideCircleQTE();
+
+// On fail:
+fetch(`https://${GetParentResourceName()}/circleQteFail`, {method: 'POST'});
+hideCircleQTE();
+            } else {
+                // Move to next ring
+                alignAngle = Math.floor(Math.random() * 360); // Randomize new align spot for next ring
+                randomizeRing(rings[currentRing]);
+                rings.forEach((ring, idx) => {
+                    ring.el.style.opacity = idx === currentRing ? "1" : "0.3";
+                });
+                updateArrowPosition();
+                // Do NOT stop the animation, let animateRings() keep running!
+            }
+        } else {
+            circleRunning = false;
+            cancelAnimationFrame(circleAnimFrame);
+            fetch(`https://${GetParentResourceName()}/circleQteFail`, {method: 'POST'});
+            hideCircleQTE();
+        }
+    }
+});
+
+        // NUI
+        window.addEventListener('message', function(event) {
+            if (event.data.action === 'startQTE') {
+                startBarQTE();
+            }
+            if (event.data.action === 'startCircleQTE') {
+                startCircleQTE();
+            }
+            if (event.data.action === 'hideQTE') {
+                hideBarQTE();
+            }
+            if (event.data.action === 'hideCircleQTE') {
+                hideCircleQTE();
+            }
+            if (event.data.action === 'startRhythmQTE') {
+                startRhythmQTE();
+            }
+            if (event.data.action === 'hideRhythmQTE') {
+                hideRhythmQTE();
+            }
+        });
+
+        // --- Bar QTE Variables and Functions ---
+        let barContainer = document.getElementById('qte-bar-container');
+        let barTarget = document.getElementById('qte-bar-target');
+        let barFilling = false;
+        let barFill = 0;
+        let barInterval;
+        let barTargetStart = 0.4, barTargetEnd = 0.6;
+
+        function startBarQTE() {
+            circleContainer.style.display = 'none';
+            barContainer.style.display = 'block';
+            barFilling = true;
+            barFill = 0;
+            barTargetStart = Math.random() * 0.5 + 0.2; // random between 0.2 and 0.7
+            barTargetEnd = barTargetStart + 0.15; // 15% wide
+            barTarget.style.left = (barTargetStart * 100) + '%';
+            barTarget.style.width = ((barTargetEnd - barTargetStart) * 100) + '%';
+            let bar = barContainer.querySelector('#qte-bar');
+            bar.style.background = '#444';
+            let fillElem = document.createElement('div');
+            fillElem.style.position = 'absolute';
+            fillElem.style.top = 0;
+            fillElem.style.left = 0;
+            fillElem.style.height = '100%';
+            fillElem.style.background = '#0f0';
+            fillElem.style.width = '0%';
+            fillElem.style.zIndex = 5;
+            fillElem.id = 'bar-fill';
+            bar.appendChild(fillElem);
+
+            barInterval = setInterval(() => {
+                if (!barFilling) return;
+                barFill += 0.01;
+                fillElem.style.width = (barFill * 100) + '%';
+                if (barFill >= 1) {
+                    barFilling = false;
+                    clearInterval(barInterval);
+                    fetch(`https://${GetParentResourceName()}/qteFail`, {method: 'POST'});
+                    hideBarQTE();
+                }
+            }, 16);
+        }
+
+        function hideBarQTE() {
+            barContainer.style.display = 'none';
+            barFilling = false;
+            if (barInterval) clearInterval(barInterval);
+            let fillElem = document.getElementById('bar-fill');
+            if (fillElem) fillElem.remove();
+        }
+        // --- Rhythm QTE Variables and Functions ---
+        const rhythmContainer = document.getElementById('rhythm-qte-container');
+        const rhythmTrack = document.getElementById('rhythm-qte-track');
+        const rhythmKeys = ['d', 'f', 'j', 'k'];
+        let rhythmNotes = [];
+        let rhythmActive = false;
+        let rhythmAnimFrame;
+        let rhythmStartTime = 0;
+        let rhythmSequence = [];
+        let rhythmCurrent = 0;
+        let rhythmNoteSpeed = 300; // pixels per second
+        let rhythmHitWindow = 40; // px
+
+        function startRhythmQTE() {
+            // Hide other QTEs
+            barContainer.style.display = 'none';
+            circleContainer.style.display = 'none';
+            rhythmContainer.style.display = 'block';
+
+            // Generate a random sequence of 5-10 notes
+            rhythmSequence = [];
+            const numNotes = Math.floor(Math.random() * 6) + 5;
+            for (let i = 0; i < numNotes; i++) {
+                const key = rhythmKeys[Math.floor(Math.random() * rhythmKeys.length)];
+                // Each note is spaced 0.7s apart
+                rhythmSequence.push({
+                    key,
+                    time: i * 700 // ms
+                });
+            }
+
+            // Remove old notes
+            document.querySelectorAll('.rhythm-qte-note').forEach(n => n.remove());
+            rhythmNotes = [];
+
+            // Create note elements
+            for (let i = 0; i < rhythmSequence.length; i++) {
+                const note = document.createElement('div');
+                note.className = 'rhythm-qte-note';
+                note.textContent = rhythmSequence[i].key.toUpperCase();
+                note.dataset.key = rhythmSequence[i].key;
+                note.dataset.idx = i;
+                // Start off-screen right
+                note.style.left = '420px';
+                rhythmTrack.appendChild(note);
+                rhythmNotes.push(note);
+            }
+
+            rhythmActive = true;
+            rhythmCurrent = 0;
+            rhythmStartTime = performance.now();
+            animateRhythmNotes();
+        }
+
+        function hideRhythmQTE() {
+            rhythmContainer.style.display = 'none';
+            rhythmActive = false;
+            cancelAnimationFrame(rhythmAnimFrame);
+            document.querySelectorAll('.rhythm-qte-note').forEach(n => n.remove());
+        }
+
+        function animateRhythmNotes() {
+            if (!rhythmActive) return;
+            const now = performance.now();
+            let allDone = true;
+            for (let i = 0; i < rhythmSequence.length; i++) {
+                const note = rhythmNotes[i];
+                const seq = rhythmSequence[i];
+                const elapsed = now - rhythmStartTime - seq.time;
+                const trackWidth = 420;
+                const hitboxX = 15;
+                const startX = trackWidth;
+                const endX = hitboxX;
+                const totalTravel = startX - endX;
+                const pxPerMs = rhythmNoteSpeed / 1000;
+                let x;
+                if (elapsed < 0) {
+                    x = startX;
+                    allDone = false;
+                } else if (elapsed < totalTravel / pxPerMs) {
+                    x = startX - elapsed * pxPerMs;
+                    allDone = false;
+                } else {
+                    x = endX;
+                    // If not hit or missed, mark as missed and color red
+                    if (!note.classList.contains('hit') && !note.classList.contains('miss')) {
+                        note.classList.add('miss');
+                        note.style.background = '#f33'; // red
+                        failRhythmQTE();                // 🔹 instantly end the rhythm QTE
+                        return;                         // stop processing further notes
+                    }
+                }
+                note.style.left = x + 'px';
+
+                // Only set color if not hit or missed
+                if (!note.classList.contains('hit') && !note.classList.contains('miss')) {
+                    if (Math.abs(x - hitboxX) <= rhythmHitWindow) {
+                        note.style.background = '#ff0'; // yellow in hit window
+                    } else {
+                        note.style.background = '#00ffea'; // default
+                    }
+                }
+            }
+            const allProcessed = rhythmNotes.every(n => n.classList.contains('hit') || n.classList.contains('miss'));
+            if (!allDone || !allProcessed) {
+                rhythmAnimFrame = requestAnimationFrame(animateRhythmNotes);
+            } else {
+                let allHit = rhythmNotes.every(n => n.classList.contains('hit'));
+                setTimeout(() => {
+                    fetch(`https://${GetParentResourceName()}/rhythmQteEnd`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ success: allHit })
+});
+                    hideRhythmQTE();
+                }, 700);
+            }
+        }
+
+        // Key handling for rhythm QTE
+        window.addEventListener('keydown', function(e) {
+            if (!rhythmActive) return;
+            const key = e.key.toLowerCase();
+            if (!rhythmKeys.includes(key)) return;
+
+            for (let i = 0; i < rhythmSequence.length; i++) {
+                const note = rhythmNotes[i];
+                const seq = rhythmSequence[i];
+                if (seq.key === key && !note.classList.contains('hit') && !note.classList.contains('miss')) {
+                    const noteX = parseFloat(note.style.left);
+                    const hitboxX = 15;
+                    if (Math.abs(noteX - hitboxX) <= rhythmHitWindow) {
+                        note.classList.add('hit');
+                        note.style.background = '#0f0'; // green
+                        fetch(`https://${GetParentResourceName()}/rhythmQteHit`, {method: 'POST'});
+                        showGoodFeedback(key);
+                    } else {
+                        note.classList.add('miss');
+                        note.style.background = '#f33'; // red
+                        fetch(`https://${GetParentResourceName()}/rhythmQteMiss`, {method: 'POST'});
+                        failRhythmQTE(); // instantly end on bad timing
+                    }
+                    break; // Prevent double-processing of the same note
+                }
+            }
+        });
+
+        // Add this function near your other rhythm QTE functions
+        function showGoodFeedback(key) {
+    // Find the hitbox for the key
+    const hitbox = document.querySelector(`.rhythm-qte-hitbox[data-key="${key}"]`);
+    if (!hitbox) return;
+    // Create the feedback element
+    const feedback = document.createElement('div');
+    feedback.textContent = 'GOOD';
+    feedback.style.position = 'absolute';
+    feedback.style.left = hitbox.style.left;
+    feedback.style.bottom = '110px';
+    feedback.style.width = hitbox.offsetWidth + 'px';
+    feedback.style.textAlign = 'center';
+    feedback.style.fontSize = '1.4em';
+    feedback.style.fontWeight = 'bold';
+    feedback.style.color = '#0f0';
+    feedback.style.textShadow = '0 0 8px #000, 0 0 16px #0f0';
+    feedback.style.pointerEvents = 'none';
+    feedback.style.opacity = '1';
+    feedback.style.transition = 'opacity 0.5s, transform 0.5s';
+    feedback.style.zIndex = 10;
+    feedback.className = 'rhythm-qte-feedback';
+
+    // Add to the track
+    rhythmTrack.appendChild(feedback);
+
+    // Animate and remove
+    setTimeout(() => {
+        feedback.style.opacity = '0';
+        feedback.style.transform = 'translateY(-20px)';
+    }, 300);
+    setTimeout(() => {
+        if (feedback.parentNode) feedback.parentNode.removeChild(feedback);
+    }, 800);
+}
+function failRhythmQTE() {
+    rhythmActive = false;
+    cancelAnimationFrame(rhythmAnimFrame);
+    hideRhythmQTE();
+    fetch(`https://${GetParentResourceName()}/rhythmQteMiss`, {method: 'POST'});
+}
+    </script>
+
+</body></html>
